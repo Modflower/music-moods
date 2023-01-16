@@ -4,14 +4,20 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
+
 plugins {
 	java
 	`java-library`
 	alias(libs.plugins.loom)
 	`maven-publish`
 	alias(libs.plugins.spotless)
+	alias(libs.plugins.minotaur)
 }
 
+val modrinthId: String by project
+val minecraftCompatible: String by project
 val projectVersion: String by project
 
 val isPublish = System.getenv("GITHUB_EVENT_NAME") == "release"
@@ -99,4 +105,24 @@ tasks {
 		(options as StandardJavadocDocletOptions).tags("reason:a:Reason")
 	}
 	withType<Jar> { from("LICENSE") }
+}
+
+modrinth {
+	token.set(System.getenv("MODRINTH_TOKEN"))
+	projectId.set(modrinthId)
+	versionType.set(
+		System.getenv("RELEASE_OVERRIDE") ?: when {
+			"alpha" in projectVersion -> "alpha"
+			!isRelease || '-' in projectVersion -> "beta"
+			else -> "release"
+		}
+	)
+	val ref = System.getenv("GITHUB_REF")
+	changelog.set(
+		System.getenv("CHANGELOG") ?: if (ref != null && ref.startsWith("refs/tags/")) "You may view the changelog at https://github.com/the-glitch-network/music-moods/releases/tag/${URLEncoder.encode(ref.substring(10), StandardCharsets.UTF_8)}"
+		else "No changelog is available. Perhaps poke at https://github.com/the-glitch-network/music-moods for a changelog?"
+	)
+	uploadFile.set(tasks.remapJar.get())
+	gameVersions.set(minecraftCompatible.split(","))
+	loaders.addAll("fabric", "quilt")
 }
