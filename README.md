@@ -13,5 +13,35 @@
 [![Discord](https://img.shields.io/discord/368932049354227712?color=7289da&label=Community&logo=discord&logoColor=7289da)](https://discord.gg/ExCdXwP)
 
 Configure how music & sound are handled.
+Useful for cases where resource packs and mods replace the music immediately instead of just letting it play for any
+reason.
+
+## How to Use
+
+Music Moods requires Minecraft 1.19-1.19.2 currently, along with Quilt Loader.
+
+It is recommended that you install [Mod Menu](https://modrinth.com/mod/modmenu) to easily access the configuration
+screen as well.
+
+Install Minecraft 1.19+, [Quilt](https://quiltmc.org/install), any mods that like to replace the currently playing track
+and stick with the default of fading between tracks or modify the config to not let the current track be replaced.
+
+## Configuration
+
+You can edit the config in game when Mod Menu is installed by navigating to `Mods`, `Music Moods`, then hitting the
+`Configure...` button in the top right.
+
+![The configuration screen](docs/images/config-music.png)
+
+### Music
+
+#### Situational Music
+
+*Includes the title screen, various biomes, being underwater and battles.*
+
+- `Allow replacing current track` - Allows replacing the current music with a more fitting track. On by default.
+- `Always play on repeat` - Plays the new situational music immediately, fading in from the old one. On by default.
+- `Always play music` - Whether to keep music playing at all times or not. Good if you dislike silence. Off by default.
+- `Fade time in ticks` - The time measured in 20 TPS ticks to fade between tracks. 30 seconds (600 ticks) by default.
 
 </div>
