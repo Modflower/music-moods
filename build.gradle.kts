@@ -95,5 +95,8 @@ tasks {
 
 		filesMatching("quilt.mod.json") { expand(map) }
 	}
+	javadoc {
+		(options as StandardJavadocDocletOptions).tags("reason:a:Reason")
+	}
 	withType<Jar> { from("LICENSE") }
 }
