@@ -1,0 +1,46 @@
+{
+	"schema_version": 1,
+	"quilt_loader": {
+		"group": "net.kjp12",
+		"id": "music-moods",
+		"version": "${version}",
+		"metadata": {
+			"name": "Music Moods",
+			"description": "Configure how music & sound are handled.",
+			"contributors": {
+				"KJP12": "Owner"
+			},
+			"contact": {
+				"homepage": "https://modrinth.com/mod/music-moods",
+				"sources": "https://github.com/the-glitch-network/music-moods",
+				"issues": "https://github.com/the-glitch-network/music-moods/issues"
+			},
+			"license": "MPL-2.0",
+			"icon": "assets/music-moods/pack.png"
+		},
+		"entrypoints": {
+			"client_init": [
+				"net.kjp12.musicmoods.ClientMain"
+			],
+			"modmenu": [
+				"net.kjp12.musicmoods.client.MusicMoodsModMenuCompat"
+			]
+		},
+		"intermediate_mappings": "net.fabricmc:intermediary",
+		"depends": [
+			{
+				"id": "minecraft",
+				"versions": "${minecraft_required}"
+			},
+			{
+				"id": "quilt_loader",
+				"versions": ">=0.17.0-"
+			},
+			{
+				"id": "java",
+				"versions": ">=${java}"
+			}
+		]
+	},
+	"mixin": "music-moods.mixin.json"
+}

@@ -1,0 +1,56 @@
+name: Bug report
+description: Create a bug report to help us improve.
+labels: [ 'bug' ]
+
+body:
+  - type: textarea
+    attributes:
+      label: Environment
+      description: |
+        What platform, side and version of Minecraft, Music Moods and Java are you using?
+
+        Example:
+          - **Minecraft**: 1.19.2 Client
+          - **Music Moods**: 0.1.0
+          - **Loader**: Quilt
+          - **Java**: Temurin 17.0.5
+      value: |
+        - **Minecraft**:
+        - **Music Moods**:
+        - **Mod Loader**:
+        - **Java**:
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: To reproduce
+      description: Steps to reproduce the behaviour.
+      placeholder: |
+        1. ...
+        2. ...
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Expected results
+      description: What behaviour did you expect?
+      placeholder: e.g. For music to fade out.
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Actual results
+      description: What behaviour did you observe instead?
+      placeholder: e.g. The music never faded out.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Anything else?
+      description: Crash reports, server logs, screenshots and videos should go here.
+    validations:
+      required: false
