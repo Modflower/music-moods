@@ -1,0 +1,12 @@
+{
+	"required": true,
+	"package": "gay.ampflower.musicmoods.mixin",
+	"compatibilityLevel": "JAVA_17",
+	"client": [
+		"MixinMusicManager",
+		"MixinWeighedSoundEvents"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}
