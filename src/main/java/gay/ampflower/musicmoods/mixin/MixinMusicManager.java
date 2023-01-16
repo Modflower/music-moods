@@ -52,7 +52,7 @@ public abstract class MixinMusicManager {
 
 	/**
 	 * @author Ampflower
-	 * @reason Better integration &amp; still figuring things out
+	 * @reason Better integration without having injects and redirects everywhere.
 	 */
 	@Overwrite
 	public void tick() {
