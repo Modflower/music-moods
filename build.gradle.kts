@@ -124,5 +124,5 @@ modrinth {
 	)
 	uploadFile.set(tasks.remapJar.get())
 	gameVersions.set(minecraftCompatible.split(","))
-	loaders.addAll("fabric", "quilt")
+	loaders.addAll("quilt")
 }
