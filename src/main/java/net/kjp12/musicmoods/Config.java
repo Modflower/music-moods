@@ -60,6 +60,11 @@ public final class Config {
 	 */
 	public static boolean chaoticallyPlayMusic = false;
 
+	/**
+	 * Injects UI components into Vanilla for better discoverability.
+	 */
+	public static boolean injectUiComponents = true;
+
 	public static void read() throws IOException {
 		if (Files.notExists(config)) {
 			// Commit the config, so it exists on disk to edit.
@@ -78,6 +83,7 @@ public final class Config {
 		immediatelyPlayOnReplace = toBoolean(properties, "immediatelyPlayOnReplace", true);
 		alwaysPlayMusic = toBoolean(properties, "alwaysPlayMusic", false);
 		chaoticallyPlayMusic = toBoolean(properties, "chaoticallyPlayMusic", false);
+		injectUiComponents = toBoolean(properties, "injectUiComponents", true);
 	}
 
 	public static void commit() throws IOException {

@@ -16,7 +16,9 @@ import dev.lambdaurora.spruceui.screen.SpruceScreen;
 import dev.lambdaurora.spruceui.widget.SpruceButtonWidget;
 import dev.lambdaurora.spruceui.widget.container.SpruceOptionListWidget;
 import dev.lambdaurora.spruceui.widget.container.tabbed.SpruceTabbedWidget;
+import net.kjp12.musicmoods.ClientMain;
 import net.kjp12.musicmoods.Config;
+import net.kjp12.musicmoods.Constants;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.ErrorScreen;
 import net.minecraft.client.gui.screens.Screen;
@@ -38,7 +40,7 @@ public class ConfigurationScreen extends SpruceScreen {
 
 	private SpruceTabbedWidget tabbedWidget;
 
-	protected ConfigurationScreen(final Screen parent) {
+	public ConfigurationScreen(final Screen parent) {
 		super(Component.translatable("music-moods.gui.configuration"));
 		this.parent = parent;
 	}
@@ -50,15 +52,14 @@ public class ConfigurationScreen extends SpruceScreen {
 		this.tabbedWidget = new SpruceTabbedWidget(Position.of(this, 0, 4), this.width, this.height - 35 - 4,
 				this.title);
 
-		this.tabbedWidget.addTabEntry(
-				Component.translatable("music-moods.gui.configuration.music"), Component
-						.translatable("music-moods.gui.configuration.music.description").withStyle(ChatFormatting.GRAY),
-				ConfigurationScreen::buildMusicOptionList);
+		addTabEntry("music", ConfigurationScreen::buildMusicOptionList);
+		addTabEntry("meta", ConfigurationScreen::buildMetaList);
 
 		this.addRenderableWidget(this.tabbedWidget);
 
-		this.addRenderableWidget(new SpruceButtonWidget(Position.of(this, this.width / 2 - (150 / 2), this.height - 28),
-				150, 20, SpruceTexts.GUI_DONE, btn -> onClose()));
+		this.addRenderableWidget(new SpruceButtonWidget(
+				Position.of(this, this.width / 2 - (Constants.buttonWidth / 2), this.height - 28),
+				Constants.buttonWidth, Constants.buttonHeight, SpruceTexts.GUI_DONE, btn -> onClose()));
 	}
 
 	@Override
@@ -73,6 +74,12 @@ public class ConfigurationScreen extends SpruceScreen {
 		}
 	}
 
+	protected void addTabEntry(String name, SpruceTabbedWidget.ContainerFactory factory) {
+		final var key = "music-moods.gui.configuration." + name;
+		this.tabbedWidget.addTabEntry(Component.translatable(key),
+				Component.translatable(key + ".description").withStyle(ChatFormatting.GRAY), factory);
+	}
+
 	protected static SpruceOptionListWidget buildMusicOptionList(int width, int height) {
 		final var list = new SpruceOptionListWidget(Position.origin(), width, height);
 
@@ -81,6 +88,24 @@ public class ConfigurationScreen extends SpruceScreen {
 			list.addSingleOptionEntry(checkbox("allowReplacingCurrentMusic"));
 			list.addOptionEntry(checkbox("immediatelyPlayOnReplace"), checkbox("alwaysPlayMusic"));
 			list.addOptionEntry(intInput("fadeInTicks"), intInput("fadeOutTicks"));
+		} catch (ReflectiveOperationException roe) {
+			throw new AssertionError("Unexpected access violation", roe);
+		}
+
+		return list;
+	}
+
+	protected static SpruceOptionListWidget buildMetaList(int width, int height) {
+		final var list = new SpruceOptionListWidget(Position.origin(), width, height);
+
+		try {
+			list.addSingleOptionEntry(separator("modPack"));
+			if (ClientMain.isModMenuPresent) {
+				list.addSingleOptionEntry(checkbox("injectUiComponents"));
+			} else {
+				// TODO: Make a proper widget for this.
+				list.addSingleOptionEntry(separator("modMenu"));
+			}
 		} catch (ReflectiveOperationException roe) {
 			throw new AssertionError("Unexpected access violation", roe);
 		}
