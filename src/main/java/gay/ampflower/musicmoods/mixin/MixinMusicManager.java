@@ -27,7 +27,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 /**
  * @author Ampflower
- * @since ${version}
+ * @since 0.0.0
  **/
 @Mixin(MusicManager.class)
 public abstract class MixinMusicManager {

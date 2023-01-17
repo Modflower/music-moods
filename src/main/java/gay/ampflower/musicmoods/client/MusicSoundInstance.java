@@ -16,7 +16,7 @@ import net.minecraft.sounds.SoundSource;
  * Tickable music sound instance for fade out on
  *
  * @author Ampflower
- * @since ${version}
+ * @since 0.0.0
  **/
 public class MusicSoundInstance extends AbstractTickableSoundInstance {
 	/**

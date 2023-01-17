@@ -25,7 +25,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 /**
  * @author Ampflower
- * @since ${version}
+ * @since 0.0.0
  **/
 @Mixin(SoundOptionsScreen.class)
 public class MixinSoundOptionsScreen extends OptionsSubScreen {

@@ -18,7 +18,7 @@ import java.util.Properties;
 
 /**
  * @author Ampflower
- * @since ${version}
+ * @since 0.0.0
  **/
 public final class Config {
 	private static final Path config = QuiltLoader.getConfigDir().resolve("music-moods.properties");
