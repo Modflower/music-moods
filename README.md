@@ -30,7 +30,9 @@ and stick with the default of fading between tracks or modify the config to not 
 
 You can edit the config in game when Mod Menu is installed by navigating to `Mods`, `Music Moods`, then hitting the
 `Configure...` button in the top right.
+Alternatively, there's a new button in the Music & Sound Options screen.
 
+![The new button in Music & Sound Options](docs/images/config-button.png)
 ![The configuration screen](docs/images/config-music.png)
 
 ### Music
