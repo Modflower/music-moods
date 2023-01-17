@@ -14,7 +14,7 @@ import java.io.IOException;
 
 /**
  * @author KJP12
- * @since ${version}
+ * @since 0.0.0
  **/
 public class ClientMain implements ClientModInitializer {
 	public static boolean isModMenuPresent = QuiltLoader.isModLoaded("modmenu");

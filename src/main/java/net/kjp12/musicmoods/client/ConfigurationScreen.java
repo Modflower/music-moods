@@ -30,7 +30,7 @@ import java.lang.invoke.MethodHandles;
 
 /**
  * @author KJP12
- * @since ${version}
+ * @since 0.0.0
  **/
 public class ConfigurationScreen extends SpruceScreen {
 	private static final Logger logger = LogUtils.getLogger();

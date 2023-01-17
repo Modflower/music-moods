@@ -24,7 +24,7 @@ import java.util.Set;
 
 /**
  * @author KJP12
- * @since ${version}
+ * @since 0.0.0
  **/
 @Mixin(WeighedSoundEvents.class)
 public class MixinWeighedSoundEvents implements WeighedSoundEventsQuery {

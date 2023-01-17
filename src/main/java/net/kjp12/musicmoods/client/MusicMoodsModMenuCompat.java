@@ -11,7 +11,7 @@ import com.terraformersmc.modmenu.api.ModMenuApi;
 
 /**
  * @author KJP12
- * @since ${version}
+ * @since 0.0.0
  **/
 public class MusicMoodsModMenuCompat implements ModMenuApi {
 	@Override

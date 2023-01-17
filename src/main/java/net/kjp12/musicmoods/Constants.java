@@ -11,7 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 
 /**
  * @author KJP12
- * @since ${version}
+ * @since 0.0.0
  **/
 public final class Constants {
 	public static final ResourceLocation moodsResource = new ResourceLocation("music-moods",

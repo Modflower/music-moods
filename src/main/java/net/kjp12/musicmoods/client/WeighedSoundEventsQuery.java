@@ -10,7 +10,7 @@ import net.minecraft.client.resources.sounds.Sound;
 
 /**
  * @author KJP12
- * @since ${version}
+ * @since 0.0.0
  **/
 public interface WeighedSoundEventsQuery {
 	boolean contains(Sound sound);
