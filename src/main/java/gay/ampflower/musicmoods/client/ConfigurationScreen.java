@@ -40,6 +40,8 @@ public class ConfigurationScreen extends SpruceScreen {
 
 	private SpruceTabbedWidget tabbedWidget;
 
+	private boolean committed;
+
 	public ConfigurationScreen(final Screen parent) {
 		super(Component.translatable("music-moods.gui.configuration"));
 		this.parent = parent;
@@ -63,8 +65,20 @@ public class ConfigurationScreen extends SpruceScreen {
 	}
 
 	@Override
+	public void removed() {
+		if (!committed) {
+			try {
+				Config.commit();
+			} catch (IOException ioe) {
+				logger.error("Failed to save Music-Moods config. User not notified.", ioe);
+			}
+		}
+	}
+
+	@Override
 	public void onClose() {
 		try {
+			committed = true;
 			Config.commit();
 			minecraft.setScreen(parent);
 		} catch (IOException ioe) {
