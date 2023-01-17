@@ -3,8 +3,14 @@
 	"music-moods.gui.configuration.error": "Unable to save your settings.\n\nBe sure file permissions are correctly set.",
 	"music-moods.gui.configuration.music": "Music",
 	"music-moods.gui.configuration.music.description": "Configure how music is handled",
+	"music-moods.gui.configuration.meta": "Meta",
+	"music-moods.gui.configuration.meta.description": "Configure Music Moods itself",
 	"music-moods.option.separator.situationalMusic": "Situational Music",
 	"music-moods.option.separator.situationalMusic.description": "Includes the title screen, various biomes, being underwater and battles.",
+	"music-moods.option.separator.modPack": "Mod Pack",
+	"music-moods.option.separator.modPack.description": "Options useful for mod pack creators.",
+	"music-moods.option.separator.modMenu": "Mod Menu Required",
+	"music-moods.option.separator.modMenu.description": "There are options that are only available when Mod Menu is installed.\n\nYou can still manually edit those options via the config if you really must.",
 	"music-moods.option.allowReplacingCurrentMusic": "Allow replacing current track",
 	"music-moods.option.allowReplacingCurrentMusic.description": "Allows replacing the current music with a more fitting track.",
 	"music-moods.option.alwaysPlayMusic": "Always play music",
@@ -14,5 +20,7 @@
 	"music-moods.option.fadeInTicks": "Fade-in time in ticks",
 	"music-moods.option.fadeInTicks.description": "How long it takes for the new track to fade in, counted in ticks.\n\nOnly applies when the old track was replaced by a new track.",
 	"music-moods.option.fadeOutTicks": "Fade-out time in ticks",
-	"music-moods.option.fadeOutTicks.description": "How long it takes for the old track to fade out, counted in ticks.\n\nOnly applies when the old track was replaced by a new track."
+	"music-moods.option.fadeOutTicks.description": "How long it takes for the old track to fade out, counted in ticks.\n\nOnly applies when the old track was replaced by a new track.",
+	"music-moods.option.injectUiComponents": "Inject UI Components",
+	"music-moods.option.injectUiComponents.description": "Inject buttons into Vanilla UIs for discoverability.\n\nNote: Disabling this will hinder discoverability of Music Moods' options and should only be done if you're providing an alternative mean of accessing its settings."
 }
