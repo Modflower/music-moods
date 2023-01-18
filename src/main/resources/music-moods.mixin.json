@@ -10,7 +10,7 @@
 		"MixinMinecraft",
 		"MixinMusicManager",
 		"MixinSoundEngine",
-		"MixinSoundOptionsScreen",
+		"MixinOptionsListEntry",
 		"MixinWeighedSoundEvents"
 	],
 	"injectors": {
