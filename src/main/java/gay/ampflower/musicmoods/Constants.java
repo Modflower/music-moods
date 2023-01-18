@@ -24,7 +24,8 @@ public final class Constants {
 	public static final int twoColumnButtonOffset = 5;
 
 	public static final int smallButtonWidth = 20;
-	public static final int smallButtonOffset = 24;
+	public static final int smallButtonPlacementOffset = 4;
+	public static final int smallButtonOffset = smallButtonWidth + smallButtonPlacementOffset;
 
 	public static final int primaryButtonLeftOffset = buttonWidth + twoColumnButtonOffset;
 	public static final int primaryButtonRightOffset = primaryButtonLeftOffset + twoColumnButtonOffset;

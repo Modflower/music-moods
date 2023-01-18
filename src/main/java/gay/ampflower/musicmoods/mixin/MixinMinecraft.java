@@ -6,6 +6,7 @@
 
 package gay.ampflower.musicmoods.mixin;// Created 2023-17-01T21:38:15
 
+import gay.ampflower.musicmoods.client.WidgetAttachment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.sounds.MusicManager;
@@ -14,8 +15,10 @@ import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * @author Ampflower
@@ -26,6 +29,16 @@ public abstract class MixinMinecraft {
 	@Shadow
 	@Nullable
 	public LocalPlayer player;
+
+	/**
+	 * Late-init hook because Quilt hooks in too early for what we need.
+	 *
+	 * @since 0.1.0
+	 */
+	@Inject(method = "<init>", at = @At("RETURN"))
+	private void musicmoods$returnHook(CallbackInfo ci) {
+		WidgetAttachment.init((Minecraft) (Object) this);
+	}
 
 	/**
 	 * Fixes underwater music constantly playing when set to always playing or
