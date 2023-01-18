@@ -57,7 +57,7 @@ public abstract class MixinMusicManager {
 	@Overwrite
 	public void tick() {
 		final var music = this.minecraft.getSituationalMusic();
-		final var musicLocation = music.getEvent().getLocation();
+		final var musicLocation = music.getEvent().value().getLocation();
 		// Cache the sound manager in a local.
 		final var soundManager = this.minecraft.getSoundManager();
 		var oldFadingOutMusic = this.fadingOutMusic;
@@ -179,7 +179,7 @@ public abstract class MixinMusicManager {
 	 */
 	@Unique
 	private void startPlayingFadeIn(Music music) {
-		this.currentMusic = new MusicSoundInstance(music.getEvent(), Config.fadeInTicks);
+		this.currentMusic = new MusicSoundInstance(music.getEvent().value(), Config.fadeInTicks);
 		if (this.currentMusic.getSound() != SoundManager.EMPTY_SOUND) {
 			this.minecraft.getSoundManager().play(this.currentMusic);
 		}
@@ -195,6 +195,6 @@ public abstract class MixinMusicManager {
 	@Redirect(method = "startPlaying", at = @At(value = "FIELD", target = "Lnet/minecraft/client/sounds/MusicManager;currentMusic:Lnet/minecraft/client/resources/sounds/SoundInstance;", opcode = Opcodes.PUTFIELD))
 	private void musicmoods$setCustomSoundInstance(final MusicManager self, final SoundInstance value,
 			final Music music) {
-		this.currentMusic = new MusicSoundInstance(music.getEvent());
+		this.currentMusic = new MusicSoundInstance(music.getEvent().value());
 	}
 }
