@@ -6,6 +6,7 @@
 
 package gay.ampflower.musicmoods;// Created 2022-26-12T16:26:36
 
+import gay.ampflower.musicmoods.config.Replacing;
 import org.quiltmc.loader.api.QuiltLoader;
 
 import java.io.IOException;
@@ -27,7 +28,7 @@ public final class Config {
 	/**
 	 * The current config version, used for updating if needed.
 	 */
-	public static final int version = 0;
+	public static final int version = 1;
 
 	/**
 	 * The fade-out time in Minecraft server ticks.
@@ -43,7 +44,7 @@ public final class Config {
 	 * Allows the music manager to replace the current track if the situational
 	 * music doesn't match the current situation.
 	 */
-	public static boolean allowReplacingCurrentMusic = true;
+	public static Replacing situationalMusicReplacing = Replacing.allow;
 
 	/**
 	 * Tells the music manager to always play music when replacing a track.
@@ -77,9 +78,17 @@ public final class Config {
 			properties.load(configStream);
 		}
 
+		int version = toInt(properties, "version", 0);
+
+		if (version < 1) {
+			final boolean replaces = toBoolean(properties, "allowReplacingCurrentMusic", true);
+			situationalMusicReplacing = replaces ? Replacing.allow : Replacing.never;
+		} else {
+			situationalMusicReplacing = toEnum(properties, "situationalMusicReplacing", Replacing.allow);
+		}
+
 		fadeOutTicks = toInt(properties, "fadeOutTicks", fadeDefault);
 		fadeInTicks = toInt(properties, "fadeInTicks", fadeDefault);
-		allowReplacingCurrentMusic = toBoolean(properties, "allowReplacingCurrentMusic", true);
 		immediatelyPlayOnReplace = toBoolean(properties, "immediatelyPlayOnReplace", true);
 		alwaysPlayMusic = toBoolean(properties, "alwaysPlayMusic", false);
 		chaoticallyPlayMusic = toBoolean(properties, "chaoticallyPlayMusic", false);
@@ -106,6 +115,20 @@ public final class Config {
 
 			properties.store(configStream, "Music Moods Config");
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T extends Enum<T>> T toEnum(final Properties properties, final String key, final T def) {
+		final var str = properties.getProperty(key);
+		if (str == null) {
+			return def;
+		}
+		for (final var t : def.getClass().getEnumConstants()) {
+			if (t.name().equals(str)) {
+				return (T) t;
+			}
+		}
+		return def;
 	}
 
 	private static boolean toBoolean(final Properties properties, final String key, final boolean def) {

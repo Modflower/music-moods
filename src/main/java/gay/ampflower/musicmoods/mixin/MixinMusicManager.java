@@ -9,6 +9,7 @@ package gay.ampflower.musicmoods.mixin;// Created 2022-24-12T20:34:50
 import gay.ampflower.musicmoods.Config;
 import gay.ampflower.musicmoods.client.MusicSoundInstance;
 import gay.ampflower.musicmoods.client.WeighedSoundEventsQuery;
+import gay.ampflower.musicmoods.config.Replacing;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
@@ -69,8 +70,8 @@ public abstract class MixinMusicManager {
 		if (this.currentMusic != null) {
 
 			// Allow the end user to say whether they want their music replaced at all.
-			if (Config.allowReplacingCurrentMusic && (isLoudAndCompatible(oldFadingOutMusic, musicLocation)
-					|| (music.replaceCurrentMusic() && isReplaceable(this.currentMusic, musicLocation)))) {
+			if (Config.situationalMusicReplacing.replaces()
+					&& (isLoudAndCompatible(oldFadingOutMusic, musicLocation) || shouldReplace(music))) {
 
 				// Do a fade out on the current music if configured to make it not jarring.
 				if (Config.fadeOutTicks > 0 && this.currentMusic instanceof MusicSoundInstance musicSoundInstance) {
@@ -144,6 +145,12 @@ public abstract class MixinMusicManager {
 		}
 
 		return isCompatible(instance, musicLocation);
+	}
+
+	@Unique
+	private boolean shouldReplace(final Music music) {
+		return (Config.situationalMusicReplacing == Replacing.always || music.replaceCurrentMusic())
+				&& this.isReplaceable(this.currentMusic, music.getEvent().getLocation());
 	}
 
 	@Unique
