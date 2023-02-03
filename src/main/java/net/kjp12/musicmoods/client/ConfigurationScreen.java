@@ -10,6 +10,7 @@ import com.mojang.logging.LogUtils;
 import dev.lambdaurora.spruceui.Position;
 import dev.lambdaurora.spruceui.SpruceTexts;
 import dev.lambdaurora.spruceui.option.SpruceCheckboxBooleanOption;
+import dev.lambdaurora.spruceui.option.SpruceCyclingOption;
 import dev.lambdaurora.spruceui.option.SpruceIntegerInputOption;
 import dev.lambdaurora.spruceui.option.SpruceSeparatorOption;
 import dev.lambdaurora.spruceui.screen.SpruceScreen;
@@ -27,6 +28,10 @@ import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
+import java.util.Locale;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * @author KJP12
@@ -99,7 +104,7 @@ public class ConfigurationScreen extends SpruceScreen {
 
 		try {
 			list.addSingleOptionEntry(separator("situationalMusic"));
-			list.addSingleOptionEntry(checkbox("allowReplacingCurrentMusic"));
+			list.addSingleOptionEntry(cycling("situationalMusicReplacing"));
 			list.addOptionEntry(checkbox("immediatelyPlayOnReplace"), checkbox("alwaysPlayMusic"));
 			list.addOptionEntry(intInput("fadeInTicks"), intInput("fadeOutTicks"));
 		} catch (ReflectiveOperationException roe) {
@@ -145,5 +150,46 @@ public class ConfigurationScreen extends SpruceScreen {
 		final var key = "music-moods.option." + field;
 		return new SpruceCheckboxBooleanOption(key, () -> (boolean) handle.get(), handle::set,
 				Component.translatable(key + ".description"));
+	}
+
+	public static SpruceCyclingOption cycling(String field) throws IllegalAccessException, NoSuchFieldException {
+		final var handle = findEnumField(field);
+		final var enums = (Enum<?>[]) handle.varType().getEnumConstants();
+		final var key = "music-moods.option." + field;
+		final var stepper = new EnumStepper(enums, handle, key);
+		return new SpruceCyclingOption(key, stepper, stepper, Component.translatable(key + ".description"));
+	}
+
+	private static VarHandle findEnumField(String name) throws IllegalAccessException, NoSuchFieldException {
+		final var fields = Config.class.getFields();
+		for (final var field : fields) {
+			if (name.equals(field.getName())) {
+				if (Enum.class.isAssignableFrom(field.getType())) {
+					return SELF.unreflectVarHandle(field);
+				}
+				throw new NoSuchFieldException("Incompatible field " + field);
+			}
+		}
+		throw new NoSuchFieldException("Cannot find " + name + " in Config");
+	}
+
+	private record EnumStepper(Enum<?>[] enums, VarHandle handle, String key)
+			implements Consumer<Integer>, Function<SpruceCyclingOption, Component> {
+
+		@Override
+		public void accept(final Integer integer) {
+			final int newIndex = (get().ordinal() + integer) % this.enums.length;
+			this.handle.set(this.enums[newIndex]);
+		}
+
+		private Enum<?> get() {
+			return (Enum<?>) this.handle.get();
+		}
+
+		@Override
+		public Component apply(final SpruceCyclingOption self) {
+			return Component.translatable(key,
+					Component.translatable("music-moods.option.value." + get().name().toLowerCase(Locale.ROOT)));
+		}
 	}
 }
