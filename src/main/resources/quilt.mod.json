@@ -42,5 +42,8 @@
 			}
 		]
 	},
-	"mixin": "music-moods.mixin.json"
+	"mixin": "music-moods.mixin.json",
+	"minecraft": {
+		"environment": "client"
+	}
 }

@@ -26,6 +26,10 @@ screen as well.
 Install Minecraft 1.19+, [Quilt](https://quiltmc.org/install), any mods that like to replace the currently playing track
 and stick with the default of fading between tracks or modify the config to not let the current track be replaced.
 
+Mods that are recommended to be used with are the [BetterNether](https://modrinth.com/mod/betternether) and
+[BetterEnd](https://modrinth.com/mod/betterend) mods,
+as this mod aims to solve the niche requirement that these two add.
+
 ## Configuration
 
 You can edit the config in game when Mod Menu is installed by navigating to `Mods`, `Music Moods`, then hitting the
