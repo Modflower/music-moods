@@ -57,7 +57,7 @@ dependencies {
 	minecraft(libs.minecraft)
 	mappings(loom.officialMojangMappings())
 	modImplementation(libs.quilt.loader)
-	print(modImplementation(libs.spruceui))
+	modImplementation(libs.spruceui)
 	include(libs.spruceui)
 	modImplementation(libs.modmenu)
 	modImplementation(libs.quilted.fabric.api)
