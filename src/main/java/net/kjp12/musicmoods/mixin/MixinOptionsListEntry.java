@@ -1,4 +1,4 @@
-/* Copyright 2023 KJP12
+/* Copyright 2023 Ampflower
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -21,7 +21,7 @@ import java.util.Collection;
 import java.util.Map;
 
 /**
- * @author KJP12
+ * @author Ampflower
  * @since 0.1.0
  **/
 @Mixin(targets = "net.minecraft.client.gui.components.OptionsList$Entry")

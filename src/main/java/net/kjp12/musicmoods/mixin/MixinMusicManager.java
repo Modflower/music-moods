@@ -1,4 +1,4 @@
-/* Copyright 2023 KJP12
+/* Copyright 2023 Ampflower
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -27,7 +27,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 /**
- * @author KJP12
+ * @author Ampflower
  * @since 0.0.0
  **/
 @Mixin(MusicManager.class)
@@ -52,7 +52,7 @@ public abstract class MixinMusicManager {
 	private ResourceLocation currentCompatibleLocation;
 
 	/**
-	 * @author KJP12
+	 * @author Ampflower
 	 * @reason Better integration without having injects and redirects everywhere.
 	 */
 	@Overwrite

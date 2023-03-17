@@ -1,4 +1,4 @@
-/* Copyright 2023 KJP12
+/* Copyright 2023 Ampflower
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -13,7 +13,7 @@ import org.quiltmc.qsl.base.api.entrypoint.client.ClientModInitializer;
 import java.io.IOException;
 
 /**
- * @author KJP12
+ * @author Ampflower
  * @since 0.0.0
  **/
 public class ClientMain implements ClientModInitializer {
