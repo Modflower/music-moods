@@ -39,6 +39,10 @@
 			{
 				"id": "java",
 				"versions": ">=${java}"
+			},
+			{
+				"id": "spruceui",
+				"versions": "*"
 			}
 		]
 	},
