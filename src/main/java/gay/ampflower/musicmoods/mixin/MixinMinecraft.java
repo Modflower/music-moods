@@ -8,21 +8,50 @@ package gay.ampflower.musicmoods.mixin;// Created 2023-17-01T21:38:15
 
 import gay.ampflower.musicmoods.client.WidgetAttachment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.sounds.MusicManager;
+import net.minecraft.sounds.Music;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Late-init hook because Quilt hooks in too early for what we need.
- *
  * @author Ampflower
  * @since 0.1.0
  **/
 @Mixin(Minecraft.class)
-public class MixinMinecraft {
+public abstract class MixinMinecraft {
+	@Shadow
+	@Nullable
+	public LocalPlayer player;
+
+	/**
+	 * Late-init hook because Quilt hooks in too early for what we need.
+	 *
+	 * @since 0.1.0
+	 */
 	@Inject(method = "<init>", at = @At("RETURN"))
 	private void musicmoods$returnHook(CallbackInfo ci) {
 		WidgetAttachment.init((Minecraft) (Object) this);
+	}
+
+	/**
+	 * Fixes underwater music constantly playing when set to always playing or
+	 * replacing.
+	 *
+	 * @reason {@link LocalPlayer#isUnderWater()} check needs to happen as we have a
+	 *         continuous mode, in which Minecraft does not account for when telling
+	 *         if it should return underwater music.
+	 * @since 0.3.0
+	 */
+	@Redirect(method = "getSituationalMusic", at = @At(value = "INVOKE", ordinal = 0, slice = "underWaterMusicManager", target = "Lnet/minecraft/client/sounds/MusicManager;isPlayingMusic(Lnet/minecraft/sounds/Music;)Z"), slice = @Slice(id = "underWaterMusicManager", from = @At(value = "FIELD", target = "Lnet/minecraft/sounds/Musics;UNDER_WATER:Lnet/minecraft/sounds/Music;")))
+	private boolean musicmoods$checkPlayer(MusicManager self, Music music) {
+		assert this.player != null : "Minecraft moved underwater check?";
+		return this.player.isUnderWater() && self.isPlayingMusic(music);
 	}
 }
