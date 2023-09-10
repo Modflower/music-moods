@@ -1,0 +1,44 @@
+modLoader = "lowcodefml"
+loaderVersion = "[47,)"
+license = "Mozilla Public License 2.0"
+
+issueTrackerURL = "https://github.com/Modflower/music-moods/issues"
+
+[properties]
+"connector:placeholder"=true
+
+[[mods]]
+modId = "music_moods"
+namespace = "music-moods"
+version = "${version}"
+displayName = "Music Moods"
+
+updateJSONURL = "https://api.modrinth.com/updates/${modrinthId}/forge_updates.json"
+
+logoFile = "assets/music-moods/pack.png"
+logoBlur = false
+
+displayURL = "https://mod.ampflower.gay/petworks"
+
+description = '''
+Configure how music & sound are handled.
+'''
+
+authors = "Ampflower"
+
+[[dependencies.music_moods]]
+modId = "minecraft"
+mandatory = true
+
+versionRange = "[1.20.1]"
+ordering = "NONE"
+side = "CLIENT"
+
+
+[[dependencies.music_moods]]
+modId = "connectormod"
+mandatory = true
+
+versionRange = "[1.0.0-beta.41,)"
+ordering = "NONE"
+side = "CLIENT"
