@@ -96,11 +96,12 @@ tasks {
 				"java" to java.targetCompatibility.majorVersion,
 				"version" to project.version,
 				"project_version" to projectVersion,
-				"minecraft_required" to libs.versions.minecraft.required.get()
+				"minecraft_required" to libs.versions.minecraft.required.get(),
+				"modrinthId" to modrinthId,
 			)
 		inputs.properties(map)
 
-		filesMatching("fabric.mod.json") { expand(map) }
+		filesMatching(listOf("fabric.mod.json", "quilt.mod.json", "META-INF/mods.toml")) { expand(map) }
 	}
 	javadoc {
 		(options as StandardJavadocDocletOptions).tags("reason:a:Reason")
