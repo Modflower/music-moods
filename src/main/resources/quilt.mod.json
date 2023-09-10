@@ -30,7 +30,9 @@
 		"depends": [
 			{
 				"id": "minecraft",
-				"versions": "${minecraft_required}"
+				"versions": {
+					"all": ["${minecraft_required}"]
+				}
 			},
 			{
 				"id": "quilt_loader",

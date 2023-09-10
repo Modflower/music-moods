@@ -57,9 +57,13 @@ dependencies {
 	minecraft(libs.minecraft)
 	mappings(loom.officialMojangMappings())
 	modImplementation(libs.quilt.loader)
-	modImplementation(libs.spruceui)
+	modImplementation(libs.spruceui) {
+		exclude(module = "fabric-loader")
+	}
 	include(libs.spruceui)
-	modImplementation(libs.modmenu)
+	modImplementation(libs.modmenu)  {
+		exclude(module = "fabric-loader")
+	}
 	modImplementation(libs.quilted.fabric.api)
 	modRuntimeOnly(libs.bundles.mod.runtime)
 }
