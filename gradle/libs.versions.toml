@@ -2,14 +2,15 @@
 annotations = "23.0.0"
 
 # https://github.com/LambdAurora/SpruceUI
-spruceui = "5.0.0+1.20"
-modmenu = "7.0.1"
+spruceui = "5.0.3+1.20.2"
+modmenu = "8.0.+"
 
 # Minecraft
-minecraft_version = "1.20"
-minecraft_required = '>=1.20", "<=1.20.1'
-quilt_loader = "0.18.+"
-quilted_fabric_api = "7.2.1+0.88.0-1.20.1"
+minecraft_version = "1.20.2"
+minecraft_required = '>=1.20.2'
+quilt_loader = "0.20.+"
+# quilted_fabric_api = "7.2.1+0.88.0-1.20.1"
+fabric_api = "0.89.1+1.20.2"
 
 # Plugins
 loom = "1.+"
@@ -28,7 +29,8 @@ annotations = { module = "org.jetbrains:annotations", version.ref = "annotations
 # Mods
 spruceui = { module = "dev.lambdaurora:spruceui", version.ref = "spruceui" }
 modmenu = { module = "com.terraformersmc:modmenu", version.ref = "modmenu" }
-quilted_fabric_api = { module = "org.quiltmc.quilted-fabric-api:quilted-fabric-api", version.ref = "quilted_fabric_api" }
+# quilted_fabric_api = { module = "org.quiltmc.quilted-fabric-api:quilted-fabric-api", version.ref = "quilted_fabric_api" }
+quilted_fabric_api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fabric_api" }
 
 [bundles]
 compileOnly = ["annotations"]

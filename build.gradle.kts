@@ -42,6 +42,7 @@ java {
 }
 
 repositories {
+	mavenLocal()
 	mavenCentral()
 	maven("https://oss.sonatype.org/content/repositories/snapshots") {
 		name = "Nexus Repository OSS"
@@ -124,8 +125,8 @@ modrinth {
 	)
 	val ref = System.getenv("GITHUB_REF")
 	changelog.set(
-		System.getenv("CHANGELOG") ?: if (ref != null && ref.startsWith("refs/tags/")) "You may view the changelog at https://github.com/the-glitch-network/music-moods/releases/tag/${URLEncoder.encode(ref.substring(10), StandardCharsets.UTF_8)}"
-		else "No changelog is available. Perhaps poke at https://github.com/the-glitch-network/music-moods for a changelog?"
+		System.getenv("CHANGELOG") ?: if (ref != null && ref.startsWith("refs/tags/")) "You may view the changelog at https://github.com/Modflower/music-moods/releases/tag/${URLEncoder.encode(ref.substring(10), StandardCharsets.UTF_8)}"
+		else "No changelog is available. Perhaps poke at https://github.com/Modflower/music-moods for a changelog?"
 	)
 	uploadFile.set(tasks.remapJar.get())
 	gameVersions.set(minecraftCompatible.split(","))

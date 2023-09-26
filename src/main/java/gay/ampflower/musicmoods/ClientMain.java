@@ -6,9 +6,8 @@
 
 package gay.ampflower.musicmoods;// Created 2023-12-01T02:08:34
 
-import org.quiltmc.loader.api.ModContainer;
+import net.fabricmc.api.ClientModInitializer;
 import org.quiltmc.loader.api.QuiltLoader;
-import org.quiltmc.qsl.base.api.entrypoint.client.ClientModInitializer;
 
 import java.io.IOException;
 
@@ -20,7 +19,7 @@ public class ClientMain implements ClientModInitializer {
 	public static boolean isModMenuPresent = QuiltLoader.isModLoaded("modmenu");
 
 	@Override
-	public void onInitializeClient(final ModContainer mod) {
+	public void onInitializeClient() {
 		try {
 			Config.read();
 		} catch (IOException ioe) {

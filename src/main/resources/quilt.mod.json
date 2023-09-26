@@ -19,7 +19,7 @@
 			"icon": "assets/music-moods/pack.png"
 		},
 		"entrypoints": {
-			"client_init": [
+			"client": [
 				"gay.ampflower.musicmoods.ClientMain"
 			],
 			"modmenu": [
