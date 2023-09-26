@@ -7,6 +7,7 @@
 package gay.ampflower.musicmoods;// Created 2023-16-01T21:35:22
 
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.resources.ResourceLocation;
 
 /**
@@ -14,10 +15,9 @@ import net.minecraft.resources.ResourceLocation;
  * @since 0.0.0
  **/
 public final class Constants {
-	public static final ResourceLocation moodsResource = new ResourceLocation("music-moods",
-			"textures/gui/widgets.png");
+	public static final String modId = "music-moods";
 
-	public static final int atlasSize = 256;
+	public static final WidgetSprites musicSprites = widgetHoverable("music");
 
 	public static final int buttonHeight = Button.DEFAULT_HEIGHT;
 	public static final int buttonWidth = Button.DEFAULT_WIDTH;
@@ -29,4 +29,12 @@ public final class Constants {
 
 	public static final int primaryButtonLeftOffset = buttonWidth + twoColumnButtonOffset;
 	public static final int primaryButtonRightOffset = primaryButtonLeftOffset + twoColumnButtonOffset;
+
+	public static WidgetSprites widgetHoverable(String widget) {
+		return new WidgetSprites(widget(widget), widget(widget + "_hover"));
+	}
+
+	public static ResourceLocation widget(String widget) {
+		return new ResourceLocation(modId, "widget/" + widget);
+	}
 }
