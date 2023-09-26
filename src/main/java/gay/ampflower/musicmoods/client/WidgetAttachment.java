@@ -32,8 +32,7 @@ public final class WidgetAttachment {
 			final int x = deriveX(widget, first, Constants.smallButtonWidth, Constants.smallButtonPlacementOffset);
 			final int y = widget.getY();
 
-			return new ImageButton(x, y, Constants.smallButtonWidth, Constants.smallButtonWidth, 0, 0,
-					Constants.smallButtonWidth, Constants.moodsResource, Constants.atlasSize, Constants.atlasSize,
+			return new ImageButton(x, y, Constants.smallButtonWidth, Constants.smallButtonWidth, Constants.musicSprites,
 					button -> minecraft.setScreen(new ConfigurationScreen(minecraft.screen)));
 		});
 	}
