@@ -56,11 +56,11 @@ repositories {
 dependencies {
 	minecraft(libs.minecraft)
 	mappings(loom.officialMojangMappings())
-	modImplementation(libs.quilt.loader)
+	modImplementation(libs.fabric.loader)
 	modImplementation(libs.spruceui)
 	include(libs.spruceui)
 	modImplementation(libs.modmenu)
-	modImplementation(libs.quilted.fabric.api)
+	modImplementation(libs.fabric.api)
 	modRuntimeOnly(libs.bundles.mod.runtime)
 }
 
@@ -100,7 +100,7 @@ tasks {
 			)
 		inputs.properties(map)
 
-		filesMatching("quilt.mod.json") { expand(map) }
+		filesMatching("fabric.mod.json") { expand(map) }
 	}
 	javadoc {
 		(options as StandardJavadocDocletOptions).tags("reason:a:Reason")
@@ -120,10 +120,10 @@ modrinth {
 	)
 	val ref = System.getenv("GITHUB_REF")
 	changelog.set(
-		System.getenv("CHANGELOG") ?: if (ref != null && ref.startsWith("refs/tags/")) "You may view the changelog at https://github.com/the-glitch-network/music-moods/releases/tag/${URLEncoder.encode(ref.substring(10), StandardCharsets.UTF_8)}"
-		else "No changelog is available. Perhaps poke at https://github.com/the-glitch-network/music-moods for a changelog?"
+		System.getenv("CHANGELOG") ?: if (ref != null && ref.startsWith("refs/tags/")) "You may view the changelog at https://github.com/Modflower/music-moods/releases/tag/${URLEncoder.encode(ref.substring(10), StandardCharsets.UTF_8)}"
+		else "No changelog is available. Perhaps poke at https://github.com/Modflower/music-moods for a changelog?"
 	)
 	uploadFile.set(tasks.remapJar.get())
 	gameVersions.set(minecraftCompatible.split(","))
-	loaders.addAll("quilt")
+	loaders.addAll("fabric", "quilt")
 }

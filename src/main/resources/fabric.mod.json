@@ -1,0 +1,34 @@
+{
+	"schemaVersion": 1,
+	"id": "music-moods",
+	"version": "${version}",
+	"name": "Music Moods",
+	"description": "Configure how music & sound are handled.",
+	"contributors": [
+		"Ampflower"
+	],
+	"contact": {
+		"homepage": "https://modrinth.com/mod/music-moods",
+		"sources": "https://github.com/Modflower/music-moods",
+		"issues": "https://github.com/Modflower/music-moods/issues"
+	},
+	"license": "MPL-2.0",
+	"icon": "assets/music-moods/pack.png",
+	"entrypoints": {
+		"client": [
+			"gay.ampflower.musicmoods.ClientMain"
+		],
+		"modmenu": [
+			"gay.ampflower.musicmoods.client.MusicMoodsModMenuCompat"
+		]
+	},
+	"depends": {
+		"minecraft": "${minecraft_required}",
+		"java": ">=${java}",
+		"spruceui": "*"
+	},
+	"mixins": [
+		"music-moods.mixin.json"
+	],
+	"environment": "client"
+}

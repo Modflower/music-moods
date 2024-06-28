@@ -7,7 +7,7 @@
 package gay.ampflower.musicmoods;// Created 2022-26-12T16:26:36
 
 import gay.ampflower.musicmoods.config.Replacing;
-import org.quiltmc.loader.api.QuiltLoader;
+import net.fabricmc.loader.api.FabricLoader;
 
 import java.io.IOException;
 import java.lang.reflect.Modifier;
@@ -22,7 +22,7 @@ import java.util.Properties;
  * @since 0.0.0
  **/
 public final class Config {
-	private static final Path config = QuiltLoader.getConfigDir().resolve("music-moods.properties");
+	private static final Path config = FabricLoader.getInstance().getConfigDir().resolve("music-moods.properties");
 	private static final int fadeDefault = 600;
 
 	/**
@@ -108,7 +108,7 @@ public final class Config {
 				throw new AssertionError("Unexpected access violation accessing self @ " + field, roe);
 			}
 
-		Files.createDirectories(QuiltLoader.getConfigDir());
+		Files.createDirectories(FabricLoader.getInstance().getConfigDir());
 
 		try (final var configStream = Files.newOutputStream(config, StandardOpenOption.CREATE,
 				StandardOpenOption.TRUNCATE_EXISTING)) {
