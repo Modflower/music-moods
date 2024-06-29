@@ -7,7 +7,7 @@
 package gay.ampflower.musicmoods.client;// Created 2023-09-01T02:55:14
 
 import it.unimi.dsi.fastutil.floats.FloatUnaryOperator;
-import net.minecraft.client.Timer;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.sounds.SoundEvent;
@@ -25,7 +25,8 @@ public class MusicSoundInstance extends AbstractTickableSoundInstance {
 	 */
 	private static final float JUMP_LIMIT = 0.025F;
 
-	private final Timer timer = new Timer(20F, System.currentTimeMillis(), FloatUnaryOperator.identity());
+	private final DeltaTracker.Timer timer = new DeltaTracker.Timer(20F, System.currentTimeMillis(),
+			FloatUnaryOperator.identity());
 	private float fadeOut;
 	private float fadeIn;
 
@@ -66,10 +67,11 @@ public class MusicSoundInstance extends AbstractTickableSoundInstance {
 
 	@Override
 	public void tick() {
-		this.timer.advanceTime(System.currentTimeMillis());
+		this.timer.advanceTime(System.currentTimeMillis(), false);
 
 		if (fadeOut > 0F && this.volume > 0F) {
-			final var newVolume = Math.max(this.volume - Math.min(this.timer.tickDelta / fadeOut, JUMP_LIMIT), 0F);
+			final var newVolume = Math
+					.max(this.volume - Math.min(this.timer.getRealtimeDeltaTicks() / fadeOut, JUMP_LIMIT), 0F);
 
 			if (newVolume == newVolume) {
 				this.volume = newVolume;
@@ -77,7 +79,8 @@ public class MusicSoundInstance extends AbstractTickableSoundInstance {
 		}
 
 		if (fadeIn > 0F && this.volume < 1F) {
-			final var newVolume = Math.min(this.volume + Math.min(this.timer.tickDelta / fadeIn, JUMP_LIMIT), 1F);
+			final var newVolume = Math
+					.min(this.volume + Math.min(this.timer.getRealtimeDeltaTicks() / fadeIn, JUMP_LIMIT), 1F);
 
 			if (newVolume == newVolume) {
 				this.volume = newVolume;
