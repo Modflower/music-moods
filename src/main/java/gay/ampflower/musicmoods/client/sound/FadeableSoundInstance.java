@@ -6,6 +6,7 @@
 
 package gay.ampflower.musicmoods.client.sound;
 
+import it.unimi.dsi.fastutil.floats.FloatUnaryOperator;
 import net.minecraft.client.Timer;
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
 import net.minecraft.sounds.SoundEvent;
@@ -22,7 +23,7 @@ public class FadeableSoundInstance extends AbstractTickableSoundInstance impleme
 	 */
 	private static final float JUMP_LIMIT = 0.1F;
 
-	protected final Timer timer = new Timer(20F, System.currentTimeMillis());
+	protected final Timer timer = new Timer(20F, System.currentTimeMillis(), FloatUnaryOperator.identity());
 	protected float maxVolume = 1.f;
 	protected float fadeOut;
 	protected float fadeIn;
