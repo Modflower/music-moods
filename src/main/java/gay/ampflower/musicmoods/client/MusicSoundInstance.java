@@ -6,6 +6,7 @@
 
 package gay.ampflower.musicmoods.client;// Created 2023-09-01T02:55:14
 
+import it.unimi.dsi.fastutil.floats.FloatUnaryOperator;
 import net.minecraft.client.Timer;
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
@@ -24,7 +25,7 @@ public class MusicSoundInstance extends AbstractTickableSoundInstance {
 	 */
 	private static final float JUMP_LIMIT = 0.025F;
 
-	private final Timer timer = new Timer(20F, System.currentTimeMillis());
+	private final Timer timer = new Timer(20F, System.currentTimeMillis(), FloatUnaryOperator.identity());
 	private float fadeOut;
 	private float fadeIn;
 
