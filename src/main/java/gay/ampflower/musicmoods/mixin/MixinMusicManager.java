@@ -52,7 +52,9 @@ public abstract class MixinMusicManager {
 	@Shadow
 	public abstract void startPlaying(final Music music);
 
+	@Unique
 	private MusicSoundInstance fadingOutMusic;
+	@Unique
 	private ResourceLocation currentCompatibleLocation;
 
 	/**
