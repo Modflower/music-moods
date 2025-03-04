@@ -7,8 +7,8 @@
 package gay.ampflower.musicmoods.mixin;// Created 2022-24-12T20:34:50
 
 import gay.ampflower.musicmoods.Config;
-import gay.ampflower.musicmoods.client.MusicSoundInstance;
 import gay.ampflower.musicmoods.client.WeighedSoundEventsQuery;
+import gay.ampflower.musicmoods.client.sound.MusicSoundInstance;
 import gay.ampflower.musicmoods.config.Replacing;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
