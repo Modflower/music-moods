@@ -5,6 +5,7 @@
 	"client": [
 		"AccessorLevelRenderer",
 		"AccessorMinecraft",
+		"MixinClientPacketListener",
 		"MixinLevelRenderer",
 		"MixinMinecraft",
 		"MixinMusicManager",

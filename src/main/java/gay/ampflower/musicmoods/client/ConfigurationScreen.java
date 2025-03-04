@@ -109,7 +109,9 @@ public class ConfigurationScreen extends SpruceScreen {
 			list.addSingleOptionEntry(separator("situationalMusic"));
 			list.addSingleOptionEntry(cycling("situationalMusicReplacing"));
 			list.addOptionEntry(checkbox("immediatelyPlayOnReplace"), checkbox("alwaysPlayMusic"));
+			list.addSingleOptionEntry(separator("transitions"));
 			list.addOptionEntry(intInput("fadeInTicks"), intInput("fadeOutTicks"));
+			list.addOptionEntry(checkbox("seamlessTransitions"), checkbox("allowPausingMusic"));
 		} catch (ReflectiveOperationException roe) {
 			throw new AssertionError("Unexpected access violation", roe);
 		}
@@ -125,7 +127,7 @@ public class ConfigurationScreen extends SpruceScreen {
 			list.addOptionEntry(checkbox("jukeboxEnabled"), checkbox("jukeboxMultiplayer"));
 			list.addSingleOptionEntry(separator("jukeboxRange"));
 			list.addOptionEntry(floatSlider("jukeboxReplaceRange"), floatSlider("jukeboxFadeRange"));
-			list.addSingleOptionEntry(separator("jukeboxFade"));
+			list.addSingleOptionEntry(separator("transitions"));
 			list.addOptionEntry(intInput("jukeboxFadeMixTicks"), intInput("jukeboxFadeStopTicks"));
 		} catch (ReflectiveOperationException roe) {
 			throw new AssertionError("Unexpected access violation", roe);

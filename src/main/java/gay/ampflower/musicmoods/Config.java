@@ -60,6 +60,16 @@ public final class Config {
 	public static boolean alwaysPlayMusic = false;
 
 	/**
+	 * Seamlessly transition between scenes.
+	 */
+	public static boolean seamlessTransitions = true;
+
+	/**
+	 * Allows music to be paused by vanilla.
+	 */
+	public static boolean allowPausingMusic = false;
+
+	/**
 	 * Tells the music manager how to prioritise the jukebox over situational.
 	 */
 	public static boolean jukeboxEnabled = true;
@@ -128,6 +138,9 @@ public final class Config {
 		fadeInTicks = toInt(properties, "fadeInTicks", fadeDefault);
 		immediatelyPlayOnReplace = toBoolean(properties, "immediatelyPlayOnReplace", true);
 		alwaysPlayMusic = toBoolean(properties, "alwaysPlayMusic", false);
+
+		seamlessTransitions = toBoolean(properties, "seamlessTransitions", true);
+		allowPausingMusic = toBoolean(properties, "allowPausingMusic", false);
 
 		jukeboxEnabled = toBoolean(properties, "jukeboxEnabled", true);
 		jukeboxMultiplayer = toBoolean(properties, "jukeboxMultiplayer", true);

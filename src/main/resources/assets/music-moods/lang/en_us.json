@@ -18,8 +18,8 @@
 	"music-moods.option.separator.jukebox.description": "Options that tie in with jukeboxes.",
 	"music-moods.option.separator.jukeboxRange": "Distances from a Jukebox",
 	"music-moods.option.separator.jukeboxRange.description": "Trigger distances for various effects.",
-	"music-moods.option.separator.jukeboxFade": "Fade timings",
-	"music-moods.option.separator.jukeboxFade.description": "Transitions for when a jukebox takes over, or abruptly ends.",
+	"music-moods.option.separator.transitions": "Transitions",
+	"music-moods.option.separator.transitions.description": "Transitions for when a track takes over, or otherwise would abruptly stop.",
 	"music-moods.option.separator.modPack": "Mod Pack",
 	"music-moods.option.separator.modPack.description": "Options useful for mod pack creators.",
 	"music-moods.option.separator.modMenu": "Mod Menu Required",
@@ -35,6 +35,11 @@
 	"music-moods.option.fadeInTicks.description": "How long it takes for the new track to fade in, counted in ticks.\n\nOnly applies when the old track was replaced by a new track.",
 	"music-moods.option.fadeOutTicks": "Fade-out time in ticks",
 	"music-moods.option.fadeOutTicks.description": "How long it takes for the old track to fade out, counted in ticks.\n\nOnly applies when the old track was replaced by a new track.",
+
+	"music-moods.option.seamlessTransitions": "Seamless Transitions",
+	"music-moods.option.seamlessTransitions.description": "Whether to do seamless transitions between dimensions.",
+	"music-moods.option.allowPausingMusic": "Allow Pausing Music",
+	"music-moods.option.allowPausingMusic.description": "Whether to allow music to be paused when the game is paused.",
 
 	"music-moods.option.jukeboxEnabled": "Enable Jukebox Handling",
 	"music-moods.option.jukeboxEnabled.description": "Whether Jukebox effects should apply at all.",
