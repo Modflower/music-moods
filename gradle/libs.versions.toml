@@ -13,7 +13,7 @@ fabric_loader = "0.16.+"
 fabric_api = "0.77.0+1.19.2"
 
 # Plugins
-loom = "1.+"
+loom = "1.10.+"
 spotless = "5.+"
 quiltflower = "1.+"
 minotaur = "2.+"
