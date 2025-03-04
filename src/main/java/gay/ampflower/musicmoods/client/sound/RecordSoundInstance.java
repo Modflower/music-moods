@@ -22,6 +22,7 @@ public class RecordSoundInstance extends FadeableSoundInstance implements Relati
 	private final Vec3 origin;
 
 	private boolean relativeDirty;
+	private boolean toRelative;
 	private Vec3 delta, dest;
 	private final float duration = 20.f;
 
@@ -55,10 +56,14 @@ public class RecordSoundInstance extends FadeableSoundInstance implements Relati
 			this.y += scale.y();
 			this.z += scale.z();
 
-			if (dest.distanceToSqr(this.x, this.y, this.z) < delta.lengthSqr()) {
-				this.x = dest.x();
-				this.y = dest.y();
-				this.z = dest.z();
+			if (dest.distanceToSqr(this.x, this.y, this.z) < Math.max(delta.lengthSqr(), 0.1)) {
+				if (toRelative) {
+					toRelative(null, null);
+				} else {
+					this.x = dest.x();
+					this.y = dest.y();
+					this.z = dest.z();
+				}
 
 				dest = null;
 				delta = null;
@@ -66,21 +71,25 @@ public class RecordSoundInstance extends FadeableSoundInstance implements Relati
 		}
 	}
 
-	public void centerOnPlayer(Vec3 player, Vec2 rotation) {
-		toRelative(player, rotation);
-		move(Vec3.ZERO);
+	public void centerOnPlayer(Vec3 camera, Vec2 rotation) {
+		if (this.relative && this.x == 0 && this.y == 0 && this.z == 0) {
+			return;
+		}
+		this.toRelative = true;
+		startTransition(camera);
 	}
 
-	public void centerOnOrigin(Vec3 player, Vec2 rotation) {
-		fromRelative(player, rotation);
-		move(origin);
+	public void centerOnOrigin(Vec3 camera, Vec2 rotation) {
+		this.toRelative = false;
+		fromRelative(camera, rotation);
+		startTransition(origin);
 	}
 
-	private void fromRelative(Vec3 player, Vec2 rotation) {
+	private void fromRelative(Vec3 camera, Vec2 rotation) {
 		if (this.relative) {
-			this.x += player.x();
-			this.y += player.y();
-			this.z += player.z();
+			this.x += camera.x();
+			this.y += camera.y();
+			this.z += camera.z();
 			this.relativeDirty = true;
 			this.relative = false;
 		}
@@ -88,9 +97,7 @@ public class RecordSoundInstance extends FadeableSoundInstance implements Relati
 
 	private void toRelative(Vec3 player, Vec2 rotation) {
 		if (!this.relative) {
-			this.x = this.x - player.x();
-			this.y = this.y - player.y();
-			this.z = this.z - player.z();
+			this.move(Vec3.ZERO);
 			this.relativeDirty = true;
 			this.relative = true;
 		}

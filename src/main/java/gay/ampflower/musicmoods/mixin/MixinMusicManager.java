@@ -158,9 +158,14 @@ public abstract class MixinMusicManager {
 		final float replSq = Mint.square(Config.jukeboxReplaceRange);
 		final float maxSq = Math.max(fadeSq, replSq);
 
+		final var camera = this.minecraft.gameRenderer.getMainCamera();
+
+		final var cameraPos = camera.getPosition();
+		final var cameraRot = Mint.cameraToRotationVector(camera);
+
 		if (maxSq <= 0) {
 			if (this.focusedJukebox != null) {
-				this.focusedJukebox.centerOnOrigin(player.getEyePosition(), player.getRotationVector());
+				this.focusedJukebox.centerOnOrigin(cameraPos, cameraRot);
 				this.focusedJukebox = null;
 			}
 			return;
@@ -201,10 +206,10 @@ public abstract class MixinMusicManager {
 		}
 
 		if (this.focusedJukebox != null && this.focusedJukebox != lastRecord) {
-			this.focusedJukebox.centerOnOrigin(player.getEyePosition(), player.getRotationVector());
+			this.focusedJukebox.centerOnOrigin(cameraPos, cameraRot);
 		}
 		if (lastRecord != null && lastDelta > replSq) {
-			lastRecord.centerOnOrigin(player.getEyePosition(), player.getRotationVector());
+			lastRecord.centerOnOrigin(cameraPos, cameraRot);
 		}
 		this.focusedJukebox = lastRecord;
 
@@ -213,7 +218,7 @@ public abstract class MixinMusicManager {
 		}
 
 		if (lastDelta < replSq) {
-			lastRecord.centerOnPlayer(player.getEyePosition(), player.getRotationVector());
+			lastRecord.centerOnPlayer(cameraPos, cameraRot);
 		}
 
 		if (this.currentMusic instanceof MusicSoundInstance music) {

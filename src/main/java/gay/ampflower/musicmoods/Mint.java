@@ -6,6 +6,9 @@
 
 package gay.ampflower.musicmoods;
 
+import net.minecraft.client.Camera;
+import net.minecraft.world.phys.Vec2;
+
 /**
  * @author Ampflower
  * @since 0.5
@@ -63,5 +66,9 @@ public final class Mint {
 
 	public static double square(double base) {
 		return base * base;
+	}
+
+	public static Vec2 cameraToRotationVector(Camera camera) {
+		return new Vec2(camera.getXRot(), camera.getYRot());
 	}
 }
