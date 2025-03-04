@@ -11,6 +11,7 @@ import dev.lambdaurora.spruceui.Position;
 import dev.lambdaurora.spruceui.SpruceTexts;
 import dev.lambdaurora.spruceui.option.SpruceCheckboxBooleanOption;
 import dev.lambdaurora.spruceui.option.SpruceCyclingOption;
+import dev.lambdaurora.spruceui.option.SpruceFloatInputOption;
 import dev.lambdaurora.spruceui.option.SpruceIntegerInputOption;
 import dev.lambdaurora.spruceui.option.SpruceSeparatorOption;
 import dev.lambdaurora.spruceui.screen.SpruceScreen;
@@ -20,6 +21,7 @@ import dev.lambdaurora.spruceui.widget.container.tabbed.SpruceTabbedWidget;
 import gay.ampflower.musicmoods.ClientMain;
 import gay.ampflower.musicmoods.Config;
 import gay.ampflower.musicmoods.Constants;
+import gay.ampflower.musicmoods.config.OptionEnum;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.ErrorScreen;
 import net.minecraft.client.gui.screens.Screen;
@@ -137,6 +139,13 @@ public class ConfigurationScreen extends SpruceScreen {
 		return new SpruceSeparatorOption(key, true, Component.translatable(key + ".description"));
 	}
 
+	public static SpruceFloatInputOption floatSlider(String field) throws IllegalAccessException, NoSuchFieldException {
+		final var handle = SELF.findStaticVarHandle(Config.class, field, float.class);
+		final var key = "music-moods.option." + field;
+		return new SpruceFloatInputOption(key, () -> (float) handle.get(), handle::set,
+				Component.translatable(key + ".description"));
+	}
+
 	public static SpruceIntegerInputOption intInput(String field) throws IllegalAccessException, NoSuchFieldException {
 		final var handle = SELF.findStaticVarHandle(Config.class, field, int.class);
 		final var key = "music-moods.option." + field;
@@ -188,8 +197,15 @@ public class ConfigurationScreen extends SpruceScreen {
 
 		@Override
 		public Component apply(final SpruceCyclingOption self) {
-			return Component.translatable(key,
-					Component.translatable("music-moods.option.value." + get().name().toLowerCase(Locale.ROOT)));
+			final var en = get();
+			final var lname = en.name().toLowerCase(Locale.ROOT);
+
+			if (en instanceof OptionEnum option) {
+				return Component.translatable(key,
+						Component.translatable("music-moods.option.value." + option.localizationClass() + "." + lname));
+			}
+
+			return Component.translatable(key, Component.translatable("music-moods.option.value." + lname));
 		}
 	}
 }
