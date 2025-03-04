@@ -24,6 +24,9 @@ import java.util.Properties;
 public final class Config {
 	private static final Path config = FabricLoader.getInstance().getConfigDir().resolve("music-moods.properties");
 	private static final int fadeDefault = 600;
+	private static final float jukeboxReplaceRangeDefault = 0;
+	private static final float jukeboxFadeRangeDefault = 48;
+	private static final int jukeboxFadeDefault = 20;
 
 	/**
 	 * The current config version, used for updating if needed.
@@ -55,6 +58,40 @@ public final class Config {
 	 * Tells the music manager to always play music.
 	 */
 	public static boolean alwaysPlayMusic = false;
+
+	/**
+	 * Tells the music manager how to prioritise the jukebox over situational.
+	 */
+	public static boolean jukeboxEnabled = true;
+
+	/** Whether the jukebox changes affect multiplayer */
+	public static boolean jukeboxMultiplayer = true;
+
+	/**
+	 * Jukebox replace range
+	 *
+	 * Experimental.
+	 */
+	public static float jukeboxReplaceRange = jukeboxReplaceRangeDefault;
+
+	/**
+	 * Jukebox fade range
+	 */
+	public static float jukeboxFadeRange = jukeboxFadeRangeDefault;
+
+	/**
+	 * The fade-out time in Minecraft server ticks.
+	 *
+	 * Note: Applies only to currently playing situational music.
+	 */
+	public static int jukeboxFadeMixTicks = jukeboxFadeDefault;
+
+	/**
+	 * The fade-out time in Minecraft server ticks.
+	 *
+	 * Note: Applies only to currently playing jukebox track.
+	 */
+	public static int jukeboxFadeStopTicks = jukeboxFadeDefault;
 
 	/**
 	 * Plays music in a chaotic manner.
@@ -91,6 +128,14 @@ public final class Config {
 		fadeInTicks = toInt(properties, "fadeInTicks", fadeDefault);
 		immediatelyPlayOnReplace = toBoolean(properties, "immediatelyPlayOnReplace", true);
 		alwaysPlayMusic = toBoolean(properties, "alwaysPlayMusic", false);
+
+		jukeboxEnabled = toBoolean(properties, "jukeboxEnabled", true);
+		jukeboxMultiplayer = toBoolean(properties, "jukeboxMultiplayer", true);
+		jukeboxReplaceRange = toFloat(properties, "jukeboxReplaceRange", jukeboxReplaceRangeDefault);
+		jukeboxFadeRange = toFloat(properties, "jukeboxFadeRange", jukeboxFadeRangeDefault);
+		jukeboxFadeMixTicks = toInt(properties, "jukeboxFadeMixTicks", jukeboxFadeDefault);
+		jukeboxFadeStopTicks = toInt(properties, "jukeboxFadeStopTicks", jukeboxFadeDefault);
+
 		chaoticallyPlayMusic = toBoolean(properties, "chaoticallyPlayMusic", false);
 		injectUiComponents = toBoolean(properties, "injectUiComponents", true);
 	}
@@ -145,5 +190,13 @@ public final class Config {
 			return def;
 		}
 		return Integer.parseInt(str);
+	}
+
+	private static float toFloat(final Properties properties, final String key, final float def) {
+		final var str = properties.getProperty(key);
+		if (str == null) {
+			return def;
+		}
+		return Float.parseFloat(str);
 	}
 }

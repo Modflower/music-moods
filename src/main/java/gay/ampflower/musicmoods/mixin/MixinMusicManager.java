@@ -7,8 +7,10 @@
 package gay.ampflower.musicmoods.mixin;// Created 2022-24-12T20:34:50
 
 import gay.ampflower.musicmoods.Config;
+import gay.ampflower.musicmoods.Mint;
 import gay.ampflower.musicmoods.client.WeighedSoundEventsQuery;
 import gay.ampflower.musicmoods.client.sound.MusicSoundInstance;
+import gay.ampflower.musicmoods.client.sound.RecordSoundInstance;
 import gay.ampflower.musicmoods.config.Replacing;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -53,6 +55,8 @@ public abstract class MixinMusicManager {
 	public abstract void startPlaying(final Music music);
 
 	@Unique
+	private RecordSoundInstance focusedJukebox;
+	@Unique
 	private MusicSoundInstance fadingOutMusic;
 	@Unique
 	private ResourceLocation currentCompatibleLocation;
@@ -63,6 +67,11 @@ public abstract class MixinMusicManager {
 	 */
 	@Overwrite
 	public void tick() {
+		if (Config.jukeboxEnabled
+				&& (!Config.jukeboxMultiplayer || !((AccessorMinecraft) minecraft).invokeIsMultiplayerServer())) {
+			handleRecords();
+		}
+
 		final var music = this.minecraft.getSituationalMusic();
 		final var musicLocation = music.getEvent().getLocation();
 		// Cache the sound manager in a local.
@@ -121,6 +130,13 @@ public abstract class MixinMusicManager {
 			}
 		}
 
+		if (focusedJukebox != null) {
+			if (soundManager.isActive(focusedJukebox)) {
+				return;
+			}
+			focusedJukebox = null;
+		}
+
 		if ((Config.chaoticallyPlayMusic || this.currentMusic == null)
 				&& (Config.alwaysPlayMusic || decrementSongDelay(music.getMaxDelay()) <= 0)) {
 			if (oldFadingOutMusic != null) {
@@ -129,6 +145,85 @@ public abstract class MixinMusicManager {
 				this.startPlaying(music);
 			}
 		}
+	}
+
+	@Unique
+	private void handleRecords() {
+		final var player = this.minecraft.player;
+		if (player == null) {
+			return;
+		}
+
+		final float fadeSq = Mint.square(Config.jukeboxFadeRange);
+		final float replSq = Mint.square(Config.jukeboxReplaceRange);
+		final float maxSq = Math.max(fadeSq, replSq);
+
+		if (maxSq <= 0) {
+			if (this.focusedJukebox != null) {
+				this.focusedJukebox.centerOnOrigin(player.getEyePosition(), player.getRotationVector());
+				this.focusedJukebox = null;
+			}
+			return;
+		}
+
+		final var map = ((AccessorLevelRenderer) this.minecraft.levelRenderer).getPlayingRecords();
+		if (map.isEmpty() || map.size() > 128) {
+			return;
+		}
+
+		final var soundManager = this.minecraft.getSoundManager();
+
+		final var itr = map.entrySet().iterator();
+		RecordSoundInstance lastRecord = null;
+		double lastDelta = Double.POSITIVE_INFINITY;
+		while (itr.hasNext()) {
+			final var entry = itr.next();
+
+			if (!soundManager.isActive(entry.getValue())) {
+				itr.remove();
+				continue;
+			}
+
+			if (!(entry.getValue()instanceof RecordSoundInstance record)) {
+				continue;
+			}
+
+			var delta = entry.getKey().distToCenterSqr(player.getEyePosition());
+
+			if (delta > maxSq) {
+				continue;
+			}
+
+			if (delta < lastDelta) {
+				lastRecord = record;
+				lastDelta = delta;
+			}
+		}
+
+		if (this.focusedJukebox != null && this.focusedJukebox != lastRecord) {
+			this.focusedJukebox.centerOnOrigin(player.getEyePosition(), player.getRotationVector());
+		}
+		if (lastRecord != null && lastDelta > replSq) {
+			lastRecord.centerOnOrigin(player.getEyePosition(), player.getRotationVector());
+		}
+		this.focusedJukebox = lastRecord;
+
+		if (lastRecord == null) {
+			return;
+		}
+
+		if (lastDelta < replSq) {
+			lastRecord.centerOnPlayer(player.getEyePosition(), player.getRotationVector());
+		}
+
+		if (this.currentMusic instanceof MusicSoundInstance music) {
+			music.setFadeOut(Config.jukeboxFadeMixTicks);
+			fadingOutMusic = music;
+		} else {
+			soundManager.stop(this.currentMusic);
+		}
+
+		this.currentMusic = null;
 	}
 
 	/**

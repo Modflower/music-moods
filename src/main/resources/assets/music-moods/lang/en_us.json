@@ -3,17 +3,28 @@
 	"music-moods.gui.configuration.error": "Unable to save your settings.\n\nBe sure file permissions are correctly set.",
 	"music-moods.gui.configuration.music": "Music",
 	"music-moods.gui.configuration.music.description": "Configure how music is handled",
+	"music-moods.gui.configuration.jukebox": "Jukebox",
+	"music-moods.gui.configuration.jukebox.description": "Configuring jukeboxes?",
 	"music-moods.gui.configuration.meta": "Meta",
 	"music-moods.gui.configuration.meta.description": "Configure Music Moods itself",
+
 	"music-moods.option.value.never": "NEVER",
 	"music-moods.option.value.allow": "ALLOW",
 	"music-moods.option.value.always": "ALWAYS",
+
 	"music-moods.option.separator.situationalMusic": "Situational Music",
 	"music-moods.option.separator.situationalMusic.description": "Includes the title screen, various biomes, being underwater and battles.",
+	"music-moods.option.separator.jukebox": "Jukebox",
+	"music-moods.option.separator.jukebox.description": "Options that tie in with jukeboxes.",
+	"music-moods.option.separator.jukeboxRange": "Distances from a Jukebox",
+	"music-moods.option.separator.jukeboxRange.description": "Trigger distances for various effects.",
+	"music-moods.option.separator.jukeboxFade": "Fade timings",
+	"music-moods.option.separator.jukeboxFade.description": "Transitions for when a jukebox takes over, or abruptly ends.",
 	"music-moods.option.separator.modPack": "Mod Pack",
 	"music-moods.option.separator.modPack.description": "Options useful for mod pack creators.",
 	"music-moods.option.separator.modMenu": "Mod Menu Required",
 	"music-moods.option.separator.modMenu.description": "There are options that are only available when Mod Menu is installed.\n\nYou can still manually edit those options via the config if you really must.",
+
 	"music-moods.option.situationalMusicReplacing": "Replace current track: %s",
 	"music-moods.option.situationalMusicReplacing.description": "Allows replacing the current music with a more fitting track.\n\nNEVER - Never replace the track\nALLOW - Allows replacing the track\nALWAYS - Always replace the track where applicable.",
 	"music-moods.option.alwaysPlayMusic": "Always play music",
@@ -24,6 +35,22 @@
 	"music-moods.option.fadeInTicks.description": "How long it takes for the new track to fade in, counted in ticks.\n\nOnly applies when the old track was replaced by a new track.",
 	"music-moods.option.fadeOutTicks": "Fade-out time in ticks",
 	"music-moods.option.fadeOutTicks.description": "How long it takes for the old track to fade out, counted in ticks.\n\nOnly applies when the old track was replaced by a new track.",
+
+	"music-moods.option.jukeboxEnabled": "Enable Jukebox Handling",
+	"music-moods.option.jukeboxEnabled.description": "Whether Jukebox effects should apply at all.",
+	"music-moods.option.jukeboxMultiplayer": "Apply in Multiplayer",
+	"music-moods.option.jukeboxMultiplayer.description": "Whether Jukebox effects should apply in multiplayer.",
+
+	"music-moods.option.jukeboxReplaceRange": "OST Replace range in blocks",
+	"music-moods.option.jukeboxReplaceRange.description": "How close you need to be for the situational music to be replaced in favor of the jukebox.\n\nSetting this to 0 disables this.",
+	"music-moods.option.jukeboxFadeRange": "OST Fade-out range in blocks",
+	"music-moods.option.jukeboxFadeRange.description": "How close you need to be for the situational music to be paused in favour of a jukebox.\n\nSetting this to 0 disables this, but the replacing setting takes priority if set higher.",
+
+	"music-moods.option.jukeboxFadeMixTicks": "OST Fade-out time in ticks",
+	"music-moods.option.jukeboxFadeMixTicks.description": "How long it takes for the situational track to fade out when a record is played, counted in ticks.",
+	"music-moods.option.jukeboxFadeStopTicks": "Jukebox Fade-out time in ticks",
+	"music-moods.option.jukeboxFadeStopTicks.description": "How long it takes for the jukebox record to fade out when the record is removed, counted in ticks.",
+
 	"music-moods.option.injectUiComponents": "Inject UI Components",
 	"music-moods.option.injectUiComponents.description": "Inject buttons into Vanilla UIs for discoverability.\n\nNote: Disabling this will hinder discoverability of Music Moods' options and should only be done if you're providing an alternative mean of accessing its settings."
 }

@@ -62,6 +62,7 @@ public class ConfigurationScreen extends SpruceScreen {
 				this.title);
 
 		addTabEntry("music", ConfigurationScreen::buildMusicOptionList);
+		addTabEntry("jukebox", ConfigurationScreen::buildJukeboxOptionList);
 		addTabEntry("meta", ConfigurationScreen::buildMetaList);
 
 		this.addRenderableWidget(this.tabbedWidget);
@@ -109,6 +110,23 @@ public class ConfigurationScreen extends SpruceScreen {
 			list.addSingleOptionEntry(cycling("situationalMusicReplacing"));
 			list.addOptionEntry(checkbox("immediatelyPlayOnReplace"), checkbox("alwaysPlayMusic"));
 			list.addOptionEntry(intInput("fadeInTicks"), intInput("fadeOutTicks"));
+		} catch (ReflectiveOperationException roe) {
+			throw new AssertionError("Unexpected access violation", roe);
+		}
+
+		return list;
+	}
+
+	protected static SpruceOptionListWidget buildJukeboxOptionList(int width, int height) {
+		final var list = new SpruceOptionListWidget(Position.origin(), width, height);
+
+		try {
+			list.addSingleOptionEntry(separator("jukebox"));
+			list.addOptionEntry(checkbox("jukeboxEnabled"), checkbox("jukeboxMultiplayer"));
+			list.addSingleOptionEntry(separator("jukeboxRange"));
+			list.addOptionEntry(floatSlider("jukeboxReplaceRange"), floatSlider("jukeboxFadeRange"));
+			list.addSingleOptionEntry(separator("jukeboxFade"));
+			list.addOptionEntry(intInput("jukeboxFadeMixTicks"), intInput("jukeboxFadeStopTicks"));
 		} catch (ReflectiveOperationException roe) {
 			throw new AssertionError("Unexpected access violation", roe);
 		}
