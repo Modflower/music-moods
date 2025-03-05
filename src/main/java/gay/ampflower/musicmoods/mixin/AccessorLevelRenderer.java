@@ -21,5 +21,5 @@ import java.util.Map;
 @Mixin(LevelRenderer.class)
 public interface AccessorLevelRenderer {
 	@Accessor
-	Map<BlockPos, SoundInstance> getPlayingRecords();
+	Map<BlockPos, SoundInstance> getPlayingJukeboxSongs();
 }

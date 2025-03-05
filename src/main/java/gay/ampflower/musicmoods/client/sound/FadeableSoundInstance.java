@@ -7,7 +7,7 @@
 package gay.ampflower.musicmoods.client.sound;
 
 import it.unimi.dsi.fastutil.floats.FloatUnaryOperator;
-import net.minecraft.client.Timer;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
@@ -23,7 +23,8 @@ public class FadeableSoundInstance extends AbstractTickableSoundInstance impleme
 	 */
 	private static final float JUMP_LIMIT = 0.1F;
 
-	protected final Timer timer = new Timer(20F, System.currentTimeMillis(), FloatUnaryOperator.identity());
+	protected final DeltaTracker.Timer timer = new DeltaTracker.Timer(20F, System.currentTimeMillis(),
+			FloatUnaryOperator.identity());
 	protected float maxVolume = 1.f;
 	protected float fadeOut;
 	protected float fadeIn;
@@ -35,7 +36,7 @@ public class FadeableSoundInstance extends AbstractTickableSoundInstance impleme
 
 	@Override
 	public void tick() {
-		this.timer.advanceTime(System.currentTimeMillis());
+		this.timer.advanceTime(System.currentTimeMillis(), false);
 
 		if (fadeOut > 0F && this.volume > 0F) {
 
@@ -43,7 +44,8 @@ public class FadeableSoundInstance extends AbstractTickableSoundInstance impleme
 				this.volume /= 2;
 			}
 
-			final var newVolume = Math.max(this.volume - Math.min(this.timer.tickDelta / fadeOut, JUMP_LIMIT), 0F);
+			final var newVolume = Math
+					.max(this.volume - Math.min(this.timer.getRealtimeDeltaTicks() / fadeOut, JUMP_LIMIT), 0F);
 
 			if (newVolume == newVolume) {
 				this.volume = newVolume;
@@ -51,8 +53,8 @@ public class FadeableSoundInstance extends AbstractTickableSoundInstance impleme
 		}
 
 		if (fadeIn > 0F && this.volume < maxVolume) {
-			final var newVolume = Math.min(this.volume + Math.min(this.timer.tickDelta / fadeIn, JUMP_LIMIT),
-					maxVolume);
+			final var newVolume = Math
+					.min(this.volume + Math.min(this.timer.getRealtimeDeltaTicks() / fadeIn, JUMP_LIMIT), maxVolume);
 
 			if (newVolume == newVolume) {
 				this.volume = newVolume;
