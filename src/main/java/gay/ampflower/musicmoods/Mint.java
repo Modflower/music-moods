@@ -18,25 +18,26 @@ public final class Mint {
 	public static final double WHOLE_CIRCLE_DEG = 360;
 	public static final double HALF_CIRCLE_DEG = 180;
 
+	public static final double TAU = Math.PI * 2;
 	public static final double HALF_PI = Math.PI / 2;
 	public static final double DEG_TO_RAD = Math.PI / 180;
 	public static final double RAD_TO_DEG = 180 / Math.PI;
 
 	public static double wrapRadiansPositive(double rad) {
-		rad %= Math.TAU;
+		rad %= Mint.TAU;
 		if (rad < 0) {
-			rad += Math.TAU;
+			rad += Mint.TAU;
 		}
 		return rad;
 	}
 
 	public static double wrapRadians(double rad) {
-		rad %= Math.TAU;
+		rad %= Mint.TAU;
 		if (rad < -Math.PI) {
-			rad += Math.TAU;
+			rad += Mint.TAU;
 		}
 		if (rad > Math.PI) {
-			rad -= Math.TAU;
+			rad -= Mint.TAU;
 		}
 		return rad;
 	}
