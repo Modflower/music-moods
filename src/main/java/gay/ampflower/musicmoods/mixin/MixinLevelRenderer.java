@@ -28,7 +28,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 public class MixinLevelRenderer {
 
 	@Redirect(method = "playStreamingMusic", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sounds/SoundManager;stop(Lnet/minecraft/client/resources/sounds/SoundInstance;)V"))
-	private static void fadeOutRecord(final SoundManager manager, final SoundInstance instance) {
+	private void fadeOutRecord(final SoundManager manager, final SoundInstance instance) {
 		if (Config.jukeboxEnabled && Config.jukeboxFadeStopTicks > 0 && instance instanceof Fadeable fadeable) {
 			fadeable.setFadeOut(Config.jukeboxFadeStopTicks);
 		} else {
@@ -37,7 +37,7 @@ public class MixinLevelRenderer {
 	}
 
 	@Redirect(method = "playStreamingMusic", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/resources/sounds/SimpleSoundInstance;forRecord(Lnet/minecraft/sounds/SoundEvent;DDD)Lnet/minecraft/client/resources/sounds/SimpleSoundInstance;"))
-	private static SimpleSoundInstance nullifyRecord(final SoundEvent soundEvent, double x, double y, double z) {
+	private SimpleSoundInstance nullifyRecord(final SoundEvent soundEvent, double x, double y, double z) {
 		return null;
 	}
 
