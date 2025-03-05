@@ -171,7 +171,7 @@ public abstract class MixinMusicManager {
 			return;
 		}
 
-		final var map = ((AccessorLevelRenderer) this.minecraft.levelRenderer).getPlayingRecords();
+		final var map = ((AccessorLevelRenderer) this.minecraft.levelRenderer).getPlayingJukeboxSongs();
 		if (map.isEmpty() || map.size() > 128) {
 			return;
 		}

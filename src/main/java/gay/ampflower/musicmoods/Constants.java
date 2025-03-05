@@ -35,6 +35,6 @@ public final class Constants {
 	}
 
 	public static ResourceLocation widget(String widget) {
-		return new ResourceLocation(modId, "widget/" + widget);
+		return ResourceLocation.fromNamespaceAndPath(modId, "widget/" + widget);
 	}
 }
