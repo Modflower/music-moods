@@ -26,6 +26,7 @@ public final class Config {
 	private static final int fadeDefault = 600;
 	private static final float jukeboxReplaceRangeDefault = 0;
 	private static final float jukeboxFadeRangeDefault = 48;
+	private static final int soundsFadeDefault = 100;
 	private static final int jukeboxFadeDefault = 20;
 
 	/**
@@ -63,6 +64,9 @@ public final class Config {
 	 * Seamlessly transition between scenes.
 	 */
 	public static boolean seamlessTransitions = true;
+
+	/** Seamlessly transition between scenes, with sounds. */
+	public static int seamlessSoundTransitions = 0;
 
 	/**
 	 * Allows music to be paused by vanilla.

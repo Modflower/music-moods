@@ -9,6 +9,7 @@ package gay.ampflower.musicmoods.mixin;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.audio.Channel;
 import gay.ampflower.musicmoods.Config;
+import gay.ampflower.musicmoods.client.SoundHandler;
 import gay.ampflower.musicmoods.client.sound.MusicSoundInstance;
 import gay.ampflower.musicmoods.client.sound.Relativeable;
 import net.minecraft.client.resources.sounds.SoundInstance;
@@ -35,10 +36,19 @@ import java.util.function.Consumer;
  * @since 0.5
  **/
 @Mixin(SoundEngine.class)
-public abstract class MixinSoundEngine {
+public abstract class MixinSoundEngine implements SoundHandler {
 	@Shadow
 	@Final
 	private Map<SoundInstance, ChannelAccess.ChannelHandle> instanceToChannel;
+	@Shadow
+	@Final
+	private Map<SoundInstance, Integer> queuedSounds;
+	@Shadow
+	@Final
+	private List<TickableSoundInstance> queuedTickableSounds;
+
+	@Shadow
+	private boolean loaded;
 
 	@Shadow
 	public abstract void stop(final SoundInstance soundInstance);
@@ -149,5 +159,56 @@ public abstract class MixinSoundEngine {
 	@Inject(method = "stopAll", at = @At(value = "FIELD", target = "Lnet/minecraft/client/sounds/SoundEngine;tickingSounds:Ljava/util/List;", shift = At.Shift.AFTER))
 	private void onStopAll(final CallbackInfo ci) {
 		this.tickingWhilePaused.clear();
+	}
+
+	@Override
+	public void moods$stopMusic() {
+		if (!this.loaded) {
+			return;
+		}
+
+		for (final var entry : this.instanceToChannel.entrySet()) {
+			if (isMusic(entry.getKey())) {
+				entry.getValue().execute(Channel::stop);
+			}
+		}
+	}
+
+	@Override
+	public void moods$stopSounds() {
+		if (!this.loaded) {
+			return;
+		}
+
+		for (final var entry : this.instanceToChannel.entrySet()) {
+			if (isNotMusic(entry.getKey())) {
+				entry.getValue().execute(Channel::stop);
+			}
+		}
+	}
+
+	@Override
+	public void moods$fadeSounds(final float ticks) {
+		if (!this.loaded) {
+			return;
+		}
+
+		throw new UnsupportedOperationException("not implemented");
+	}
+
+	@Override
+	public void moods$clearQueued() {
+		this.queuedSounds.clear();
+		this.queuedTickableSounds.clear();
+	}
+
+	@Unique
+	private static boolean isMusic(SoundInstance instance) {
+		return instance instanceof MusicSoundInstance;
+	}
+
+	@Unique
+	private static boolean isNotMusic(SoundInstance instance) {
+		return !(instance instanceof MusicSoundInstance);
 	}
 }

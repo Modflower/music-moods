@@ -7,7 +7,7 @@
 package gay.ampflower.musicmoods.mixin;// Created 2023-17-01T21:38:15
 
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
-import gay.ampflower.musicmoods.Config;
+import gay.ampflower.musicmoods.client.SoundHandler;
 import gay.ampflower.musicmoods.client.WidgetAttachment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -15,6 +15,7 @@ import net.minecraft.client.sounds.MusicManager;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.sounds.Music;
 import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -32,6 +33,10 @@ public abstract class MixinMinecraft {
 	@Shadow
 	@Nullable
 	public LocalPlayer player;
+
+	@Shadow
+	@Final
+	private SoundManager soundManager;
 
 	/**
 	 * Late-init hook because Quilt hooks in too early for what we need.
@@ -60,6 +65,6 @@ public abstract class MixinMinecraft {
 
 	@WrapWithCondition(method = "updateScreenAndTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sounds/SoundManager;stop()V"))
 	private boolean musicmoods$dontStopSound(SoundManager self) {
-		return !Config.seamlessTransitions;
+		return ((SoundHandler) soundManager).moods$onInterceptStop();
 	}
 }
