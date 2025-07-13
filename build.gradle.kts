@@ -42,7 +42,6 @@ java {
 }
 
 repositories {
-	mavenLocal()
 	mavenCentral()
 	maven("https://oss.sonatype.org/content/repositories/snapshots") {
 		name = "Nexus Repository OSS"
@@ -98,6 +97,7 @@ tasks {
 				"version" to project.version,
 				"project_version" to projectVersion,
 				"minecraft_required" to libs.versions.minecraft.required.get(),
+				"minecraft_forge_required" to libs.versions.minecraft.forge.required.get(),
 				"modrinthId" to modrinthId,
 			)
 		inputs.properties(map)

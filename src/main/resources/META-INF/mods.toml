@@ -18,7 +18,7 @@ updateJSONURL = "https://api.modrinth.com/updates/${modrinthId}/forge_updates.js
 logoFile = "assets/music-moods/pack.png"
 logoBlur = false
 
-displayURL = "https://mod.ampflower.gay/petworks"
+displayURL = "https://mod.ampflower.gay/music-moods"
 
 description = '''
 Configure how music & sound are handled.
@@ -30,7 +30,7 @@ authors = "Ampflower"
 modId = "minecraft"
 mandatory = true
 
-versionRange = "[1.20.1]"
+versionRange = "${minecraft_forge_required}"
 ordering = "NONE"
 side = "CLIENT"
 
