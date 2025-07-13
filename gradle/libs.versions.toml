@@ -8,6 +8,7 @@ modmenu = "11.0.+"
 # Minecraft
 minecraft_version = "1.21"
 minecraft_required = ">=1.21- <1.21.2"
+minecraft_forge_required = "[1.19,1.19.2]"
 fabric_loader = "0.16.+"
 fabric_api = "0.100.4+1.21"
 
