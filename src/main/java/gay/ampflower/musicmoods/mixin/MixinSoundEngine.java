@@ -62,7 +62,7 @@ public abstract class MixinSoundEngine implements SoundHandler {
 	@Unique
 	private final List<TickableSoundInstance> tickingWhilePaused = new ArrayList<>();
 
-	@ModifyArg(method = "tickNonPaused", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sounds/ChannelAccess$ChannelHandle;execute(Ljava/util/function/Consumer;)V"))
+	@ModifyArg(method = "tickInGameSound", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sounds/ChannelAccess$ChannelHandle;execute(Ljava/util/function/Consumer;)V"))
 	private Consumer<Channel> consumerAudioEquipmentIsQuiteNeatIsntIt(Consumer<Channel> original,
 			@Local TickableSoundInstance sound) {
 		if (!(sound instanceof Relativeable relativeable) || !relativeable.isRelativeDirty()) {
@@ -135,7 +135,7 @@ public abstract class MixinSoundEngine implements SoundHandler {
 		}
 	}
 
-	@Inject(method = "pause", at = @At("HEAD"), cancellable = true)
+	@Inject(method = "tickMusicWhenPaused", at = @At("HEAD"), cancellable = true)
 	private void onPause(CallbackInfo ci) {
 		if (Config.allowPausingMusic) {
 			return;

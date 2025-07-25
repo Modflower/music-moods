@@ -15,6 +15,7 @@ import gay.ampflower.musicmoods.config.Replacing;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
+import net.minecraft.client.sounds.MusicInfo;
 import net.minecraft.client.sounds.MusicManager;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.resources.ResourceLocation;
@@ -31,6 +32,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+
+import java.util.Optional;
 
 /**
  * @author Ampflower
@@ -52,7 +55,7 @@ public abstract class MixinMusicManager {
 	private RandomSource random;
 
 	@Shadow
-	public abstract void startPlaying(final Music music);
+	public abstract void startPlaying(final MusicInfo music);
 
 	@Unique
 	private RecordSoundInstance focusedJukebox;
@@ -73,7 +76,7 @@ public abstract class MixinMusicManager {
 		}
 
 		final var music = this.minecraft.getSituationalMusic();
-		final var musicLocation = music.getEvent().value().getLocation();
+		final var musicLocation = music.music().event().value().location();
 		// Cache the sound manager in a local.
 		final var soundManager = this.minecraft.getSoundManager();
 		var oldFadingOutMusic = this.fadingOutMusic;
@@ -86,7 +89,7 @@ public abstract class MixinMusicManager {
 
 			// Allow the end user to say whether they want their music replaced at all.
 			if (Config.situationalMusicReplacing.replaces()
-					&& (isLoudAndCompatible(oldFadingOutMusic, musicLocation) || shouldReplace(music))) {
+					&& (isLoudAndCompatible(oldFadingOutMusic, musicLocation) || shouldReplace(music.music()))) {
 
 				// Do a fade out on the current music if configured to make it not jarring.
 				if (Config.fadeOutTicks > 0 && this.currentMusic instanceof MusicSoundInstance musicSoundInstance) {
@@ -102,14 +105,14 @@ public abstract class MixinMusicManager {
 					this.currentMusic = oldFadingOutMusic;
 					oldFadingOutMusic.setFadeIn(Config.fadeInTicks);
 				} else if (Config.immediatelyPlayOnReplace) {
-					this.startPlayingFadeIn(music);
+					this.startPlayingFadeIn(music.music());
 				} else {
 					// Clear currentMusic, so it's not trying to tick it.
 					this.currentMusic = null;
 					this.currentCompatibleLocation = null;
 
 					// Set the delay, since the old track is not applicable to move in.
-					this.nextSongDelay = Mth.nextInt(this.random, 0, music.getMinDelay() / 2);
+					this.nextSongDelay = Mth.nextInt(this.random, 0, music.music().minDelay() / 2);
 				}
 			}
 
@@ -124,9 +127,9 @@ public abstract class MixinMusicManager {
 					// 10 seconds at 60 FPS
 					minDelay = 600;
 				} else {
-					minDelay = music.getMinDelay();
+					minDelay = music.music().minDelay();
 				}
-				this.nextSongDelay = Mth.nextInt(this.random, minDelay, music.getMaxDelay());
+				this.nextSongDelay = Mth.nextInt(this.random, minDelay, music.music().maxDelay());
 			}
 		}
 
@@ -138,9 +141,9 @@ public abstract class MixinMusicManager {
 		}
 
 		if ((Config.chaoticallyPlayMusic || this.currentMusic == null)
-				&& (Config.alwaysPlayMusic || decrementSongDelay(music.getMaxDelay()) <= 0)) {
+				&& (Config.alwaysPlayMusic || decrementSongDelay(music.music().maxDelay()) <= 0)) {
 			if (oldFadingOutMusic != null) {
-				this.startPlayingFadeIn(music);
+				this.startPlayingFadeIn(music.music());
 			} else {
 				this.startPlaying(music);
 			}
@@ -256,7 +259,7 @@ public abstract class MixinMusicManager {
 	@Unique
 	private boolean shouldReplace(final Music music) {
 		return (Config.situationalMusicReplacing == Replacing.always || music.replaceCurrentMusic())
-				&& this.isReplaceable(this.currentMusic, music.getEvent().value().getLocation());
+				&& this.isReplaceable(this.currentMusic, music.event().value().location());
 	}
 
 	@Unique
@@ -287,12 +290,12 @@ public abstract class MixinMusicManager {
 	}
 
 	/**
-	 * Reimplementation of {@link MusicManager#startPlaying(Music)} with a fade-in
+	 * Reimplementation of {@link MusicManager#startPlaying(MusicInfo)} with a fade-in
 	 * configured.
 	 */
 	@Unique
 	private void startPlayingFadeIn(Music music) {
-		this.currentMusic = new MusicSoundInstance(music.getEvent().value(), Config.fadeInTicks);
+		this.currentMusic = new MusicSoundInstance( music.event().value(), Config.fadeInTicks);
 		if (this.currentMusic.getSound() != SoundManager.EMPTY_SOUND) {
 			this.minecraft.getSoundManager().play(this.currentMusic);
 		}
@@ -300,14 +303,13 @@ public abstract class MixinMusicManager {
 		this.nextSongDelay = Integer.MAX_VALUE;
 	}
 
-	@Redirect(method = "startPlaying", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/resources/sounds/SimpleSoundInstance;forMusic(Lnet/minecraft/sounds/SoundEvent;)Lnet/minecraft/client/resources/sounds/SimpleSoundInstance;"))
-	private SimpleSoundInstance musicmoods$simpleSoundInstanceNullifier(final SoundEvent soundEvent) {
+	@Redirect(method = "startPlaying", at = @At(value = "INVOKE", target = "net/minecraft/client/resources/sounds/SimpleSoundInstance.forMusic (Lnet/minecraft/sounds/SoundEvent;F)Lnet/minecraft/client/resources/sounds/SimpleSoundInstance;"))
+	private SimpleSoundInstance musicmoods$simpleSoundInstanceNullifier(final SoundEvent soundEvent, float volume) {
 		return null;
 	}
 
 	@Redirect(method = "startPlaying", at = @At(value = "FIELD", target = "Lnet/minecraft/client/sounds/MusicManager;currentMusic:Lnet/minecraft/client/resources/sounds/SoundInstance;", opcode = Opcodes.PUTFIELD))
-	private void musicmoods$setCustomSoundInstance(final MusicManager self, final SoundInstance value,
-			final Music music) {
-		this.currentMusic = new MusicSoundInstance(music.getEvent().value());
+	private void musicmoods$setCustomSoundInstance(MusicManager instance, SoundInstance value, MusicInfo musicInfo) {
+		this.currentMusic = new MusicSoundInstance(musicInfo.music().event().value(), musicInfo.volume());
 	}
 }

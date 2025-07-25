@@ -15,6 +15,7 @@ import dev.lambdaurora.spruceui.option.SpruceFloatInputOption;
 import dev.lambdaurora.spruceui.option.SpruceIntegerInputOption;
 import dev.lambdaurora.spruceui.option.SpruceSeparatorOption;
 import dev.lambdaurora.spruceui.screen.SpruceScreen;
+import dev.lambdaurora.spruceui.tooltip.TooltipData;
 import dev.lambdaurora.spruceui.widget.SpruceButtonWidget;
 import dev.lambdaurora.spruceui.widget.container.SpruceOptionListWidget;
 import dev.lambdaurora.spruceui.widget.container.tabbed.SpruceTabbedWidget;
@@ -156,21 +157,21 @@ public class ConfigurationScreen extends SpruceScreen {
 
 	public static SpruceSeparatorOption separator(String field) {
 		final var key = "music-moods.option.separator." + field;
-		return new SpruceSeparatorOption(key, true, Component.translatable(key + ".description"));
+		return new SpruceSeparatorOption(key, true, TooltipData.builder().text(key + ".description").build());
 	}
 
 	public static SpruceFloatInputOption floatSlider(String field) throws IllegalAccessException, NoSuchFieldException {
 		final var handle = SELF.findStaticVarHandle(Config.class, field, float.class);
 		final var key = "music-moods.option." + field;
 		return new SpruceFloatInputOption(key, () -> (float) handle.get(), handle::set,
-				Component.translatable(key + ".description"));
+			TooltipData.builder().text(key + ".description").build());
 	}
 
 	public static SpruceIntegerInputOption intInput(String field) throws IllegalAccessException, NoSuchFieldException {
 		final var handle = SELF.findStaticVarHandle(Config.class, field, int.class);
 		final var key = "music-moods.option." + field;
 		return new SpruceIntegerInputOption(key, () -> (int) handle.get(), handle::set,
-				Component.translatable(key + ".description"));
+			TooltipData.builder().text(key + ".description").build());
 	}
 
 	public static SpruceCheckboxBooleanOption checkbox(String field)
@@ -178,7 +179,7 @@ public class ConfigurationScreen extends SpruceScreen {
 		final var handle = SELF.findStaticVarHandle(Config.class, field, boolean.class);
 		final var key = "music-moods.option." + field;
 		return new SpruceCheckboxBooleanOption(key, () -> (boolean) handle.get(), handle::set,
-				Component.translatable(key + ".description"));
+			TooltipData.builder().text(key + ".description").build());
 	}
 
 	public static SpruceCyclingOption cycling(String field) throws IllegalAccessException, NoSuchFieldException {
@@ -186,7 +187,7 @@ public class ConfigurationScreen extends SpruceScreen {
 		final var enums = (Enum<?>[]) handle.varType().getEnumConstants();
 		final var key = "music-moods.option." + field;
 		final var stepper = new EnumStepper(enums, handle, key);
-		return new SpruceCyclingOption(key, stepper, stepper, Component.translatable(key + ".description"));
+		return new SpruceCyclingOption(key, stepper, stepper, TooltipData.builder().text(key + ".description").build());
 	}
 
 	private static VarHandle findEnumField(String name) throws IllegalAccessException, NoSuchFieldException {

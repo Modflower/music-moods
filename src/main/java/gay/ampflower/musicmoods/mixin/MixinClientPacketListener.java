@@ -20,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(ClientPacketListener.class)
 public class MixinClientPacketListener {
 	@WrapWithCondition(method = "handleRespawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sounds/MusicManager;stopPlaying()V"))
-	private static boolean musicmoods$dontStopMusic(MusicManager manager) {
+	private boolean musicmoods$dontStopMusic(MusicManager manager) {
 		return !Config.seamlessTransitions;
 	}
 }

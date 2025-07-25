@@ -9,7 +9,7 @@ package gay.ampflower.musicmoods.mixin;
 import gay.ampflower.musicmoods.Config;
 import gay.ampflower.musicmoods.client.sound.Fadeable;
 import gay.ampflower.musicmoods.client.sound.RecordSoundInstance;
-import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.LevelEventHandler;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.client.sounds.SoundManager;
@@ -27,7 +27,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
  * @author Ampflower
  * @since 0.5
  **/
-@Mixin(LevelRenderer.class)
+@Mixin(LevelEventHandler.class)
 public class MixinLevelRenderer {
 
 	@Redirect(method = "stopJukeboxSong", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sounds/SoundManager;stop(Lnet/minecraft/client/resources/sounds/SoundInstance;)V"))

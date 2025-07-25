@@ -26,7 +26,7 @@ import java.util.Map;
  **/
 @Mixin(targets = "net.minecraft.client.gui.components.OptionsList$Entry")
 public class MixinOptionsListEntry {
-	@Shadow
+//	@Shadow
 	@Final
 	Map<OptionInstance<?>, AbstractWidget> options;
 
