@@ -33,8 +33,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-import java.util.Optional;
-
 /**
  * @author Ampflower
  * @since 0.0.0
@@ -44,6 +42,11 @@ public abstract class MixinMusicManager {
 	@Shadow
 	@Nullable
 	private SoundInstance currentMusic;
+	@Shadow
+	private MusicManager.MusicFrequency gameMusicFrequency;
+	@Shadow
+	private float currentGain;
+
 	@Shadow
 	@Final
 	private Minecraft minecraft;
@@ -56,6 +59,11 @@ public abstract class MixinMusicManager {
 
 	@Shadow
 	public abstract void startPlaying(final MusicInfo music);
+
+	@Shadow
+	private boolean fadePlaying(final float volume) {
+		throw new AssertionError();
+	}
 
 	@Unique
 	private RecordSoundInstance focusedJukebox;
@@ -75,8 +83,25 @@ public abstract class MixinMusicManager {
 			handleRecords();
 		}
 
-		final var music = this.minecraft.getSituationalMusic();
-		final var musicLocation = music.music().event().value().location();
+		final var musicInfo = this.minecraft.getSituationalMusic();
+
+		if (this.currentMusic != null && this.currentGain != musicInfo.volume()) {
+			// note: return intentionally not replicated.
+			boolean playing = this.fadePlaying(musicInfo.volume());
+			if (!playing) {
+				this.stopMusic();
+			}
+		}
+
+		final var music = musicInfo.music();
+
+		// Vanilla behaviour.
+		if (music == null) {
+			this.handleMissingTrack();
+			return;
+		}
+
+		final var musicLocation = music.event().value().location();
 		// Cache the sound manager in a local.
 		final var soundManager = this.minecraft.getSoundManager();
 		var oldFadingOutMusic = this.fadingOutMusic;
@@ -89,47 +114,28 @@ public abstract class MixinMusicManager {
 
 			// Allow the end user to say whether they want their music replaced at all.
 			if (Config.situationalMusicReplacing.replaces()
-					&& (isLoudAndCompatible(oldFadingOutMusic, musicLocation) || shouldReplace(music.music()))) {
+					&& (isLoudAndCompatible(oldFadingOutMusic, musicLocation) || shouldReplace(music))) {
 
-				// Do a fade out on the current music if configured to make it not jarring.
-				if (Config.fadeOutTicks > 0 && this.currentMusic instanceof MusicSoundInstance musicSoundInstance) {
-					musicSoundInstance.setFadeOut(Config.fadeOutTicks);
-					this.fadingOutMusic = musicSoundInstance;
-				} else {
-					soundManager.stop(this.currentMusic);
-				}
-
-				this.currentCompatibleLocation = null;
+				this.fadeOrStopMusic();
 
 				if (oldFadingOutMusic != null && isCompatible(oldFadingOutMusic, musicLocation)) {
 					this.currentMusic = oldFadingOutMusic;
 					oldFadingOutMusic.setFadeIn(Config.fadeInTicks);
 				} else if (Config.immediatelyPlayOnReplace) {
-					this.startPlayingFadeIn(music.music());
+					this.startPlayingFadeIn(music);
 				} else {
 					// Clear currentMusic, so it's not trying to tick it.
-					this.currentMusic = null;
-					this.currentCompatibleLocation = null;
+					this.clearCurrent();
 
 					// Set the delay, since the old track is not applicable to move in.
-					this.nextSongDelay = Mth.nextInt(this.random, 0, music.music().minDelay() / 2);
+					this.nextSongDelay = Mth.nextInt(this.random, 0, music.minDelay() / 2);
 				}
 			}
 
 			if (!soundManager.isActive(this.currentMusic)) {
-				this.currentMusic = null;
-				this.currentCompatibleLocation = null;
+				this.clearCurrent();
 
-				// Change from Mojang code: Removed the Math.min as it doesn't really change the
-				// logic.
-				final int minDelay;
-				if (Config.chaoticallyPlayMusic) {
-					// 10 seconds at 60 FPS
-					minDelay = 600;
-				} else {
-					minDelay = music.music().minDelay();
-				}
-				this.nextSongDelay = Mth.nextInt(this.random, minDelay, music.music().maxDelay());
+				this.nextSongDelay = this.deriveNextSongDelay(music);
 			}
 		}
 
@@ -140,13 +146,44 @@ public abstract class MixinMusicManager {
 			focusedJukebox = null;
 		}
 
-		if ((Config.chaoticallyPlayMusic || this.currentMusic == null)
-				&& (Config.alwaysPlayMusic || decrementSongDelay(music.music().maxDelay()) <= 0)) {
+		if ((Config.chaoticallyPlayMusic || this.currentMusic == null) && (decrementSongDelay(music) <= 0)) {
 			if (oldFadingOutMusic != null) {
-				this.startPlayingFadeIn(music.music());
+				this.startPlayingFadeIn(music);
 			} else {
-				this.startPlaying(music);
+				this.startPlaying(musicInfo);
 			}
+		}
+	}
+
+	@Unique
+	private int deriveNextSongDelay(final Music music) {
+		final var frequency = (AccessorMusicFrequency) (Object) this.gameMusicFrequency;
+		if (frequency != null) {
+			return Math.min(this.nextSongDelay, frequency.invokeGetNextSongDelay(music, this.random));
+		}
+
+		// This shouldn't happen but IntelliJ is complaining.
+		// Fall back to legacy logic in case this is actually true.
+
+		final int minDelay;
+		if (Config.chaoticallyPlayMusic) {
+			// 10 seconds at 60 FPS
+			minDelay = 600;
+		} else {
+			minDelay = music.minDelay();
+		}
+
+		return Math.min(this.nextSongDelay, Mth.nextInt(this.random, minDelay, music.maxDelay()));
+	}
+
+	@Unique
+	private void handleMissingTrack() {
+		this.nextSongDelay = Math.max(this.nextSongDelay, 100);
+
+		// Slightly deviant from vanilla behaviour; tho the biome may be requesting
+		// silence.
+		if (Config.situationalMusicReplacing == Replacing.always) {
+			this.fadeOrStopMusic();
 		}
 	}
 
@@ -174,7 +211,9 @@ public abstract class MixinMusicManager {
 			return;
 		}
 
-		final var map = ((AccessorLevelRenderer) this.minecraft.levelRenderer).getPlayingJukeboxSongs();
+		final var levelEventHandler = ((AccessorClientLevel) this.minecraft.level).getLevelEventHandler();
+
+		final var map = ((AccessorLevelEventHandler) levelEventHandler).getPlayingJukeboxSongs();
 		if (map.isEmpty() || map.size() > 128) {
 			return;
 		}
@@ -285,22 +324,53 @@ public abstract class MixinMusicManager {
 	}
 
 	@Unique
-	private int decrementSongDelay(int maxDelay) {
+	private int decrementSongDelay(Music music) {
+		final var frequency = (AccessorMusicFrequency) (Object) this.gameMusicFrequency;
+		final int maxDelay;
+		if (frequency == null) {
+			maxDelay = music.maxDelay();
+		} else {
+			maxDelay = Math.min(music.maxDelay(), frequency.getMaxFrequency());
+		}
 		return this.nextSongDelay = Math.min(this.nextSongDelay - 1, maxDelay);
 	}
 
 	/**
-	 * Reimplementation of {@link MusicManager#startPlaying(MusicInfo)} with a fade-in
-	 * configured.
+	 * Reimplementation of {@link MusicManager#startPlaying(MusicInfo)} with a
+	 * fade-in configured.
 	 */
 	@Unique
 	private void startPlayingFadeIn(Music music) {
-		this.currentMusic = new MusicSoundInstance( music.event().value(), Config.fadeInTicks);
+		this.currentMusic = new MusicSoundInstance(music.event().value(), Config.fadeInTicks);
 		if (this.currentMusic.getSound() != SoundManager.EMPTY_SOUND) {
 			this.minecraft.getSoundManager().play(this.currentMusic);
 		}
 
 		this.nextSongDelay = Integer.MAX_VALUE;
+	}
+
+	@Unique
+	private void fadeOrStopMusic() {
+		// Do a fade out on the current music if configured to make it not jarring.
+		if (Config.fadeOutTicks > 0 && this.currentMusic instanceof MusicSoundInstance musicSoundInstance) {
+			musicSoundInstance.setFadeOut(Config.fadeOutTicks);
+			this.fadingOutMusic = musicSoundInstance;
+			this.clearCurrent();
+		} else {
+			this.stopMusic();
+		}
+	}
+
+	@Unique
+	private void stopMusic() {
+		this.minecraft.getSoundManager().stop(this.currentMusic);
+		this.clearCurrent();
+	}
+
+	@Unique
+	private void clearCurrent() {
+		this.currentMusic = null;
+		this.currentCompatibleLocation = null;
 	}
 
 	@Redirect(method = "startPlaying", at = @At(value = "INVOKE", target = "net/minecraft/client/resources/sounds/SimpleSoundInstance.forMusic (Lnet/minecraft/sounds/SoundEvent;F)Lnet/minecraft/client/resources/sounds/SimpleSoundInstance;"))

@@ -16,6 +16,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.function.Function;
 
 /**
  * @author Ampflower
@@ -58,6 +59,7 @@ public final class Config {
 	/**
 	 * Tells the music manager to always play music.
 	 */
+	@Deprecated(forRemoval = true)
 	public static boolean alwaysPlayMusic = false;
 
 	/**
@@ -71,6 +73,7 @@ public final class Config {
 	/**
 	 * Allows music to be paused by vanilla.
 	 */
+	@Deprecated(forRemoval = true)
 	public static boolean allowPausingMusic = false;
 
 	/**
@@ -165,7 +168,10 @@ public final class Config {
 				final var modifiers = field.getModifiers();
 				if (!Modifier.isPublic(modifiers) || !Modifier.isStatic(modifiers))
 					continue;
-				properties.setProperty(field.getName(), Objects.toString(field.get(null)));
+				final var value = field.get(null);
+				if (value != null) {
+					properties.setProperty(field.getName(), Objects.toString(value));
+				}
 			} catch (ReflectiveOperationException roe) {
 				throw new AssertionError("Unexpected access violation accessing self @ " + field, roe);
 			}
@@ -215,5 +221,13 @@ public final class Config {
 			return def;
 		}
 		return Float.parseFloat(str);
+	}
+
+	private static <T> T toMaybe(final Properties properties, final String key, final Function<String, T> converter) {
+		final var str = properties.getProperty(key);
+		if (str == null) {
+			return null;
+		}
+		return converter.apply(str);
 	}
 }

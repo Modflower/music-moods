@@ -6,21 +6,17 @@
 
 package gay.ampflower.musicmoods.mixin;
 
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelEventHandler;
-import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.resources.sounds.SoundInstance;
-import net.minecraft.core.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.Map;
-
 /**
  * @author Ampflower
- * @since 0.5
+ * @since 0.9.10
  **/
-@Mixin(LevelEventHandler.class)
-public interface AccessorLevelRenderer {
+@Mixin(ClientLevel.class)
+public interface AccessorClientLevel {
 	@Accessor
-	Map<BlockPos, SoundInstance> getPlayingJukeboxSongs();
+	LevelEventHandler getLevelEventHandler();
 }

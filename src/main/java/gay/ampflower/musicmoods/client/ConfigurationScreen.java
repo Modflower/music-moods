@@ -109,10 +109,10 @@ public class ConfigurationScreen extends SpruceScreen {
 		try {
 			list.addSingleOptionEntry(separator("situationalMusic"));
 			list.addSingleOptionEntry(cycling("situationalMusicReplacing"));
-			list.addOptionEntry(checkbox("immediatelyPlayOnReplace"), checkbox("alwaysPlayMusic"));
+			list.addSingleOptionEntry(checkbox("immediatelyPlayOnReplace"));
 			list.addSingleOptionEntry(separator("transitions"));
 			list.addOptionEntry(intInput("fadeInTicks"), intInput("fadeOutTicks"));
-			list.addOptionEntry(checkbox("seamlessTransitions"), checkbox("allowPausingMusic"));
+			list.addSingleOptionEntry(checkbox("seamlessTransitions"));
 		} catch (ReflectiveOperationException roe) {
 			throw new AssertionError("Unexpected access violation", roe);
 		}
@@ -157,21 +157,21 @@ public class ConfigurationScreen extends SpruceScreen {
 
 	public static SpruceSeparatorOption separator(String field) {
 		final var key = "music-moods.option.separator." + field;
-		return new SpruceSeparatorOption(key, true, TooltipData.builder().text(key + ".description").build());
+		return new SpruceSeparatorOption(key, true, translation(key + ".description"));
 	}
 
 	public static SpruceFloatInputOption floatSlider(String field) throws IllegalAccessException, NoSuchFieldException {
 		final var handle = SELF.findStaticVarHandle(Config.class, field, float.class);
 		final var key = "music-moods.option." + field;
 		return new SpruceFloatInputOption(key, () -> (float) handle.get(), handle::set,
-			TooltipData.builder().text(key + ".description").build());
+				translation(key + ".description"));
 	}
 
 	public static SpruceIntegerInputOption intInput(String field) throws IllegalAccessException, NoSuchFieldException {
 		final var handle = SELF.findStaticVarHandle(Config.class, field, int.class);
 		final var key = "music-moods.option." + field;
 		return new SpruceIntegerInputOption(key, () -> (int) handle.get(), handle::set,
-			TooltipData.builder().text(key + ".description").build());
+				translation(key + ".description"));
 	}
 
 	public static SpruceCheckboxBooleanOption checkbox(String field)
@@ -179,7 +179,7 @@ public class ConfigurationScreen extends SpruceScreen {
 		final var handle = SELF.findStaticVarHandle(Config.class, field, boolean.class);
 		final var key = "music-moods.option." + field;
 		return new SpruceCheckboxBooleanOption(key, () -> (boolean) handle.get(), handle::set,
-			TooltipData.builder().text(key + ".description").build());
+				translation(key + ".description"));
 	}
 
 	public static SpruceCyclingOption cycling(String field) throws IllegalAccessException, NoSuchFieldException {
@@ -187,7 +187,7 @@ public class ConfigurationScreen extends SpruceScreen {
 		final var enums = (Enum<?>[]) handle.varType().getEnumConstants();
 		final var key = "music-moods.option." + field;
 		final var stepper = new EnumStepper(enums, handle, key);
-		return new SpruceCyclingOption(key, stepper, stepper, TooltipData.builder().text(key + ".description").build());
+		return new SpruceCyclingOption(key, stepper, stepper, translation(key + ".description"));
 	}
 
 	private static VarHandle findEnumField(String name) throws IllegalAccessException, NoSuchFieldException {
@@ -201,6 +201,11 @@ public class ConfigurationScreen extends SpruceScreen {
 			}
 		}
 		throw new NoSuchFieldException("Cannot find " + name + " in Config");
+	}
+
+	private static TooltipData translation(final String key) {
+		final var translation = Component.translatable(key);
+		return TooltipData.builder().text(translation).build();
 	}
 
 	private record EnumStepper(Enum<?>[] enums, VarHandle handle, String key)

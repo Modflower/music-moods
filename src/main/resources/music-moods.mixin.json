@@ -3,8 +3,10 @@
 	"package": "gay.ampflower.musicmoods.mixin",
 	"compatibilityLevel": "JAVA_17",
 	"client": [
-		"AccessorLevelRenderer",
+		"AccessorClientLevel",
+		"AccessorLevelEventHandler",
 		"AccessorMinecraft",
+		"AccessorMusicFrequency",
 		"MixinClientPacketListener",
 		"MixinLevelRenderer",
 		"MixinMinecraft",
