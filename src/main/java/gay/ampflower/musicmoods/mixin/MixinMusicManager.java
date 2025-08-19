@@ -84,16 +84,33 @@ public abstract class MixinMusicManager {
 		}
 
 		final var musicInfo = this.minecraft.getSituationalMusic();
+		final var music = musicInfo.music();
+		final var soundManager = this.minecraft.getSoundManager();
 
-		if (this.currentMusic != null && this.currentGain != musicInfo.volume()) {
-			// note: return intentionally not replicated.
-			boolean playing = this.fadePlaying(musicInfo.volume());
-			if (!playing) {
-				this.stopMusic();
+		if (this.currentMusic != null) {
+			final float volume = musicInfo.volume();
+
+			if (this.currentGain != volume) {
+				// note: return intentionally not replicated.
+				boolean playing = this.fadePlaying(volume);
+				if (!playing) {
+					this.stopMusic();
+				}
+			}
+
+			// Seamless Transitions requires this to be before the music == null check.
+			if (!soundManager.isActive(this.currentMusic)) {
+				this.clearCurrent();
+
+				this.nextSongDelay = this.deriveNextSongDelay(music);
 			}
 		}
 
-		final var music = musicInfo.music();
+		var fadingOutMusic = this.fadingOutMusic;
+
+		if (fadingOutMusic != null && !soundManager.isActive(fadingOutMusic)) {
+			this.fadingOutMusic = fadingOutMusic = null;
+		}
 
 		// Vanilla behaviour.
 		if (music == null) {
@@ -102,52 +119,35 @@ public abstract class MixinMusicManager {
 		}
 
 		final var musicLocation = music.event().value().location();
-		// Cache the sound manager in a local.
-		final var soundManager = this.minecraft.getSoundManager();
-		var oldFadingOutMusic = this.fadingOutMusic;
 
-		if (oldFadingOutMusic != null && !soundManager.isActive(oldFadingOutMusic)) {
-			this.fadingOutMusic = oldFadingOutMusic = null;
-		}
+		// Allow the end user to say whether they want their music replaced at all.
+		if (this.currentMusic != null && Config.situationalMusicReplacing.replaces()
+				&& (isLoudAndCompatible(fadingOutMusic, musicLocation) || shouldReplace(music))) {
+			this.fadeOrStopMusic();
 
-		if (this.currentMusic != null) {
-
-			// Allow the end user to say whether they want their music replaced at all.
-			if (Config.situationalMusicReplacing.replaces()
-					&& (isLoudAndCompatible(oldFadingOutMusic, musicLocation) || shouldReplace(music))) {
-
-				this.fadeOrStopMusic();
-
-				if (oldFadingOutMusic != null && isCompatible(oldFadingOutMusic, musicLocation)) {
-					this.currentMusic = oldFadingOutMusic;
-					oldFadingOutMusic.setFadeIn(Config.fadeInTicks);
-				} else if (Config.immediatelyPlayOnReplace) {
-					this.startPlayingFadeIn(music);
-				} else {
-					// Clear currentMusic, so it's not trying to tick it.
-					this.clearCurrent();
-
-					// Set the delay, since the old track is not applicable to move in.
-					this.nextSongDelay = Mth.nextInt(this.random, 0, music.minDelay() / 2);
-				}
-			}
-
-			if (!soundManager.isActive(this.currentMusic)) {
+			if (isCompatible(fadingOutMusic, musicLocation)) {
+				this.currentMusic = fadingOutMusic;
+				fadingOutMusic.setFadeIn(Config.fadeInTicks);
+			} else if (Config.immediatelyPlayOnReplace) {
+				this.startPlayingFadeIn(music);
+			} else {
+				// Clear currentMusic, so it's not trying to tick it.
 				this.clearCurrent();
 
-				this.nextSongDelay = this.deriveNextSongDelay(music);
+				// Set the delay, since the old track is not applicable to move in.
+				this.nextSongDelay = Mth.nextInt(this.random, 0, music.minDelay() / 2);
 			}
 		}
 
-		if (focusedJukebox != null) {
-			if (soundManager.isActive(focusedJukebox)) {
+		if (this.focusedJukebox != null) {
+			if (soundManager.isActive(this.focusedJukebox)) {
 				return;
 			}
-			focusedJukebox = null;
+			this.focusedJukebox = null;
 		}
 
 		if ((Config.chaoticallyPlayMusic || this.currentMusic == null) && (decrementSongDelay(music) <= 0)) {
-			if (oldFadingOutMusic != null) {
+			if (fadingOutMusic != null) {
 				this.startPlayingFadeIn(music);
 			} else {
 				this.startPlaying(musicInfo);
@@ -157,6 +157,10 @@ public abstract class MixinMusicManager {
 
 	@Unique
 	private int deriveNextSongDelay(final Music music) {
+		if (music == null) {
+			return 100;
+		}
+
 		final var frequency = (AccessorMusicFrequency) (Object) this.gameMusicFrequency;
 		if (frequency != null) {
 			return Math.min(this.nextSongDelay, frequency.invokeGetNextSongDelay(music, this.random));
@@ -308,6 +312,10 @@ public abstract class MixinMusicManager {
 
 	@Unique
 	private boolean isCompatible(final SoundInstance instance, final ResourceLocation musicLocation) {
+		if (instance == null || musicLocation == null) {
+			return false;
+		}
+
 		if (instance.getLocation().equals(musicLocation)) {
 			this.currentCompatibleLocation = musicLocation;
 			return true;
