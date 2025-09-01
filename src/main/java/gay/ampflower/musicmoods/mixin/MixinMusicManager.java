@@ -79,7 +79,7 @@ public abstract class MixinMusicManager {
 	@Overwrite
 	public void tick() {
 		if (Config.jukeboxEnabled
-				&& (!Config.jukeboxMultiplayer || !((AccessorMinecraft) minecraft).invokeIsMultiplayerServer())) {
+				&& (Config.jukeboxMultiplayer || !((AccessorMinecraft) minecraft).invokeIsMultiplayerServer())) {
 			handleRecords();
 		}
 
