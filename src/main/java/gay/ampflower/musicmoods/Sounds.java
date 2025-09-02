@@ -3,6 +3,7 @@ package gay.ampflower.musicmoods;
 import com.mojang.logging.LogUtils;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.fabricmc.fabric.api.resource.ResourceReloadListenerKeys;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.core.Holder;
@@ -14,6 +15,8 @@ import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -104,9 +107,17 @@ public final class Sounds implements IdentifiableResourceReloadListener {
 	}
 
 	@Override
+	public Collection<ResourceLocation> getFabricDependencies() {
+		return Collections.singleton(ResourceReloadListenerKeys.SOUNDS);
+	}
+
+	@Override
 	public CompletableFuture<Void> reload(final PreparationBarrier preparationBarrier, final ResourceManager resourceManager, final Executor executor, final Executor executor2) {
 		// This is literally all we need to do.
-		toStereo.clear();
+		executor2.execute(() -> {
+			toStereoEvent.clear();
+			toStereo.clear();
+		});
 
 		return CompletableFuture.completedFuture(null);
 	}
