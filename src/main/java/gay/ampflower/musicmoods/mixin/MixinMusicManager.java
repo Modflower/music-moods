@@ -8,37 +8,42 @@ package gay.ampflower.musicmoods.mixin;// Created 2022-24-12T20:34:50
 
 import gay.ampflower.musicmoods.Config;
 import gay.ampflower.musicmoods.Mint;
+import gay.ampflower.musicmoods.client.MusicHandler;
 import gay.ampflower.musicmoods.client.WeighedSoundEventsQuery;
 import gay.ampflower.musicmoods.client.sound.MusicSoundInstance;
 import gay.ampflower.musicmoods.client.sound.RecordSoundInstance;
 import gay.ampflower.musicmoods.config.Replacing;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.client.sounds.MusicInfo;
 import net.minecraft.client.sounds.MusicManager;
+import net.minecraft.client.sounds.SoundEngine;
 import net.minecraft.client.sounds.SoundManager;
+import net.minecraft.core.Holder;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.Music;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.JukeboxSong;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * @author Ampflower
  * @since 0.0.0
  **/
 @Mixin(value = MusicManager.class, priority = 500)
-public abstract class MixinMusicManager {
+public abstract class MixinMusicManager implements MusicHandler {
 	@Shadow
 	@Nullable
 	private SoundInstance currentMusic;
@@ -46,6 +51,8 @@ public abstract class MixinMusicManager {
 	private MusicManager.MusicFrequency gameMusicFrequency;
 	@Shadow
 	private float currentGain;
+	@Shadow
+	private boolean toastShown;
 
 	@Shadow
 	@Final
@@ -58,13 +65,21 @@ public abstract class MixinMusicManager {
 	private RandomSource random;
 
 	@Shadow
-	public abstract void startPlaying(final MusicInfo music);
-
-	@Shadow
 	private boolean fadePlaying(final float volume) {
 		throw new AssertionError();
 	}
 
+	@Shadow
+	private String getCurrentMusicTranslationKey() {
+		throw new AssertionError();
+	}
+
+	/** Whether the current track is interruptable. */
+	@Unique
+	private boolean currentMusicIntruded;
+	/** Records don't really bodge in well... */
+	@Unique
+	private Component currentMusicName;
 	@Unique
 	private RecordSoundInstance focusedJukebox;
 	@Unique
@@ -103,6 +118,9 @@ public abstract class MixinMusicManager {
 				this.clearCurrent();
 
 				this.nextSongDelay = this.deriveNextSongDelay(music);
+			} else if (!this.toastShown && this.currentMusic.getVolume() >= 0.75F) {
+				this.minecraft.getToastManager().showNowPlayingToast();
+				this.toastShown = true;
 			}
 		}
 
@@ -121,15 +139,17 @@ public abstract class MixinMusicManager {
 		final var musicLocation = music.event().value().location();
 
 		// Allow the end user to say whether they want their music replaced at all.
-		if (this.currentMusic != null && Config.situationalMusicReplacing.replaces()
+		if (this.currentMusic != null && !this.currentMusicIntruded && Config.situationalMusicReplacing.replaces()
 				&& (isLoudAndCompatible(fadingOutMusic, musicLocation) || shouldReplace(music))) {
 			this.fadeOrStopMusic();
 
 			if (isCompatible(fadingOutMusic, musicLocation)) {
+				this.reset(0);
+				this.toastShown = false;
 				this.currentMusic = fadingOutMusic;
 				fadingOutMusic.setFadeIn(Config.fadeInTicks);
 			} else if (Config.immediatelyPlayOnReplace) {
-				this.startPlayingFadeIn(music);
+				this.startPlayingFadeIn(musicInfo);
 			} else {
 				// Clear currentMusic, so it's not trying to tick it.
 				this.clearCurrent();
@@ -148,7 +168,7 @@ public abstract class MixinMusicManager {
 
 		if ((Config.chaoticallyPlayMusic || this.currentMusic == null) && (decrementSongDelay(music) <= 0)) {
 			if (fadingOutMusic != null) {
-				this.startPlayingFadeIn(music);
+				this.startPlayingFadeIn(musicInfo);
 			} else {
 				this.startPlaying(musicInfo);
 			}
@@ -193,6 +213,11 @@ public abstract class MixinMusicManager {
 
 	@Unique
 	private void handleRecords() {
+		// Don't override intruded tracks.
+		if (this.currentMusicIntruded) {
+			return;
+		}
+
 		final var player = this.minecraft.player;
 		if (player == null) {
 			return;
@@ -267,14 +292,23 @@ public abstract class MixinMusicManager {
 			lastRecord.centerOnPlayer(cameraPos, cameraRot);
 		}
 
-		if (this.currentMusic instanceof MusicSoundInstance music) {
-			music.setFadeOut(Config.jukeboxFadeMixTicks);
-			fadingOutMusic = music;
-		} else {
-			soundManager.stop(this.currentMusic);
+		this.fadeOrStopMusic(Config.jukeboxFadeMixTicks);
+	}
+
+	@Override
+	public boolean moods$intrudeJukeboxTrack(final @NotNull Holder<JukeboxSong> jukeboxSong) {
+		final JukeboxSong song = jukeboxSong.value();
+
+		if (
+			this.currentMusicIntruded &&
+			this.isCompatible(this.currentMusic, song.soundEvent().value().location())
+		) {
+			return false;
 		}
 
-		this.currentMusic = null;
+		this.startPlayingIntruded(song.soundEvent(), song.description());
+
+		return true;
 	}
 
 	/**
@@ -308,6 +342,11 @@ public abstract class MixinMusicManager {
 	@Unique
 	private boolean isReplaceable(final SoundInstance instance, final ResourceLocation musicLocation) {
 		return musicLocation != this.currentCompatibleLocation && !isCompatible(instance, musicLocation);
+	}
+
+	@Override
+	public boolean moods$isCurrentlyPlaying(final SoundEvent soundEvent) {
+		return isCompatible(this.currentMusic, soundEvent.location());
 	}
 
 	@Unique
@@ -348,21 +387,92 @@ public abstract class MixinMusicManager {
 	 * fade-in configured.
 	 */
 	@Unique
-	private void startPlayingFadeIn(Music music) {
-		this.currentMusic = new MusicSoundInstance(music.event().value(), Config.fadeInTicks);
-		if (this.currentMusic.getSound() != SoundManager.EMPTY_SOUND) {
-			this.minecraft.getSoundManager().play(this.currentMusic);
+	private void startPlayingFadeIn(final MusicInfo music) {
+		if (music.music() == null || music.volume() <= 0) {
+			return;
 		}
 
+		this.startPlayingCommon(music.music().event(), null, music.volume(), Config.fadeInTicks);
+	}
+
+	/**
+	 * @author Ampflower
+	 * @reason The original logic is proving itself ill-suited for Music Moods' needs
+	 */
+	@Overwrite
+	public void startPlaying(final MusicInfo music) {
+		if (music.music() == null || music.volume() <= 0) {
+			return;
+		}
+
+		this.startPlayingCommon(music.music().event(), null, music.volume(), 0);
+	}
+
+	@Unique
+	private void startPlayingIntruded(final Holder<SoundEvent> soundEventHolder, final Component name) {
+		this.reset(Config.jukeboxFadeMixTicks);
+
+		this.currentMusicIntruded = true;
+		this.startPlayingCommon(soundEventHolder, name, 1.f, 0);
+	}
+
+	@Unique
+	private void startPlayingCommon(
+		final Holder<SoundEvent> soundEvent,
+		final Component name,
+		final float volume,
+		final float fadeInTicks
+	) {
+		this.currentMusic = new MusicSoundInstance(soundEvent.value(), fadeInTicks);
 		this.nextSongDelay = Integer.MAX_VALUE;
+		this.currentGain = volume;
+
+		if (this.currentMusic.getSound() == SoundManager.EMPTY_SOUND) {
+			return;
+		}
+
+		final var state = this.minecraft.getSoundManager().play(this.currentMusic);
+		if (state == SoundEngine.PlayResult.NOT_STARTED) {
+			return;
+		}
+
+		this.updateCurrentMusicName(name);
+
+		if (state == SoundEngine.PlayResult.STARTED || fadeInTicks <= 0) {
+			this.minecraft.getToastManager().showNowPlayingToast();
+			this.toastShown = true;
+		} else {
+			this.toastShown = false;
+		}
+	}
+
+	@Unique
+	private void reset(final int fadeOut) {
+		// Reset jukebox
+		final var camera = this.minecraft.gameRenderer.getMainCamera();
+
+		final var cameraPos = camera.getPosition();
+		final var cameraRot = Mint.cameraToRotationVector(camera);
+
+		if (this.focusedJukebox != null) {
+			this.focusedJukebox.centerOnOrigin(cameraPos, cameraRot);
+			this.focusedJukebox = null;
+		}
+
+		this.fadeOrStopMusic(fadeOut);
 	}
 
 	@Unique
 	private void fadeOrStopMusic() {
+		this.fadeOrStopMusic(Config.fadeOutTicks);
+	}
+
+	@Unique
+	private void fadeOrStopMusic(final float fadeOut) {
 		// Do a fade out on the current music if configured to make it not jarring.
-		if (Config.fadeOutTicks > 0 && this.currentMusic instanceof MusicSoundInstance musicSoundInstance) {
-			musicSoundInstance.setFadeOut(Config.fadeOutTicks);
-			this.fadingOutMusic = musicSoundInstance;
+		if (fadeOut > 0 && this.currentMusic instanceof MusicSoundInstance music) {
+			music.setFadeOut(fadeOut);
+			this.fadingOutMusic = music;
 			this.clearCurrent();
 		} else {
 			this.stopMusic();
@@ -378,16 +488,51 @@ public abstract class MixinMusicManager {
 	@Unique
 	private void clearCurrent() {
 		this.currentMusic = null;
+		this.currentMusicName = null;
+		this.currentMusicIntruded = false;
 		this.currentCompatibleLocation = null;
+
+		this.toastShown = false;
+		this.minecraft.getToastManager().hideNowPlayingToast();
 	}
 
-	@Redirect(method = "startPlaying", at = @At(value = "INVOKE", target = "net/minecraft/client/resources/sounds/SimpleSoundInstance.forMusic (Lnet/minecraft/sounds/SoundEvent;F)Lnet/minecraft/client/resources/sounds/SimpleSoundInstance;"))
-	private SimpleSoundInstance musicmoods$simpleSoundInstanceNullifier(final SoundEvent soundEvent, float volume) {
-		return null;
+	@Inject(method = "stopPlaying", at = @At("RETURN"))
+	private void clearOnStopPlaying(CallbackInfo ci) {
+		this.clearCurrent();
 	}
 
-	@Redirect(method = "startPlaying", at = @At(value = "FIELD", target = "Lnet/minecraft/client/sounds/MusicManager;currentMusic:Lnet/minecraft/client/resources/sounds/SoundInstance;", opcode = Opcodes.PUTFIELD))
-	private void musicmoods$setCustomSoundInstance(MusicManager instance, SoundInstance value, MusicInfo musicInfo) {
-		this.currentMusic = new MusicSoundInstance(musicInfo.music().event().value(), musicInfo.volume());
+	@Unique
+	private void updateCurrentMusicName(final @Nullable Component name) {
+		if (this.currentMusic == null) {
+			this.currentMusicName = null;
+			return;
+		}
+
+		if (name != null) {
+			this.currentMusicName = name;
+			return;
+		}
+
+		final String key = this.getCurrentMusicTranslationKey();
+
+		if (key == null) {
+			this.currentMusicName = null;
+			return;
+		}
+
+		this.currentMusicName = Component.translatable(key.replace('/', '.'));
+	}
+
+	@Override
+	public Component moods$getCurrentMusicName() {
+		if (this.currentMusic == null) {
+			return Component.empty();
+		}
+
+		if (this.currentMusicName == null) {
+			updateCurrentMusicName(null);
+		}
+
+		return this.currentMusicName;
 	}
 }

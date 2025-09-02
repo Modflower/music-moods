@@ -110,6 +110,9 @@ public final class Config {
 	 */
 	public static int jukeboxFadeStopTicks = jukeboxFadeDefault;
 
+	/** Allows shift+right-clicking a disc in inventory to play it. */
+	public static boolean rightClickToPlay = false;
+
 	/**
 	 * Plays music in a chaotic manner.
 	 */
@@ -155,6 +158,8 @@ public final class Config {
 		jukeboxFadeRange = toFloat(properties, "jukeboxFadeRange", jukeboxFadeRangeDefault);
 		jukeboxFadeMixTicks = toInt(properties, "jukeboxFadeMixTicks", jukeboxFadeDefault);
 		jukeboxFadeStopTicks = toInt(properties, "jukeboxFadeStopTicks", jukeboxFadeDefault);
+
+		rightClickToPlay = toBoolean(properties, "rightClickToPlay", false);
 
 		chaoticallyPlayMusic = toBoolean(properties, "chaoticallyPlayMusic", false);
 		injectUiComponents = toBoolean(properties, "injectUiComponents", true);

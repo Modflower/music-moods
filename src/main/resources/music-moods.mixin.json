@@ -7,10 +7,13 @@
 		"AccessorLevelEventHandler",
 		"AccessorMinecraft",
 		"AccessorMusicFrequency",
+		"MixinAbstractContainerScreen",
 		"MixinClientPacketListener",
+		"MixinJukeboxPlayable",
 		"MixinLevelRenderer",
 		"MixinMinecraft",
 		"MixinMusicManager",
+		"MixinNowPlayingToast",
 		"MixinSoundEngine",
 		"MixinSoundManager",
 		"MixinWeighedSoundEvents"

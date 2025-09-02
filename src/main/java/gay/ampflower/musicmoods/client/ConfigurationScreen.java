@@ -64,6 +64,7 @@ public class ConfigurationScreen extends SpruceScreen {
 
 		addTabEntry("music", ConfigurationScreen::buildMusicOptionList);
 		addTabEntry("jukebox", ConfigurationScreen::buildJukeboxOptionList);
+		addTabEntry("demo", ConfigurationScreen::buildDemoList);
 		addTabEntry("meta", ConfigurationScreen::buildMetaList);
 
 		this.addRenderableWidget(this.tabbedWidget);
@@ -132,6 +133,19 @@ public class ConfigurationScreen extends SpruceScreen {
 			list.addOptionEntry(intInput("jukeboxFadeMixTicks"), intInput("jukeboxFadeStopTicks"));
 		} catch (ReflectiveOperationException roe) {
 			throw new AssertionError("Unexpected access violation", roe);
+		}
+
+		return list;
+	}
+
+	protected static SpruceOptionListWidget buildDemoList(int width, int height) {
+		final var list = new SpruceOptionListWidget(Position.origin(), width, height);
+
+		try {
+			list.addSingleOptionEntry(separator("modfest"));
+			list.addSingleOptionEntry(checkbox("rightClickToPlay"));
+		} catch (ReflectiveOperationException roe) {
+			throw new AssertionError(roe);
 		}
 
 		return list;

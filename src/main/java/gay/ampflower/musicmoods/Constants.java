@@ -6,8 +6,10 @@
 
 package gay.ampflower.musicmoods;// Created 2023-16-01T21:35:22
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.WidgetSprites;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 /**
@@ -29,6 +31,21 @@ public final class Constants {
 
 	public static final int primaryButtonLeftOffset = buttonWidth + twoColumnButtonOffset;
 	public static final int primaryButtonRightOffset = primaryButtonLeftOffset + twoColumnButtonOffset;
+
+	private static final Component rightMouseButton = Component.translatable("key.mouse.right")
+		.withStyle(ChatFormatting.GRAY);
+
+	public static final Component rightClickToPlayTooltip = Component.translatable(
+		"music-moods.inventory.rightClickToPlay.play",
+			rightMouseButton
+		)
+		.withStyle(ChatFormatting.BLUE, ChatFormatting.ITALIC);
+
+	public static final Component rightClickToStopTooltip = Component.translatable(
+			"music-moods.inventory.rightClickToPlay.stop",
+			rightMouseButton
+		)
+		.withStyle(ChatFormatting.BLUE, ChatFormatting.ITALIC);
 
 	public static WidgetSprites widgetHoverable(String widget) {
 		return new WidgetSprites(widget(widget), widget(widget + "_hover"));

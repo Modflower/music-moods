@@ -5,6 +5,8 @@
 	"music-moods.gui.configuration.music.description": "Configure how music is handled",
 	"music-moods.gui.configuration.jukebox": "Jukebox",
 	"music-moods.gui.configuration.jukebox.description": "Configuring jukeboxes?",
+	"music-moods.gui.configuration.demo": "Festivities",
+	"music-moods.gui.configuration.demo.description": "Off by default additions",
 	"music-moods.gui.configuration.meta": "Meta",
 	"music-moods.gui.configuration.meta.description": "Configure Music Moods itself",
 
@@ -20,6 +22,8 @@
 	"music-moods.option.separator.jukeboxRange.description": "Trigger distances for various effects.",
 	"music-moods.option.separator.transitions": "Transitions",
 	"music-moods.option.separator.transitions.description": "Transitions for when a track takes over, or otherwise would abruptly stop.",
+	"music-moods.option.separator.modfest": "ModFest",
+	"music-moods.option.separator.modfest.description": "Options introduced for ModFest use. Maybe you'll like them in normal gameplay too?",
 	"music-moods.option.separator.modPack": "Mod Pack",
 	"music-moods.option.separator.modPack.description": "Options useful for mod pack creators.",
 	"music-moods.option.separator.modMenu": "Mod Menu Required",
@@ -56,6 +60,12 @@
 	"music-moods.option.jukeboxFadeStopTicks": "Jukebox Fade-out time in ticks",
 	"music-moods.option.jukeboxFadeStopTicks.description": "How long it takes for the jukebox record to fade out when the record is removed, counted in ticks.",
 
+	"music-moods.option.rightClickToPlay": "Right-Click Discs to Play",
+	"music-moods.option.rightClickToPlay.description": "In game, right-click any disc while your inventory is open to play them.\n\nNote: this can only be done in your player inventory.\n\nI believe some people call this the eternal jukebox.",
+
 	"music-moods.option.injectUiComponents": "Inject UI Components",
-	"music-moods.option.injectUiComponents.description": "Inject buttons into Vanilla UIs for discoverability.\n\nNote: Disabling this will hinder discoverability of Music Moods' options and should only be done if you're providing an alternative mean of accessing its settings."
+	"music-moods.option.injectUiComponents.description": "Inject buttons into Vanilla UIs for discoverability.\n\nNote: Disabling this will hinder discoverability of Music Moods' options and should only be done if you're providing an alternative mean of accessing its settings.",
+
+	"music-moods.inventory.rightClickToPlay.play": "[%s] ▶ Play",
+	"music-moods.inventory.rightClickToPlay.stop": "[%s] ■ Stop"
 }
