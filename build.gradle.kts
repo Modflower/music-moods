@@ -9,10 +9,8 @@ import java.nio.charset.StandardCharsets
 
 plugins {
 	java
-	`java-library`
 	alias(libs.plugins.loom)
-	`maven-publish`
-	alias(libs.plugins.spotless)
+	alias(libs.plugins.licenser)
 	alias(libs.plugins.minotaur)
 }
 
@@ -64,23 +62,8 @@ dependencies {
 	modRuntimeOnly(libs.bundles.mod.runtime)
 }
 
-spotless {
-	val licenseHeader = rootDir.resolve(".internal/license-header.java")
-	java {
-		importOrderFile(rootDir.resolve(".internal/spotless.importorder"))
-
-		// If the spotless config doesn't exist, this will fall back to the eclipse default.
-		val eclipse = eclipse()
-		val eclipseConfig = rootDir.resolve(".internal/spotless.xml")
-		if (eclipseConfig.exists()) eclipse.configFile(eclipseConfig)
-
-		// If the license header doesn't exist, it'll simply not be applied.
-		if (licenseHeader.exists()) licenseHeaderFile(licenseHeader)
-	}
-	kotlinGradle {
-		target("*.gradle.kts")
-		if (licenseHeader.exists()) licenseHeaderFile(licenseHeader, "(import|plugins|rootProject)")
-	}
+license {
+	rule(file(".internal/HEADER"))
 }
 
 tasks {

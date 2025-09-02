@@ -14,8 +14,7 @@ fabric_api = "0.129.0+1.21.7"
 
 # Plugins
 loom = "1.11.+"
-spotless = "5.+"
-quiltflower = "1.+"
+licenser = "2.1.+"
 minotaur = "2.+"
 
 [libraries]
@@ -37,5 +36,5 @@ mod_runtime = []
 
 [plugins]
 loom = { id = "fabric-loom", version.ref = "loom" }
-spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
+licenser = { id = "dev.yumi.gradle.licenser", version.ref = "licenser" }
 minotaur = { id = "com.modrinth.minotaur", version.ref = "minotaur" }
