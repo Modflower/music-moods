@@ -8,6 +8,7 @@ package gay.ampflower.musicmoods.mixin;// Created 2022-24-12T20:34:50
 
 import gay.ampflower.musicmoods.Config;
 import gay.ampflower.musicmoods.Mint;
+import gay.ampflower.musicmoods.Sounds;
 import gay.ampflower.musicmoods.client.MusicHandler;
 import gay.ampflower.musicmoods.client.WeighedSoundEventsQuery;
 import gay.ampflower.musicmoods.client.sound.MusicSoundInstance;
@@ -299,14 +300,16 @@ public abstract class MixinMusicManager implements MusicHandler {
 	public boolean moods$intrudeJukeboxTrack(final @NotNull Holder<JukeboxSong> jukeboxSong) {
 		final JukeboxSong song = jukeboxSong.value();
 
+		final Holder<SoundEvent> soundEvent = Sounds.findStereo(song.soundEvent());
+
 		if (
 			this.currentMusicIntruded &&
-			this.isCompatible(this.currentMusic, song.soundEvent().value().location())
+			this.isCompatible(this.currentMusic, soundEvent.value().location())
 		) {
 			return false;
 		}
 
-		this.startPlayingIntruded(song.soundEvent(), song.description());
+		this.startPlayingIntruded(soundEvent, song.description());
 
 		return true;
 	}
@@ -342,6 +345,17 @@ public abstract class MixinMusicManager implements MusicHandler {
 	@Unique
 	private boolean isReplaceable(final SoundInstance instance, final ResourceLocation musicLocation) {
 		return musicLocation != this.currentCompatibleLocation && !isCompatible(instance, musicLocation);
+	}
+
+	@Override
+	public boolean moods$isCurrentlyPlaying(final @NotNull Holder<JukeboxSong> jukeboxSong) {
+		if (!this.currentMusicIntruded) {
+			return false;
+		}
+
+		final ResourceLocation location = jukeboxSong.value().soundEvent().value().location();
+
+		return isCompatible(this.currentMusic, Sounds.findStereo(location));
 	}
 
 	@Override
