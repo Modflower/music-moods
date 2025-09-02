@@ -510,7 +510,7 @@ public abstract class MixinMusicManager implements MusicHandler {
 		this.minecraft.getToastManager().hideNowPlayingToast();
 	}
 
-	@Inject(method = "stopPlaying", at = @At("RETURN"))
+	@Inject(method = {"stopPlaying(Lnet/minecraft/sounds/Music;)V", "stopPlaying()V"}, at = @At("RETURN"))
 	private void clearOnStopPlaying(CallbackInfo ci) {
 		this.clearCurrent();
 	}
