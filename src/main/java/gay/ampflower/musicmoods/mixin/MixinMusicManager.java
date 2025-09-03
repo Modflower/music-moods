@@ -297,9 +297,7 @@ public abstract class MixinMusicManager implements MusicHandler {
 	}
 
 	@Override
-	public boolean moods$intrudeJukeboxTrack(final @NotNull Holder<JukeboxSong> jukeboxSong) {
-		final JukeboxSong song = jukeboxSong.value();
-
+	public boolean moods$intrudeJukeboxTrack(final @NotNull JukeboxSong song) {
 		final Holder<SoundEvent> soundEvent = Sounds.findStereo(song.soundEvent());
 
 		if (
@@ -348,12 +346,12 @@ public abstract class MixinMusicManager implements MusicHandler {
 	}
 
 	@Override
-	public boolean moods$isCurrentlyPlaying(final @NotNull Holder<JukeboxSong> jukeboxSong) {
+	public boolean moods$isCurrentlyPlaying(final @NotNull JukeboxSong song) {
 		if (!this.currentMusicIntruded) {
 			return false;
 		}
 
-		final ResourceLocation location = jukeboxSong.value().soundEvent().value().location();
+		final ResourceLocation location = song.soundEvent().value().location();
 
 		return isCompatible(this.currentMusic, Sounds.findStereo(location));
 	}

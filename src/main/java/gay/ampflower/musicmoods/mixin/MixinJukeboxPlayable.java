@@ -11,6 +11,7 @@ import gay.ampflower.musicmoods.Config;
 import gay.ampflower.musicmoods.Constants;
 import gay.ampflower.musicmoods.client.MusicHandler;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.EitherHolder;
 import net.minecraft.world.item.JukeboxPlayable;
@@ -50,16 +51,18 @@ public class MixinJukeboxPlayable {
 			return;
 		}
 
-		final var jukeboxSong = song.unwrap(level.registryAccess());
+		final var optionalSong = song.unwrap(level.registryAccess());
 
-		if (jukeboxSong.isEmpty()) {
+		if (optionalSong.isEmpty()) {
 			return;
 		}
 
+		final var jukeboxSong = optionalSong.get();
+		final var stereoSong = jukeboxSong.unwrapKey().flatMap(k -> level.registryAccess().lookup(Registries.JUKEBOX_SONG).orElseThrow().getOptional(Constants.toStereo(k.location())));
 		final var musicHandler = (MusicHandler) minecraft.getMusicManager();
 
 		tooltipConsumer.accept(
-			musicHandler.moods$isCurrentlyPlaying(jukeboxSong.get())
+			musicHandler.moods$isCurrentlyPlaying(stereoSong.orElse(jukeboxSong.value()))
 				? Constants.rightClickToStopTooltip
 				: Constants.rightClickToPlayTooltip
 		);

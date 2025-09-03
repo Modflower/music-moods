@@ -6,7 +6,6 @@
 
 package gay.ampflower.musicmoods.client;
 
-import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.item.JukeboxSong;
@@ -20,13 +19,13 @@ public interface MusicHandler {
 	/**
 	 * Intrudes the given jukebox song into the music manager.
 	 *
-	 * @param jukeboxSong The jukebox song to intrude.
+	 * @param song The jukebox song to intrude.
 	 * @return Whether it swapped out the track. {@code false} means it is already playing.
 	 */
-	boolean moods$intrudeJukeboxTrack(final @NotNull Holder<JukeboxSong> jukeboxSong);
+	boolean moods$intrudeJukeboxTrack(final @NotNull JukeboxSong song);
 
-	default boolean moods$isCurrentlyPlaying(final @NotNull Holder<JukeboxSong> jukeboxSong) {
-		return moods$isCurrentlyPlaying(jukeboxSong.value().soundEvent().value());
+	default boolean moods$isCurrentlyPlaying(final @NotNull JukeboxSong song) {
+		return moods$isCurrentlyPlaying(song.soundEvent().value());
 	}
 
 	boolean moods$isCurrentlyPlaying(final SoundEvent soundEvent);

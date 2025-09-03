@@ -8,12 +8,14 @@ package gay.ampflower.musicmoods.mixin;
 
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import gay.ampflower.musicmoods.Config;
+import gay.ampflower.musicmoods.Constants;
 import gay.ampflower.musicmoods.client.MusicHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.HorseInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.JukeboxSong;
@@ -70,20 +72,21 @@ public class MixinAbstractContainerScreen {
 			return true;
 		}
 
-		final var song = JukeboxSong.fromStack(level.registryAccess(), stack);
+		final var optionalSong = JukeboxSong.fromStack(level.registryAccess(), stack);
 
-		if (song.isEmpty()) {
+		if (optionalSong.isEmpty()) {
 			return true;
 		}
 
-		final var jukeboxSong = song.get();
+		final var jukeboxSong = optionalSong.get();
+		final var stereoSong = jukeboxSong.unwrapKey().flatMap(k -> level.registryAccess().lookup(Registries.JUKEBOX_SONG).orElseThrow().getOptional(Constants.toStereo(k.location())));
 		final var musicManager = Minecraft.getInstance().getMusicManager();
 		final var musicHandler = (MusicHandler) musicManager;
 
-		if (musicHandler.moods$isCurrentlyPlaying(jukeboxSong)) {
+		if (musicHandler.moods$isCurrentlyPlaying(stereoSong.orElse(jukeboxSong.value()))) {
 			musicManager.stopPlaying();
 		} else {
-			musicHandler.moods$intrudeJukeboxTrack(jukeboxSong);
+			musicHandler.moods$intrudeJukeboxTrack(stereoSong.orElse(jukeboxSong.value()));
 		}
 
 		return false;
