@@ -47,6 +47,11 @@ public final class Constants {
 		)
 		.withStyle(ChatFormatting.BLUE, ChatFormatting.ITALIC);
 
+	public static ResourceLocation toStereo(ResourceLocation mono) {
+		String newPath = mono.getPath().replace("music/", "music/stereo/");
+		return ResourceLocation.fromNamespaceAndPath(mono.getNamespace(), newPath);
+	}
+
 	public static WidgetSprites widgetHoverable(String widget) {
 		return new WidgetSprites(widget(widget), widget(widget + "_hover"));
 	}
