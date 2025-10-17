@@ -33,8 +33,10 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build --no-daemon
       - name: Upload build artifacts
+        if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: music-moods-artifacts
           path: |
             versions/*/build/libs
+            build/reports
