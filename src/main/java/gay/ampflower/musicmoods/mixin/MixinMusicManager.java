@@ -8,7 +8,6 @@ package gay.ampflower.musicmoods.mixin;// Created 2022-24-12T20:34:50
 
 import gay.ampflower.musicmoods.Config;
 import gay.ampflower.musicmoods.Mint;
-import gay.ampflower.musicmoods.Sounds;
 import gay.ampflower.musicmoods.client.MusicHandler;
 import gay.ampflower.musicmoods.client.WeighedSoundEventsQuery;
 import gay.ampflower.musicmoods.client.sound.MusicSoundInstance;
@@ -16,9 +15,13 @@ import gay.ampflower.musicmoods.client.sound.RecordSoundInstance;
 import gay.ampflower.musicmoods.config.Replacing;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SoundInstance;
+#if MC_1_21_4_OR_NEWER
 import net.minecraft.client.sounds.MusicInfo;
+#endif
 import net.minecraft.client.sounds.MusicManager;
+#if MC_1_21_6_OR_NEWER
 import net.minecraft.client.sounds.SoundEngine;
+#endif
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
@@ -27,7 +30,6 @@ import net.minecraft.sounds.Music;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.item.JukeboxSong;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
@@ -48,12 +50,6 @@ public abstract class MixinMusicManager implements MusicHandler {
 	@Shadow
 	@Nullable
 	private SoundInstance currentMusic;
-	@Shadow
-	private MusicManager.MusicFrequency gameMusicFrequency;
-	@Shadow
-	private float currentGain;
-	@Shadow
-	private boolean toastShown;
 
 	@Shadow
 	@Final
@@ -65,22 +61,39 @@ public abstract class MixinMusicManager implements MusicHandler {
 	@Final
 	private RandomSource random;
 
+	#if MC_1_21_4_OR_NEWER
+	@Shadow
+	private float currentGain;
+
 	@Shadow
 	private boolean fadePlaying(final float volume) {
 		throw new AssertionError();
 	}
+	#endif
+
+	#if MC_1_21_6_OR_NEWER
+	@Shadow
+	private MusicManager.MusicFrequency gameMusicFrequency;
+	@Shadow
+	private boolean toastShown;
 
 	@Shadow
 	private String getCurrentMusicTranslationKey() {
 		throw new AssertionError();
 	}
 
-	/** Whether the current track is interruptable. */
-	@Unique
-	private boolean currentMusicIntruded;
-	/** Records don't really bodge in well... */
+	/**
+	 * Records don't really bodge in well...
+	 */
 	@Unique
 	private Component currentMusicName;
+	#endif
+
+	/**
+	 * Whether the current track is interruptable.
+	 */
+	@Unique
+	private boolean currentMusicIntruded;
 	@Unique
 	private RecordSoundInstance focusedJukebox;
 	@Unique
@@ -95,15 +108,17 @@ public abstract class MixinMusicManager implements MusicHandler {
 	@Overwrite
 	public void tick() {
 		if (Config.jukeboxEnabled
-				&& (Config.jukeboxMultiplayer || !((AccessorMinecraft) minecraft).invokeIsMultiplayerServer())) {
+			&& (Config.jukeboxMultiplayer || !((AccessorMinecraft) minecraft).invokeIsMultiplayerServer())) {
 			handleRecords();
 		}
 
 		final var musicInfo = this.minecraft.getSituationalMusic();
-		final var music = musicInfo.music();
+		//noinspection UnnecessaryLocalVariable - actually is used
+		final var music = #if (MC_1_21_4_OR_NEWER) musicInfo.music() #else musicInfo #endif ;
 		final var soundManager = this.minecraft.getSoundManager();
 
 		if (this.currentMusic != null) {
+			#if MC_1_21_4_OR_NEWER
 			final float volume = musicInfo.volume();
 
 			if (this.currentGain != volume) {
@@ -113,16 +128,20 @@ public abstract class MixinMusicManager implements MusicHandler {
 					this.stopMusic();
 				}
 			}
+			#endif
 
 			// Seamless Transitions requires this to be before the music == null check.
 			if (!soundManager.isActive(this.currentMusic)) {
 				this.clearCurrent();
 
 				this.nextSongDelay = this.deriveNextSongDelay(music);
-			} else if (!this.toastShown && this.currentMusic.getVolume() >= 0.75F) {
+			}
+			#if MC_1_21_6_OR_NEWER
+			else if (!this.toastShown && this.currentMusic.getVolume() >= 0.75F) {
 				this.minecraft.getToastManager().showNowPlayingToast();
 				this.toastShown = true;
 			}
+			#endif
 		}
 
 		var fadingOutMusic = this.fadingOutMusic;
@@ -137,7 +156,7 @@ public abstract class MixinMusicManager implements MusicHandler {
 			return;
 		}
 
-		final var musicLocation = music.event().value().location();
+		final var musicLocation = music.location;
 
 		// Allow the end user to say whether they want their music replaced at all.
 		if (this.currentMusic != null && !this.currentMusicIntruded && Config.situationalMusicReplacing.replaces()
@@ -146,7 +165,6 @@ public abstract class MixinMusicManager implements MusicHandler {
 
 			if (isCompatible(fadingOutMusic, musicLocation)) {
 				this.reset(0);
-				this.toastShown = false;
 				this.currentMusic = fadingOutMusic;
 				fadingOutMusic.setFadeIn(Config.fadeInTicks);
 			} else if (Config.immediatelyPlayOnReplace) {
@@ -156,7 +174,7 @@ public abstract class MixinMusicManager implements MusicHandler {
 				this.clearCurrent();
 
 				// Set the delay, since the old track is not applicable to move in.
-				this.nextSongDelay = Mth.nextInt(this.random, 0, music.minDelay() / 2);
+				this.nextSongDelay = Mth.nextInt(this.random, 0, music.minDelay / 2);
 			}
 		}
 
@@ -182,10 +200,12 @@ public abstract class MixinMusicManager implements MusicHandler {
 			return 100;
 		}
 
+		#if MC_1_21_6_OR_NEWER
 		final var frequency = (AccessorMusicFrequency) (Object) this.gameMusicFrequency;
 		if (frequency != null) {
 			return Math.min(this.nextSongDelay, frequency.invokeGetNextSongDelay(music, this.random));
 		}
+		#endif
 
 		// This shouldn't happen but IntelliJ is complaining.
 		// Fall back to legacy logic in case this is actually true.
@@ -195,10 +215,10 @@ public abstract class MixinMusicManager implements MusicHandler {
 			// 10 seconds at 60 FPS
 			minDelay = 600;
 		} else {
-			minDelay = music.minDelay();
+			minDelay = music.minDelay;
 		}
 
-		return Math.min(this.nextSongDelay, Mth.nextInt(this.random, minDelay, music.maxDelay()));
+		return Math.min(this.nextSongDelay, Mth.nextInt(this.random, minDelay, music.maxDelay));
 	}
 
 	@Unique
@@ -241,7 +261,11 @@ public abstract class MixinMusicManager implements MusicHandler {
 			return;
 		}
 
+		#if MC_1_21_OR_OLDER
+		final var levelEventHandler = this.minecraft.levelRenderer;
+		#else
 		final var levelEventHandler = ((AccessorClientLevel) this.minecraft.level).getLevelEventHandler();
+		#endif
 
 		final var map = ((AccessorLevelEventHandler) levelEventHandler).getPlayingJukeboxSongs();
 		if (map.isEmpty() || map.size() > 128) {
@@ -297,17 +321,18 @@ public abstract class MixinMusicManager implements MusicHandler {
 	}
 
 	@Override
-	public boolean moods$intrudeJukeboxTrack(final @NotNull JukeboxSong song) {
-		final Holder<SoundEvent> soundEvent = Sounds.findStereo(song.soundEvent());
-
+	public boolean moods$intrudeJukeboxTrack(
+		final @NotNull Holder<SoundEvent> soundEvent,
+		final @Nullable Component name
+	) {
 		if (
 			this.currentMusicIntruded &&
-			this.isCompatible(this.currentMusic, soundEvent.value().location())
+			this.isCompatible(this.currentMusic, soundEvent.value().location)
 		) {
 			return false;
 		}
 
-		this.startPlayingIntruded(soundEvent, song.description());
+		this.startPlayingIntruded(soundEvent, name);
 
 		return true;
 	}
@@ -337,7 +362,7 @@ public abstract class MixinMusicManager implements MusicHandler {
 	@Unique
 	private boolean shouldReplace(final Music music) {
 		return (Config.situationalMusicReplacing == Replacing.always || music.replaceCurrentMusic())
-				&& this.isReplaceable(this.currentMusic, music.event().value().location());
+			   && this.isReplaceable(this.currentMusic, music.location);
 	}
 
 	@Unique
@@ -346,19 +371,12 @@ public abstract class MixinMusicManager implements MusicHandler {
 	}
 
 	@Override
-	public boolean moods$isCurrentlyPlaying(final @NotNull JukeboxSong song) {
+	public boolean moods$isCurrentlyPlaying(final SoundEvent soundEvent) {
 		if (!this.currentMusicIntruded) {
 			return false;
 		}
 
-		final ResourceLocation location = song.soundEvent().value().location();
-
-		return isCompatible(this.currentMusic, Sounds.findStereo(location));
-	}
-
-	@Override
-	public boolean moods$isCurrentlyPlaying(final SoundEvent soundEvent) {
-		return isCompatible(this.currentMusic, soundEvent.location());
+		return isCompatible(this.currentMusic, soundEvent.location);
 	}
 
 	@Unique
@@ -384,15 +402,30 @@ public abstract class MixinMusicManager implements MusicHandler {
 
 	@Unique
 	private int decrementSongDelay(Music music) {
+		int maxDelay = music.maxDelay;
+		#if MC_1_21_6_OR_NEWER
 		final var frequency = (AccessorMusicFrequency) (Object) this.gameMusicFrequency;
-		final int maxDelay;
-		if (frequency == null) {
-			maxDelay = music.maxDelay();
-		} else {
-			maxDelay = Math.min(music.maxDelay(), frequency.getMaxFrequency());
+		if (frequency != null) {
+			maxDelay = Math.min(maxDelay, frequency.getMaxFrequency());
 		}
+		#endif
 		return this.nextSongDelay = Math.min(this.nextSongDelay - 1, maxDelay);
 	}
+
+	#if MC_1_21_2_OR_OLDER
+	/**
+	 * Reimplementation of {@link MusicManager#startPlaying(Music)} with a
+	 * fade-in configured.
+	 */
+	@Unique
+	private void startPlayingFadeIn(final Music music) {
+		if (music == null) {
+			return;
+		}
+
+		this.startPlayingCommon(music.event, null, 1.f, Config.fadeInTicks);
+	}
+	#else
 
 	/**
 	 * Reimplementation of {@link MusicManager#startPlaying(MusicInfo)} with a
@@ -404,21 +437,33 @@ public abstract class MixinMusicManager implements MusicHandler {
 			return;
 		}
 
-		this.startPlayingCommon(music.music().event(), null, music.volume(), Config.fadeInTicks);
+		this.startPlayingCommon(music.music.event, null, music.volume(), Config.fadeInTicks);
 	}
+	#endif
 
 	/**
 	 * @author Ampflower
 	 * @reason The original logic is proving itself ill-suited for Music Moods' needs
 	 */
+	#if MC_1_21_2_OR_OLDER
+	@Overwrite
+	public void startPlaying(final Music music) {
+		if (music == null) {
+			return;
+		}
+
+		this.startPlayingCommon(music.event, null, 1.f, 0);
+	}
+	#else
 	@Overwrite
 	public void startPlaying(final MusicInfo music) {
 		if (music.music() == null || music.volume() <= 0) {
 			return;
 		}
 
-		this.startPlayingCommon(music.music().event(), null, music.volume(), 0);
+		this.startPlayingCommon(music.music.event, null, music.volume(), 0);
 	}
+	#endif
 
 	@Unique
 	private void startPlayingIntruded(final Holder<SoundEvent> soundEventHolder, final Component name) {
@@ -431,18 +476,33 @@ public abstract class MixinMusicManager implements MusicHandler {
 	@Unique
 	private void startPlayingCommon(
 		final Holder<SoundEvent> soundEvent,
-		final Component name,
-		final float volume,
+		@SuppressWarnings("unused") final @Nullable Component name,
+		@SuppressWarnings({"unused", "SameParameterValue"}) final float volume,
 		final float fadeInTicks
 	) {
-		this.currentMusic = new MusicSoundInstance(soundEvent.value(), fadeInTicks);
+		this.startPlayingCommon(soundEvent.value(), name, volume, fadeInTicks);
+	}
+
+	@Unique
+	private void startPlayingCommon(
+		final SoundEvent soundEvent,
+		@SuppressWarnings("unused") final @Nullable Component name,
+		@SuppressWarnings({"unused", "SameParameterValue"}) final float volume,
+		final float fadeInTicks
+	) {
+		this.currentMusic = new MusicSoundInstance(soundEvent, fadeInTicks);
 		this.nextSongDelay = Integer.MAX_VALUE;
+		#if MC_1_21_4_OR_NEWER
 		this.currentGain = volume;
+		#endif
 
 		if (this.currentMusic.getSound() == SoundManager.EMPTY_SOUND) {
 			return;
 		}
 
+		#if MC_1_21_5_OR_OLDER
+		this.minecraft.getSoundManager().play(this.currentMusic);
+		#else
 		final var state = this.minecraft.getSoundManager().play(this.currentMusic);
 		if (state == SoundEngine.PlayResult.NOT_STARTED) {
 			return;
@@ -456,6 +516,7 @@ public abstract class MixinMusicManager implements MusicHandler {
 		} else {
 			this.toastShown = false;
 		}
+		#endif
 	}
 
 	@Unique
@@ -500,12 +561,14 @@ public abstract class MixinMusicManager implements MusicHandler {
 	@Unique
 	private void clearCurrent() {
 		this.currentMusic = null;
-		this.currentMusicName = null;
 		this.currentMusicIntruded = false;
 		this.currentCompatibleLocation = null;
 
+		#if MC_1_21_6_OR_NEWER
+		this.currentMusicName = null;
 		this.toastShown = false;
 		this.minecraft.getToastManager().hideNowPlayingToast();
+		#endif
 	}
 
 	@Inject(method = {"stopPlaying()V"}, at = @At("RETURN"))
@@ -513,6 +576,7 @@ public abstract class MixinMusicManager implements MusicHandler {
 		this.clearCurrent();
 	}
 
+	#if MC_1_21_6_OR_NEWER
 	@Unique
 	private void updateCurrentMusicName(final @Nullable Component name) {
 		if (this.currentMusic == null) {
@@ -547,4 +611,5 @@ public abstract class MixinMusicManager implements MusicHandler {
 
 		return this.currentMusicName;
 	}
+	#endif
 }

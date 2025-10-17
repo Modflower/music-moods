@@ -32,5 +32,5 @@ jobs:
       - name: Upload build artifacts
         uses: AButler/upload-release-assets@v3.0
         with:
-          files: 'build/libs/*'
+          files: 'versions/*/build/libs/*'
           repo-token: ${{secrets.GITHUB_TOKEN}}

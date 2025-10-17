@@ -7,7 +7,11 @@
 package gay.ampflower.musicmoods.client.sound;
 
 import it.unimi.dsi.fastutil.floats.FloatUnaryOperator;
+#if MC_1_20_5_OR_OLDER
+import net.minecraft.client.Timer;
+#else
 import net.minecraft.client.DeltaTracker;
+#endif
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
@@ -23,20 +27,56 @@ public class FadeableSoundInstance extends AbstractTickableSoundInstance impleme
 	 */
 	private static final float JUMP_LIMIT = 0.1F;
 
-	protected final DeltaTracker.Timer timer = new DeltaTracker.Timer(20F, System.currentTimeMillis(),
-			FloatUnaryOperator.identity());
+	#if MC_1_20_5_OR_OLDER
+	#if MC_1_20_2_OR_OLDER
+	protected final Timer timer = new Timer(
+		20F,
+		System.currentTimeMillis()
+	);
+	#else
+	protected final Timer timer = new Timer(
+		20F,
+		System.currentTimeMillis(),
+		FloatUnaryOperator.identity()
+	);
+	#endif
+	protected final void advanceTimer() {
+		timer.advanceTime(System.currentTimeMillis());
+	}
+	protected final float getTickDelta() {
+		return timer.tickDelta;
+	}
+	#else
+	protected final DeltaTracker.Timer timer = new DeltaTracker.Timer(
+		20F,
+		System.currentTimeMillis(),
+		FloatUnaryOperator.identity()
+	);
+
+	protected final void advanceTimer() {
+		timer.advanceTime(System.currentTimeMillis(), false);
+	}
+
+	protected final float getTickDelta() {
+		return timer.realtimeDeltaTicks;
+	}
+	#endif
+
+
 	protected float maxVolume = 1.f;
 	protected float fadeOut;
 	protected float fadeIn;
 
-	protected FadeableSoundInstance(final SoundEvent soundEvent, final SoundSource soundSource,
-			final RandomSource randomSource) {
+	protected FadeableSoundInstance(
+		final SoundEvent soundEvent, final SoundSource soundSource,
+		final RandomSource randomSource
+	) {
 		super(soundEvent, soundSource, randomSource);
 	}
 
 	@Override
 	public void tick() {
-		this.timer.advanceTime(System.currentTimeMillis(), false);
+		this.advanceTimer();
 
 		if (fadeOut > 0F && this.volume > 0F) {
 
@@ -45,7 +85,7 @@ public class FadeableSoundInstance extends AbstractTickableSoundInstance impleme
 			}
 
 			final var newVolume = Math
-					.max(this.volume - Math.min(this.timer.getRealtimeDeltaTicks() / fadeOut, JUMP_LIMIT), 0F);
+				.max(this.volume - Math.min(this.tickDelta / fadeOut, JUMP_LIMIT), 0F);
 
 			if (newVolume == newVolume) {
 				this.volume = newVolume;
@@ -54,7 +94,7 @@ public class FadeableSoundInstance extends AbstractTickableSoundInstance impleme
 
 		if (fadeIn > 0F && this.volume < maxVolume) {
 			final var newVolume = Math
-					.min(this.volume + Math.min(this.timer.getRealtimeDeltaTicks() / fadeIn, JUMP_LIMIT), maxVolume);
+				.min(this.volume + Math.min(this.tickDelta / fadeIn, JUMP_LIMIT), maxVolume);
 
 			if (newVolume == newVolume) {
 				this.volume = newVolume;

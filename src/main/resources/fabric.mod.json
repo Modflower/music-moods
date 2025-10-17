@@ -5,6 +5,10 @@
 	"name": "Music Moods",
 	"description": "Configure how music & sound are handled.",
 	"contributors": [
+		"HyperPigeon",
+		"sisby-folk"
+	],
+	"authors": [
 		"Ampflower"
 	],
 	"contact": {

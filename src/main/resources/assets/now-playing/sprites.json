@@ -1,0 +1,23 @@
+{
+	"minecraft:records/13": "minecraft:textures/item/music_disc_13",
+	"minecraft:records/cat": "minecraft:textures/item/music_disc_cat",
+	"minecraft:records/blocks": "minecraft:textures/item/music_disc_blocks",
+	"minecraft:records/chirp": "minecraft:textures/item/music_disc_chirp",
+	"minecraft:records/far": "minecraft:textures/item/music_disc_far",
+	"minecraft:records/mall": "minecraft:textures/item/music_disc_mall",
+	"minecraft:records/mellohi": "minecraft:textures/item/music_disc_mellohi",
+	"minecraft:records/stal": "minecraft:textures/item/music_disc_stal",
+	"minecraft:records/strad": "minecraft:textures/item/music_disc_strad",
+	"minecraft:records/ward": "minecraft:textures/item/music_disc_ward",
+	"minecraft:records/11": "minecraft:textures/item/music_disc_11",
+	"minecraft:records/creator_music_box": "minecraft:textures/item/music_disc_creator_music_box",
+	"minecraft:records/precipice": "minecraft:textures/item/music_disc_precipice",
+	"minecraft:records/wait": "minecraft:textures/item/music_disc_wait",
+	"minecraft:records/creator": "minecraft:textures/item/music_disc_creator",
+	"minecraft:records/otherside": "minecraft:textures/item/music_disc_otherside",
+	"minecraft:records/relic": "minecraft:textures/item/music_disc_relic",
+	"minecraft:records/5": "minecraft:textures/item/music_disc_5",
+	"minecraft:records/pigstep": "minecraft:textures/item/music_disc_pigstep",
+	"minecraft:records/tears": "minecraft:textures/item/music_disc_tears",
+	"minecraft:records/lava_chicken": "minecraft:textures/item/music_disc_lava_chicken"
+}

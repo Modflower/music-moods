@@ -54,18 +54,35 @@
 	"music-moods.option.jukeboxReplaceRange.description": "How close you need to be for the situational music to be replaced in favor of the jukebox.\n\nSetting this to 0 disables this.",
 	"music-moods.option.jukeboxFadeRange": "OST Fade-out range in blocks",
 	"music-moods.option.jukeboxFadeRange.description": "How close you need to be for the situational music to be paused in favour of a jukebox.\n\nSetting this to 0 disables this, but the replacing setting takes priority if set higher.",
-
 	"music-moods.option.jukeboxFadeMixTicks": "OST Fade-out time in ticks",
 	"music-moods.option.jukeboxFadeMixTicks.description": "How long it takes for the situational track to fade out when a record is played, counted in ticks.",
 	"music-moods.option.jukeboxFadeStopTicks": "Jukebox Fade-out time in ticks",
 	"music-moods.option.jukeboxFadeStopTicks.description": "How long it takes for the jukebox record to fade out when the record is removed, counted in ticks.",
-
 	"music-moods.option.rightClickToPlay": "Right-Click Discs to Play",
 	"music-moods.option.rightClickToPlay.description": "In game, right-click any disc while your inventory is open to play them.\n\nNote: this can only be done in your player inventory.\n\nI believe some people call this the eternal jukebox.",
-
 	"music-moods.option.injectUiComponents": "Inject UI Components",
 	"music-moods.option.injectUiComponents.description": "Inject buttons into Vanilla UIs for discoverability.\n\nNote: Disabling this will hinder discoverability of Music Moods' options and should only be done if you're providing an alternative mean of accessing its settings.",
-
 	"music-moods.inventory.rightClickToPlay.play": "[%s] ▶ Play",
-	"music-moods.inventory.rightClickToPlay.stop": "[%s] ■ Stop"
+	"music-moods.inventory.rightClickToPlay.stop": "[%s] ■ Stop",
+	"now-playing.minecraft:records/13": "C418 - 13",
+	"now-playing.minecraft:records/cat": "C418 - cat",
+	"now-playing.minecraft:records/blocks": "C418 - blocks",
+	"now-playing.minecraft:records/chirp": "C418 - chirp",
+	"now-playing.minecraft:records/far": "C418 - far",
+	"now-playing.minecraft:records/mall": "C418 - mall",
+	"now-playing.minecraft:records/mellohi": "C418 - mellohi",
+	"now-playing.minecraft:records/stal": "C418 - stal",
+	"now-playing.minecraft:records/strad": "C418 - strad",
+	"now-playing.minecraft:records/ward": "C418 - ward",
+	"now-playing.minecraft:records/11": "C418 - 11",
+	"now-playing.minecraft:records/creator_music_box": "Lena Raine - Creator (Music Box)",
+	"now-playing.minecraft:records/wait": "C418 - wait",
+	"now-playing.minecraft:records/creator": "Lena Raine - Creator",
+	"now-playing.minecraft:records/precipice": "Aaron Cherof - Precipice",
+	"now-playing.minecraft:records/otherside": "Lena Raine - otherside",
+	"now-playing.minecraft:records/relic": "Aaron Cherof - Relic",
+	"now-playing.minecraft:records/5": "Samuel Åberg - 5",
+	"now-playing.minecraft:records/pigstep": "Lena Raine - Pigstep",
+	"now-playing.minecraft:records/tears": "Amos - Roddy - Tears",
+	"now-playing.minecraft:records/lava_chicken": "Hyper Potions - Lava Chicken"
 }

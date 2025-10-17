@@ -6,7 +6,11 @@
 
 package gay.ampflower.musicmoods.mixin;
 
+#if MC_1_21_2_OR_NEWER
 import net.minecraft.client.renderer.LevelEventHandler;
+#else
+import net.minecraft.client.renderer.LevelRenderer;
+#endif
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.core.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,10 +20,10 @@ import java.util.Map;
 
 /**
  * @author Ampflower
- * @since 0.9.10
+ * @since 0.6.10
  **/
-@Mixin(LevelEventHandler.class)
+@Mixin(#if (MC_1_21_2_OR_NEWER) LevelEventHandler.class #else LevelRenderer.class #endif )
 public interface AccessorLevelEventHandler {
-	@Accessor
+	@Accessor#if (MC_1_20_5_OR_OLDER) ("playingRecords") #endif
 	Map<BlockPos, SoundInstance> getPlayingJukeboxSongs();
 }

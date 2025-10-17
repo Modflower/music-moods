@@ -15,7 +15,9 @@ import dev.lambdaurora.spruceui.option.SpruceFloatInputOption;
 import dev.lambdaurora.spruceui.option.SpruceIntegerInputOption;
 import dev.lambdaurora.spruceui.option.SpruceSeparatorOption;
 import dev.lambdaurora.spruceui.screen.SpruceScreen;
+#if MC_1_21_6_OR_NEWER
 import dev.lambdaurora.spruceui.tooltip.TooltipData;
+#endif
 import dev.lambdaurora.spruceui.widget.SpruceButtonWidget;
 import dev.lambdaurora.spruceui.widget.container.SpruceOptionListWidget;
 import dev.lambdaurora.spruceui.widget.container.tabbed.SpruceTabbedWidget;
@@ -217,13 +219,19 @@ public class ConfigurationScreen extends SpruceScreen {
 		throw new NoSuchFieldException("Cannot find " + name + " in Config");
 	}
 
+	#if MC_1_21_5_OR_OLDER
+	private static Component translation(final String key) {
+		return Component.translatable(key);
+	}
+	#else
 	private static TooltipData translation(final String key) {
 		final var translation = Component.translatable(key);
 		return TooltipData.builder().text(translation).build();
 	}
+	#endif
 
 	private record EnumStepper(Enum<?>[] enums, VarHandle handle, String key)
-			implements Consumer<Integer>, Function<SpruceCyclingOption, Component> {
+		implements Consumer<Integer>, Function<SpruceCyclingOption, Component> {
 
 		@Override
 		public void accept(final Integer integer) {

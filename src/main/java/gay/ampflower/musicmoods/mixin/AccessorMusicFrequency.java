@@ -6,6 +6,8 @@
 
 package gay.ampflower.musicmoods.mixin;
 
+#if MC_1_21_6_OR_NEWER
+
 import net.minecraft.client.sounds.MusicManager;
 import net.minecraft.sounds.Music;
 import net.minecraft.util.RandomSource;
@@ -16,7 +18,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 
 /**
  * @author Ampflower
- * @since 0.9.10
+ * @since 0.6.10
  **/
 @Mixin(MusicManager.MusicFrequency.class)
 public interface AccessorMusicFrequency {
@@ -26,3 +28,5 @@ public interface AccessorMusicFrequency {
 	@Invoker
 	int invokeGetNextSongDelay(@Nullable Music music, RandomSource random);
 }
+
+#endif

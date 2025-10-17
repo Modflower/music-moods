@@ -51,7 +51,7 @@ public class RecordSoundInstance extends FadeableSoundInstance implements Relati
 		super.tick();
 
 		if (dest != null && delta != null) {
-			final var scale = delta.scale(Math.min(timer.getRealtimeDeltaTicks(), 1.f));
+			final var scale = delta.scale(Math.min(this.tickDelta, 1.f));
 			this.x += scale.x();
 			this.y += scale.y();
 			this.z += scale.z();

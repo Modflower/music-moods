@@ -73,7 +73,8 @@ public final class Config {
 	/**
 	 * Allows music to be paused by vanilla.
 	 */
-	@Deprecated(forRemoval = true)
+	#if(MC_1_21_6_OR_NEWER)
+	@Deprecated(forRemoval = true)#endif
 	public static boolean allowPausingMusic = false;
 
 	/**

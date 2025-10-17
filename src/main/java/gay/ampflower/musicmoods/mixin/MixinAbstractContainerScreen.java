@@ -8,17 +8,15 @@ package gay.ampflower.musicmoods.mixin;
 
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import gay.ampflower.musicmoods.Config;
-import gay.ampflower.musicmoods.Constants;
 import gay.ampflower.musicmoods.client.MusicHandler;
+import gay.ampflower.musicmoods.util.JukeboxUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.HorseInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.JukeboxSong;
 import org.spongepowered.asm.mixin.Debug;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -66,27 +64,23 @@ public class MixinAbstractContainerScreen {
 			return true;
 		}
 
-		final var stack = slot.getItem();
-
-		if (stack == null || stack.isEmpty()) {
-			return true;
-		}
-
-		final var optionalSong = JukeboxSong.fromStack(level.registryAccess(), stack);
+		#if MC_1_20_5_OR_OLDER
+		final var optionalSong = JukeboxUtil.toStereoElseMono(slot.getItem());
+		#else
+		final var optionalSong = JukeboxUtil.toStereoElseMono(level.registryAccess(), slot.getItem());
+		#endif
 
 		if (optionalSong.isEmpty()) {
 			return true;
 		}
 
-		final var jukeboxSong = optionalSong.get();
-		final var stereoSong = jukeboxSong.unwrapKey().flatMap(k -> level.registryAccess().lookup(Registries.JUKEBOX_SONG).orElseThrow().getOptional(Constants.toStereo(k.location())));
 		final var musicManager = Minecraft.getInstance().getMusicManager();
 		final var musicHandler = (MusicHandler) musicManager;
 
-		if (musicHandler.moods$isCurrentlyPlaying(stereoSong.orElse(jukeboxSong.value()))) {
+		if (musicHandler.moods$isCurrentlyPlaying(optionalSong.get())) {
 			musicManager.stopPlaying();
 		} else {
-			musicHandler.moods$intrudeJukeboxTrack(stereoSong.orElse(jukeboxSong.value()));
+			musicHandler.moods$intrudeJukeboxTrack(optionalSong.get());
 		}
 
 		return false;

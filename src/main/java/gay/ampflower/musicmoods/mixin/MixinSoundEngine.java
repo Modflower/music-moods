@@ -29,6 +29,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+#if MC_1_21_5_OR_OLDER
+import gay.ampflower.musicmoods.Config;
+
+import java.util.ArrayList;
+#endif
+
 /**
  * @author Ampflower
  * @since 0.5
@@ -57,9 +63,20 @@ public abstract class MixinSoundEngine implements SoundHandler {
 	@Shadow
 	protected abstract float calculatePitch(final SoundInstance soundInstance);
 
-	@ModifyArg(method = "tickInGameSound", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sounds/ChannelAccess$ChannelHandle;execute(Ljava/util/function/Consumer;)V"))
-	private Consumer<Channel> consumerAudioEquipmentIsQuiteNeatIsntIt(Consumer<Channel> original,
-			@Local TickableSoundInstance sound) {
+	@ModifyArg(
+		method = {
+			"tickNonPaused",
+			"tickInGameSound",
+		},
+		at = @At(
+			value = "INVOKE",
+			target = "Lnet/minecraft/client/sounds/ChannelAccess$ChannelHandle;execute(Ljava/util/function/Consumer;)V"
+		)
+	)
+	private Consumer<Channel> consumerAudioEquipmentIsQuiteNeatIsntIt(
+		Consumer<Channel> original,
+		@Local TickableSoundInstance sound
+	) {
 		if (!(sound instanceof Relativeable relativeable) || !relativeable.isRelativeDirty()) {
 			return original;
 		}
@@ -71,9 +88,78 @@ public abstract class MixinSoundEngine implements SoundHandler {
 		};
 	}
 
+	#if MC_1_21_5_OR_OLDER
+
+	@Unique
+	private final List<TickableSoundInstance> tickingWhilePaused = new ArrayList<>();
+
+	@Inject(method = "tick", at = @At("TAIL"))
+	private void tickHook(boolean paused, CallbackInfo ci) {
+		if (!paused) {
+			return;
+		}
+
+		final var iterator = this.tickingWhilePaused.iterator();
+		while(iterator.hasNext()) {
+			final TickableSoundInstance sound = iterator.next();
+
+			if (!sound.canPlaySound()) {
+				this.stop(sound);
+				iterator.remove();
+				continue;
+			}
+
+			sound.tick();
+
+			if (sound.isStopped()) {
+				this.stop(sound);
+				iterator.remove();
+				continue;
+			}
+
+			final var handle = this.instanceToChannel.get(sound);
+
+			if (handle == null) {
+				continue;
+			}
+
+			this.tickSound(sound, handle);
+		}
+	}
+
+	@Inject(method = "pause", at = @At("HEAD"), cancellable = true)
+	private void onPause(CallbackInfo ci) {
+		if (Config.allowPausingMusic) {
+			return;
+		}
+		ci.cancel();
+
+		for (final var entry : this.instanceToChannel.entrySet()) {
+			if (entry.getKey() instanceof MusicSoundInstance) {
+				this.tickingWhilePaused.add((TickableSoundInstance) entry.getKey());
+				continue;
+			}
+			entry.getValue().execute(Channel::pause);
+		}
+	}
+
+	@Inject(method = "resume", at = @At("HEAD"))
+	private void onResume(CallbackInfo ci) {
+		this.tickingWhilePaused.clear();
+	}
+
+	@Inject(method = "stopAll", at = @At(value = "FIELD", target = "Lnet/minecraft/client/sounds/SoundEngine;tickingSounds:Ljava/util/List;", shift = At.Shift.AFTER))
+	private void onStopAll(final CallbackInfo ci) {
+		this.tickingWhilePaused.clear();
+	}
+
+	#else
+
 	@Inject(method = "tickMusicWhenPaused", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sounds/ChannelAccess$ChannelHandle;isStopped()Z"))
-	private void moods$tickMusicTicker(final CallbackInfo ci, final @Local ChannelAccess.ChannelHandle handle,
-			final @Local SoundInstance sound) {
+	private void moods$tickMusicTicker(
+		final CallbackInfo ci, final @Local ChannelAccess.ChannelHandle handle,
+		final @Local SoundInstance sound
+	) {
 		if (!(sound instanceof MusicSoundInstance music)) {
 			return;
 		}
@@ -85,6 +171,16 @@ public abstract class MixinSoundEngine implements SoundHandler {
 			return;
 		}
 
+		tickSound(sound, handle);
+	}
+
+	#endif
+
+	@Unique
+	private void tickSound(
+		final SoundInstance sound,
+		final ChannelAccess.ChannelHandle handle
+	) {
 		final float v = this.calculateVolume(sound);
 		final float p = this.calculatePitch(sound);
 		final var pos = new Vec3(sound.getX(), sound.getY(), sound.getZ());

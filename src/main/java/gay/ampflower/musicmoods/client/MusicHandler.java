@@ -6,27 +6,59 @@
 
 package gay.ampflower.musicmoods.client;
 
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.item.JukeboxSong;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+#if MC_1_21_OR_NEWER
+import gay.ampflower.musicmoods.Sounds;
+import net.minecraft.world.item.JukeboxSong;
+#endif
 
 /**
  * @author Ampflower
  * @since 0.6.12
  **/
 public interface MusicHandler {
+	#if MC_1_21_OR_NEWER
+
 	/**
 	 * Intrudes the given jukebox song into the music manager.
 	 *
 	 * @param song The jukebox song to intrude.
 	 * @return Whether it swapped out the track. {@code false} means it is already playing.
 	 */
-	boolean moods$intrudeJukeboxTrack(final @NotNull JukeboxSong song);
+	default boolean moods$intrudeJukeboxTrack(final @NotNull JukeboxSong song) {
+		final Holder<SoundEvent> soundEvent = Sounds.findStereo(song.soundEvent());
+
+		return moods$intrudeJukeboxTrack(soundEvent, song.description());
+	}
 
 	default boolean moods$isCurrentlyPlaying(final @NotNull JukeboxSong song) {
-		return moods$isCurrentlyPlaying(song.soundEvent().value());
+		final Holder<SoundEvent> soundEvent = Sounds.findStereo(song.soundEvent());
+
+		return moods$isCurrentlyPlaying(soundEvent.value());
 	}
+	#endif
+
+	default boolean moods$intrudeJukeboxTrack(
+		final @NotNull SoundEvent soundEvent
+	) {
+		return moods$intrudeJukeboxTrack(Holder.direct(soundEvent), null);
+	}
+
+	default boolean moods$intrudeJukeboxTrack(
+		final @NotNull Holder<SoundEvent> soundEvent
+	) {
+		return moods$intrudeJukeboxTrack(soundEvent, null);
+	}
+
+	boolean moods$intrudeJukeboxTrack(
+		final @NotNull Holder<SoundEvent> soundEvent,
+		final @Nullable Component name
+	);
 
 	boolean moods$isCurrentlyPlaying(final SoundEvent soundEvent);
 

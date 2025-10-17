@@ -8,7 +8,6 @@ package gay.ampflower.musicmoods;// Created 2023-16-01T21:35:22
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
@@ -18,8 +17,6 @@ import net.minecraft.resources.ResourceLocation;
  **/
 public final class Constants {
 	public static final String modId = "music-moods";
-
-	public static final WidgetSprites musicSprites = widgetHoverable("music");
 
 	public static final int buttonHeight = Button.DEFAULT_HEIGHT;
 	public static final int buttonWidth = Button.DEFAULT_WIDTH;
@@ -51,15 +48,11 @@ public final class Constants {
 		return mono.withPrefix("stereo/");
 	}
 
-	public static WidgetSprites widgetHoverable(String widget) {
-		return new WidgetSprites(widget(widget), widget(widget + "_hover"));
-	}
-
-	public static ResourceLocation widget(String widget) {
-		return ResourceLocation.fromNamespaceAndPath(modId, "widget/" + widget);
-	}
-
 	public static ResourceLocation id(String path) {
+		#if MC_1_20_5_OR_OLDER
+		return new ResourceLocation(modId, path);
+		#else
 		return ResourceLocation.fromNamespaceAndPath(modId, path);
+		#endif
 	}
 }

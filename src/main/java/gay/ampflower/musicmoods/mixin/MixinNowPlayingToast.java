@@ -6,6 +6,8 @@
 
 package gay.ampflower.musicmoods.mixin;
 
+#if MC_1_21_6_OR_NEWER
+
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import gay.ampflower.musicmoods.client.MusicHandler;
@@ -37,3 +39,5 @@ public class MixinNowPlayingToast {
 	}
 
 }
+
+#endif

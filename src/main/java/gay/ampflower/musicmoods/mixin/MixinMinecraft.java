@@ -8,7 +8,8 @@ package gay.ampflower.musicmoods.mixin;// Created 2023-17-01T21:38:15
 
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import gay.ampflower.musicmoods.client.SoundHandler;
-import gay.ampflower.musicmoods.client.WidgetAttachment;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.sounds.MusicManager;
@@ -19,16 +20,15 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * @author Ampflower
  * @since 0.1.0
  **/
 @Mixin(Minecraft.class)
+@Environment(EnvType.CLIENT)
 public abstract class MixinMinecraft {
 	@Shadow
 	@Nullable
@@ -39,31 +39,44 @@ public abstract class MixinMinecraft {
 	private SoundManager soundManager;
 
 	/**
-	 * Late-init hook because Quilt hooks in too early for what we need.
-	 *
-	 * @since 0.1.0
-	 */
-	@Inject(method = "<init>", at = @At("RETURN"))
-	private void musicmoods$returnHook(CallbackInfo ci) {
-		WidgetAttachment.init((Minecraft) (Object) this);
-	}
-
-	/**
 	 * Fixes underwater music constantly playing when set to always playing or
 	 * replacing.
 	 *
 	 * @reason {@link LocalPlayer#isUnderWater()} check needs to happen as we have a
-	 *         continuous mode, in which Minecraft does not account for when telling
-	 *         if it should return underwater music.
+	 * 	continuous mode, in which Minecraft does not account for when telling
+	 * 	if it should return underwater music.
 	 * @since 0.3.0
 	 */
-	@Redirect(method = "getSituationalMusic", at = @At(value = "INVOKE", ordinal = 0, slice = "underWaterMusicManager", target = "Lnet/minecraft/client/sounds/MusicManager;isPlayingMusic(Lnet/minecraft/sounds/Music;)Z"), slice = @Slice(id = "underWaterMusicManager", from = @At(value = "FIELD", target = "Lnet/minecraft/sounds/Musics;UNDER_WATER:Lnet/minecraft/sounds/Music;")))
+	@Redirect(
+		method = "getSituationalMusic",
+		at = @At(
+			value = "INVOKE",
+			ordinal = 0,
+			slice = "underWaterMusicManager",
+			target = "Lnet/minecraft/client/sounds/MusicManager;isPlayingMusic(Lnet/minecraft/sounds/Music;)Z"),
+		slice = @Slice(
+			id = "underWaterMusicManager",
+			from = @At(
+				value = "FIELD",
+				target = "Lnet/minecraft/sounds/Musics;UNDER_WATER:Lnet/minecraft/sounds/Music;"
+			)
+		)
+	)
 	private boolean musicmoods$checkPlayer(MusicManager self, Music music) {
 		assert this.player != null : "Minecraft moved underwater check?";
 		return this.player.isUnderWater() && self.isPlayingMusic(music);
 	}
 
-	@WrapWithCondition(method = "updateScreenAndTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sounds/SoundManager;stop()V"))
+	@WrapWithCondition(
+		method = {
+			// 1.21.8-
+			"updateScreenAndTick",
+			// 1.21.9+
+			"updateLevelInEngines"
+		},
+		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sounds/SoundManager;stop()V"),
+		allow = 1
+	)
 	private boolean musicmoods$dontStopSound(SoundManager self) {
 		return ((SoundHandler) soundManager).moods$onInterceptStop();
 	}

@@ -47,9 +47,13 @@ public final class Sounds implements SimpleSynchronousResourceReloadListener {
 		ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new Sounds());
 	}
 
+	public static SoundEvent findStereo(final SoundEvent soundEvent) {
+		return findStereo(Holder.direct(soundEvent)).value();
+	}
+
 	public static Holder<SoundEvent> findStereo(final Holder<SoundEvent> soundEvent) {
 		return toStereoEvent.computeIfAbsent(
-			soundEvent.value().location(),
+			soundEvent.value().location,
 			location -> findStereoInternal(soundEvent, location)
 		);
 	}
@@ -64,7 +68,11 @@ public final class Sounds implements SimpleSynchronousResourceReloadListener {
 			return soundEvent;
 		}
 
+		#if MC_1_19_OR_OLDER
+		return new Holder.Direct<>(new SoundEvent(stereo));
+		#else
 		return new Holder.Direct<>(SoundEvent.createVariableRangeEvent(stereo));
+		#endif
 	}
 
 	public static ResourceLocation findStereo(final ResourceLocation location) {
