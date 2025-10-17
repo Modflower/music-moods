@@ -130,7 +130,7 @@ tasks {
 				classes[node.name] = node to a
 			}
 
-			println(classes)
+			logger.info("{}", classes)
 
 			val source = sourceSets.first { it.output.classesDirs.contains(destinationDirectory.asFile.get()) }
 
@@ -147,7 +147,7 @@ tasks {
 				.flatMap { resourceRoot.map { res -> res.resolve(it) to it } }
 				.toSet()
 
-			println("-- nyaa --")
+			logger.info("-- nyaa --")
 
 			mixins.forEach { (file, name) ->
 				val mixin = file.reader().use(JsonParser.`object`()::from)
@@ -164,10 +164,10 @@ tasks {
 					mixin.getArray("server")?.retainAll(applicable.keys)
 					mixin.getArray("mixins")?.retainAll(applicable.keys)
 
-					println(applicable.keys)
-					println(mixin.getArray("client"))
-					println(mixin.getArray("server"))
-					println(mixin.getArray("mixins"))
+					logger.info("{}", applicable.keys)
+					logger.info("{}", mixin.getArray("client"))
+					logger.info("{}", mixin.getArray("server"))
+					logger.info("{}", mixin.getArray("mixins"))
 				} else {
 					val client = JsonArray()
 					val server = JsonArray()
@@ -188,18 +188,20 @@ tasks {
 										} else null
 									}
 
-								println(side)
+								logger.info("{}", side)
 
 								when ((side as? String)?.lowercase()) {
 									"client" -> client.add(k)
 									"server" -> server.add(k)
 									null -> {
-										if (side != null) println("what -> $side @ $k")
+										if (side != null) {
+											logger.info("what -> {} @ {}", side, k)
+										}
 										others.add(k)
 									}
 
 									else -> {
-										println("invalid -> $side @ $k")
+										logger.info("invalid -> {} @ {}", side, k)
 										others.add(k)
 									}
 								}
@@ -214,7 +216,7 @@ tasks {
 
 				val out = destinationDirectory.asFile.get().resolve(name)
 
-				println(out)
+				logger.info("{}", out)
 
 				out.writer().use {
 					JsonWriter.on(it).value(mixin).done()
