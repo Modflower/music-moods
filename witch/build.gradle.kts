@@ -1,6 +1,5 @@
 plugins {
 	java
-	application
 	alias(libs.plugins.shadow)
 }
 
