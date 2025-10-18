@@ -14,6 +14,7 @@ indent_size = 2
 
 [*.json]
 indent_size = 2
+ij_any_keep_blank_lines_in_code = 1
 
 [*.bat]
 end_of_line = crlf

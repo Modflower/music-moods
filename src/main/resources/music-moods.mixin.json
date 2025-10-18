@@ -7,6 +7,8 @@
 		"AccessorLevelEventHandler",
 		"AccessorMinecraft",
 		"AccessorMusicFrequency",
+		"AccessorOptionInstance",
+		"AccessorTooltip",
 		"MixinAbstractContainerScreen",
 		"MixinClientPacketListener",
 		"MixinJukeboxPlayable",

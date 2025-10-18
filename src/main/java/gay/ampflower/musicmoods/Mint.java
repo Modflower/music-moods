@@ -61,6 +61,14 @@ public final class Mint {
 		return deg;
 	}
 
+	public static int wrapPositive(int value, int mod) {
+		value %= mod;
+		if (value < 0) {
+			value += mod;
+		}
+		return value;
+	}
+
 	public static float square(float base) {
 		return base * base;
 	}

@@ -1,6 +1,9 @@
 {
 	"music-moods.gui.configuration": "Music Moods",
 	"music-moods.gui.configuration.error": "Unable to save your settings.\n\nBe sure file permissions are correctly set.",
+
+	"music-moods.gui.configuration.volume": "Volume",
+	"music-moods.gui.configuration.volume.description": "In-game volume control",
 	"music-moods.gui.configuration.music": "Music",
 	"music-moods.gui.configuration.music.description": "Configure how music is handled",
 	"music-moods.gui.configuration.jukebox": "Jukebox",
@@ -13,6 +16,22 @@
 	"music-moods.option.value.never": "NEVER",
 	"music-moods.option.value.allow": "ALLOW",
 	"music-moods.option.value.always": "ALWAYS",
+
+	"soundCategory.master.description": "The all-in-one approach to volume control.",
+	"soundCategory.music.description": "Controls situational music volume, including in-game and in menus.",
+	"soundCategory.record.description": "I like to play my own tracks, quietly.\n\nDoes not affect Right-Click Discs to Play.",
+	"soundCategory.weather.description": "Be quiet, rain and thunder.",
+	"soundCategory.block.description": "Place it, break it, push it, pull it, punch it, step it, open it, close it.",
+	"soundCategory.hostile.description": "Creepers love it when you turn this down.",
+	"soundCategory.neutral.description": "For when your sheep farm gets the best of ya.\n\nDid you know: This is called neutral internally, yet it doesn't include slimes, endermen, piglins and other actually neutral mobs.",
+	"soundCategory.player.description": "What sounds does a player make?",
+	"soundCategory.ambient.description": "Contrary to popular belief, thunder doesn't belong here. But fireworks, cave noises and biome sounds do. What ever happened to cave noises anyways? You don't hear them anymore.",
+	"soundCategory.voice.description": "Narrator narrates.",
+	"soundCategory.ui.description": "For navigating around menus like a ninja.\n\nclick click click click click",
+
+	"options.showSubtitles.tooltip": "Enables subtitles for sounds played in the game.",
+	"options.directionalAudio.tooltip": "Enables HRTF-based directional audio to improve the simulation of 3D sound. Requires HRTF compatible audio hardware, and is best experienced with headphones.",
+	"options.soundDevice.tooltip": "The device Minecraft plays audio to.\n\nAvailable devices:",
 
 	"music-moods.option.separator.situationalMusic": "Situational Music",
 	"music-moods.option.separator.situationalMusic.description": "Includes the title screen, various biomes, being underwater and battles.",
@@ -62,8 +81,10 @@
 	"music-moods.option.rightClickToPlay.description": "In game, right-click any disc while your inventory is open to play them.\n\nNote: this can only be done in your player inventory.\n\nI believe some people call this the eternal jukebox.",
 	"music-moods.option.injectUiComponents": "Inject UI Components",
 	"music-moods.option.injectUiComponents.description": "Inject buttons into Vanilla UIs for discoverability.\n\nNote: Disabling this will hinder discoverability of Music Moods' options and should only be done if you're providing an alternative mean of accessing its settings.",
+
 	"music-moods.inventory.rightClickToPlay.play": "[%s] ▶ Play",
 	"music-moods.inventory.rightClickToPlay.stop": "[%s] ■ Stop",
+
 	"now-playing.minecraft:records/13": "C418 - 13",
 	"now-playing.minecraft:records/cat": "C418 - cat",
 	"now-playing.minecraft:records/blocks": "C418 - blocks",
