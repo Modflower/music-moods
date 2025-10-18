@@ -13,9 +13,9 @@
 	"music-moods.gui.configuration.meta": "Meta",
 	"music-moods.gui.configuration.meta.description": "Configure Music Moods itself",
 
-	"music-moods.option.value.never": "NEVER",
-	"music-moods.option.value.allow": "ALLOW",
-	"music-moods.option.value.always": "ALWAYS",
+	"music-moods.option.value.never": "Never",
+	"music-moods.option.value.allow": "Allow",
+	"music-moods.option.value.always": "Always",
 
 	"soundCategory.master.description": "The all-in-one approach to volume control.",
 	"soundCategory.music.description": "Controls situational music volume, including in-game and in menus.",
