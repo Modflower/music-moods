@@ -16,6 +16,7 @@
 		"MixinMinecraft",
 		"MixinMusicManager",
 		"MixinNowPlayingToast",
+		"MixinOptionsScreen",
 		"MixinRecordItem",
 		"MixinSoundEngine",
 		"MixinSoundManager",
