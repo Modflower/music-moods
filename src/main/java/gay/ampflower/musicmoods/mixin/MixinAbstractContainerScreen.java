@@ -17,7 +17,6 @@ import net.minecraft.client.gui.screens.inventory.HorseInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
-import org.spongepowered.asm.mixin.Debug;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -28,7 +27,6 @@ import org.spongepowered.asm.mixin.injection.Slice;
  * @since 0.6.12
  **/
 @Mixin(AbstractContainerScreen.class)
-@Debug(export = true)
 public class MixinAbstractContainerScreen {
 
 	@WrapWithCondition(
