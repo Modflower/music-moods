@@ -1,3 +1,5 @@
+import com.modrinth.minotaur.dependencies.DependencyType
+import com.modrinth.minotaur.dependencies.ModDependency
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
@@ -49,7 +51,19 @@ modrinth {
 	)
 	gameVersions.set(minecraftCompatible.split(","))
 
-	(project.property("loaders") as? String)?.let {
+	(project.properties["loaders"] as? String)?.let {
 		loaders.addAll(it.split(','))
+	}
+
+	(project.properties["dependencies.required"] as? String)?.let {
+		for (dep in it.split(',')) {
+			dependencies.add(ModDependency(dep, DependencyType.REQUIRED))
+		}
+	}
+
+	(project.properties["dependencies.embedded"] as? String)?.let {
+		for (dep in it.split(',')) {
+			dependencies.add(ModDependency(dep, DependencyType.EMBEDDED))
+		}
 	}
 }

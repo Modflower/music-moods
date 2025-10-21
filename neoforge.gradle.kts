@@ -2,6 +2,7 @@ import moe.amp.AutoMixin.autoMixinFabric
 
 plugins {
 	alias(libs.plugins.neoforge)
+	alias(libs.plugins.machete)
 	id("versions")
 	id("mod-publish")
 }
@@ -111,6 +112,9 @@ tasks {
 		(options as StandardJavadocDocletOptions).tags("reason:a:Reason")
 	}
 	withType<Zip> { from(rootProject.file("LICENSE")) }
+	remapJar {
+		finalizedBy("optimizeOutputsOfRemapJar")
+	}
 }
 
 modrinth {
