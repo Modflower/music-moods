@@ -403,7 +403,7 @@ public class ConfigurationScreen extends SpruceScreen {
 		final Consumer<T> setter,
 		final Function<T, Component> toName
 	) {
-		final var stepper = new EnumStepper<T>(supplier.enumConstants, getter, setter, toName);
+		final var stepper = new EnumStepper<T>(supplier.getEnumConstants(), getter, setter, toName);
 
 		return new SpruceCyclingOption(
 			key,

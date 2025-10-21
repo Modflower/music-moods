@@ -6,8 +6,22 @@
 
 package gay.ampflower.musicmoods;// Created 2023-12-01T02:08:34
 
+#if FABRIC
+
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
+#endif
+
+#if NEOFORGE
+
+import gay.ampflower.musicmoods.client.ConfigurationScreen;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.loading.FMLConfig;
+import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+#endif
 
 import java.io.IOException;
 
@@ -15,10 +29,28 @@ import java.io.IOException;
  * @author Ampflower
  * @since 0.0.0
  **/
-public class ClientMain implements ClientModInitializer {
-	public static boolean isModMenuPresent = FabricLoader.getInstance().isModLoaded("modmenu");
+#if NEOFORGE
+@Mod(value = "music_moods", dist = Dist.CLIENT)
+#endif
+public class ClientMain #if(FABRIC) implements ClientModInitializer #endif {
+	public static boolean isModMenuPresent;
 
-	@Override
+	static {
+		#if FABRIC
+		isModMenuPresent = FabricLoader.getInstance().isModLoaded("modmenu");
+		#else
+		// Neoforge and Forge always has a mod menu.
+		isModMenuPresent = true;
+		#endif
+	}
+
+	#if NEOFORGE
+	public ClientMain(ModContainer container) {
+		container.registerExtensionPoint(IConfigScreenFactory.class, (self, parent) -> new ConfigurationScreen(parent));
+		onInitializeClient();
+	}
+	#endif
+
 	public void onInitializeClient() {
 		try {
 			Config.read();

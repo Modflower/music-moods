@@ -7,7 +7,14 @@
 package gay.ampflower.musicmoods;// Created 2022-26-12T16:26:36
 
 import gay.ampflower.musicmoods.config.Replacing;
+
+#if FABRIC
 import net.fabricmc.loader.api.FabricLoader;
+#elif NEOFORGE
+import net.neoforged.fml.loading.FMLLoader;
+#else
+import net.minecraft.client.Minecraft;
+#endif
 
 import java.io.IOException;
 import java.lang.reflect.Modifier;
@@ -23,7 +30,21 @@ import java.util.function.Function;
  * @since 0.0.0
  **/
 public final class Config {
-	private static final Path config = FabricLoader.getInstance().getConfigDir().resolve("music-moods.properties");
+	private static final Path configDir;
+
+	static {
+		#if(FABRIC)
+		configDir = FabricLoader.instance.configDir;
+		#elif(NEOFORGE_1_21_OR_OLDER)
+		configDir = FMLLoader.gamePath.resolve("config");
+		#elif(NEOFORGE_1_21_9_OR_NEWER)
+		configDir = FMLLoader.getCurrent().gameDir.resolve("config");
+		#else
+		configDir = Minecraft.instance.gameDirectory.toPath().resolve("config");
+		#endif
+	}
+
+	private static final Path config = configDir.resolve("music-moods.properties");
 	private static final int fadeDefault = 600;
 	private static final float jukeboxReplaceRangeDefault = 0;
 	private static final float jukeboxFadeRangeDefault = 48;
@@ -182,7 +203,7 @@ public final class Config {
 				throw new AssertionError("Unexpected access violation accessing self @ " + field, roe);
 			}
 
-		Files.createDirectories(FabricLoader.getInstance().getConfigDir());
+		Files.createDirectories(configDir);
 
 		try (final var configStream = Files.newOutputStream(config, StandardOpenOption.CREATE,
 				StandardOpenOption.TRUNCATE_EXISTING)) {

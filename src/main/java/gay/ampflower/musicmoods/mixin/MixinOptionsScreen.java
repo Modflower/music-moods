@@ -2,8 +2,6 @@ package gay.ampflower.musicmoods.mixin;
 
 import gay.ampflower.musicmoods.Config;
 import gay.ampflower.musicmoods.client.ConfigurationScreen;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.Screen;
 #if MC_1_20_5_OR_OLDER
 import net.minecraft.client.gui.screens.OptionsScreen;
@@ -24,7 +22,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * @since 0.7
  **/
 @Mixin(OptionsScreen.class)
-@Environment(EnvType.CLIENT)
 public abstract class MixinOptionsScreen extends Screen {
 	protected MixinOptionsScreen(final Component component) {
 		super(component);

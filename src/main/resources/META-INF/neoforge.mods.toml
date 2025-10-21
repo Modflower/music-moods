@@ -6,7 +6,6 @@ issueTrackerURL = "https://github.com/Modflower/music-moods/issues"
 
 [[mods]]
 modId = "music_moods"
-namespace = "music-moods"
 version = "${version}"
 displayName = "Music Moods"
 
@@ -23,6 +22,9 @@ Configure how music & sound are handled.
 
 authors = "Ampflower"
 credits = "sisby-folk, HyperPigeon"
+
+[[mixins]]
+config = "music-moods.mixin.json"
 
 [[dependencies.music_moods]]
 modId = "minecraft"

@@ -9,9 +9,11 @@
 package gay.ampflower.musicmoods;
 
 import com.mojang.logging.LogUtils;
+#if FABRIC
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.ResourceReloadListenerKeys;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
+#endif
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.core.Holder;
@@ -33,7 +35,7 @@ import java.util.Map;
  * @author Ampflower
  * @since 0.6.12
  **/
-public final class Sounds implements SimpleSynchronousResourceReloadListener {
+public final class Sounds #if(FABRIC) implements SimpleSynchronousResourceReloadListener#endif {
 	private static final Logger logger = LogUtils.getLogger();
 
 	private static final ResourceLocation id = Constants.id("sounds");
@@ -43,9 +45,11 @@ public final class Sounds implements SimpleSynchronousResourceReloadListener {
 	private static final Map<ResourceLocation, Holder<SoundEvent>> toStereoEvent = new HashMap<>();
 	private static final Map<ResourceLocation, ResourceLocation> toStereo = new HashMap<>();
 
+	#if FABRIC
 	static {
 		ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new Sounds());
 	}
+	#endif
 
 	public static SoundEvent findStereo(final SoundEvent soundEvent) {
 		return findStereo(Holder.direct(soundEvent)).value();
@@ -115,6 +119,7 @@ public final class Sounds implements SimpleSynchronousResourceReloadListener {
 	private Sounds() {
 	}
 
+	#if FABRIC
 	@Override
 	public ResourceLocation getFabricId() {
 		return id;
@@ -130,4 +135,5 @@ public final class Sounds implements SimpleSynchronousResourceReloadListener {
 		toStereoEvent.clear();
 		toStereo.clear();
 	}
+	#endif
 }

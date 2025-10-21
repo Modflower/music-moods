@@ -6,6 +6,8 @@
 
 package gay.ampflower.musicmoods.client;// Created 2023-09-01T05:34:07
 
+#if FABRIC
+
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
 
@@ -19,3 +21,5 @@ public class MusicMoodsModMenuCompat implements ModMenuApi {
 		return ConfigurationScreen::new;
 	}
 }
+
+#endif

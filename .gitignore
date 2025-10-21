@@ -32,7 +32,7 @@ remappedSrc/
 ## Stonecutter
 
 # We treat versions/ as an implementation detail.
-# The authoritative file is /stonecutter.ini and any per-version properties must go there.
+# The authoritative files are INIs, and any per-version properties must go there.
 /versions/
 
 # Generated Manifold file; is not necessary to commit.

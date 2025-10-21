@@ -8,8 +8,6 @@ package gay.ampflower.musicmoods.mixin;// Created 2023-17-01T21:38:15
 
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import gay.ampflower.musicmoods.client.SoundHandler;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.sounds.MusicManager;
@@ -28,7 +26,6 @@ import org.spongepowered.asm.mixin.injection.Slice;
  * @since 0.1.0
  **/
 @Mixin(Minecraft.class)
-@Environment(EnvType.CLIENT)
 public abstract class MixinMinecraft {
 	@Shadow
 	@Nullable
