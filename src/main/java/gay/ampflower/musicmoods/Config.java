@@ -12,6 +12,8 @@ import gay.ampflower.musicmoods.config.Replacing;
 import net.fabricmc.loader.api.FabricLoader;
 #elif NEOFORGE
 import net.neoforged.fml.loading.FMLLoader;
+#elif FORGE
+import net.minecraftforge.fml.loading.FMLPaths;
 #else
 import net.minecraft.client.Minecraft;
 #endif
@@ -39,6 +41,8 @@ public final class Config {
 		configDir = FMLLoader.gamePath.resolve("config");
 		#elif(NEOFORGE_1_21_9_OR_NEWER)
 		configDir = FMLLoader.getCurrent().gameDir.resolve("config");
+		#elif(FORGE)
+		configDir = FMLPaths.CONFIGDIR.get();
 		#else
 		configDir = Minecraft.instance.gameDirectory.toPath().resolve("config");
 		#endif

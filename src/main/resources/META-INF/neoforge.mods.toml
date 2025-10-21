@@ -23,6 +23,8 @@ Configure how music & sound are handled.
 authors = "Ampflower"
 credits = "sisby-folk, HyperPigeon"
 
+displayTest = "IGNORE_ALL_VERSION"
+
 [[mixins]]
 config = "music-moods.mixin.json"
 

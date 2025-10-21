@@ -24,6 +24,8 @@ Configure how music & sound are handled.
 authors = "Ampflower"
 credits = "sisby-folk, HyperPigeon"
 
+displayTest = "IGNORE_ALL_VERSION"
+
 [[dependencies.music_moods]]
 modId = "minecraft"
 mandatory = true
