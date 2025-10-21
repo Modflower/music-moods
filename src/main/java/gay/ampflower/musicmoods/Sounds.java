@@ -56,6 +56,11 @@ public final class Sounds #if(FABRIC) implements SimpleSynchronousResourceReload
 	}
 
 	public static Holder<SoundEvent> findStereo(final Holder<SoundEvent> soundEvent) {
+		if (soundEvent.value() == null) {
+			logger.warn("Something has gone severely wrong, and null was passed in, bailing.");
+			return Holder.direct(null);
+		}
+
 		return toStereoEvent.computeIfAbsent(
 			soundEvent.value().location,
 			location -> findStereoInternal(soundEvent, location)

@@ -23,6 +23,17 @@ import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 #endif
 
+#if FORGE
+
+import gay.ampflower.musicmoods.client.ConfigurationScreen;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.ConfigScreenHandler;
+import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.common.Mod;
+
+#endif
+
 import java.io.IOException;
 
 /**
@@ -31,6 +42,9 @@ import java.io.IOException;
  **/
 #if NEOFORGE
 @Mod(value = "music_moods", dist = Dist.CLIENT)
+#elif FORGE
+@Mod("music_moods")
+@OnlyIn(Dist.CLIENT)
 #endif
 public class ClientMain #if(FABRIC) implements ClientModInitializer #endif {
 	public static boolean isModMenuPresent;
@@ -47,6 +61,18 @@ public class ClientMain #if(FABRIC) implements ClientModInitializer #endif {
 	#if NEOFORGE
 	public ClientMain(ModContainer container) {
 		container.registerExtensionPoint(IConfigScreenFactory.class, (self, parent) -> new ConfigurationScreen(parent));
+		onInitializeClient();
+	}
+	#endif
+
+	#if FORGE
+	public ClientMain() {
+		ModLoadingContext.get().activeContainer.registerExtensionPoint(
+			ConfigScreenHandler.ConfigScreenFactory.class,
+			() -> new ConfigScreenHandler.ConfigScreenFactory(
+				(minecraft, parent) -> new ConfigurationScreen(parent)
+			)
+		);
 		onInitializeClient();
 	}
 	#endif

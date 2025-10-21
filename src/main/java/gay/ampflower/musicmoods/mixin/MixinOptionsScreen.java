@@ -39,7 +39,24 @@ public abstract class MixinOptionsScreen extends Screen {
 	private Screen replaceScreen(Screen original) {
 		return new ConfigurationScreen(this);
 	}
+	#elif FORGE
+	// This for some reason only works on Forge..???
+	@Inject(
+		method = "*",
+		at = @At(
+			value = "INVOKE",
+			target = "Lnet/minecraft/client/gui/screens/SoundOptionsScreen;<init>(Lnet/minecraft/client/gui/screens/Screen;Lnet/minecraft/client/Options;)V"
+		),
+		cancellable = true
+	)
+	private void wrapScreen(CallbackInfoReturnable<Screen> cir) {
+		if (!Config.injectUiComponents) {
+			return;
+		}
+		cir.returnValue = new ConfigurationScreen(this);
+	}
 	#else
+	// This of course, doesn't get remapped by Arch Loom on Forge...???
 	@Inject(
 		method = "method_19829",
 		at = @At("HEAD"),

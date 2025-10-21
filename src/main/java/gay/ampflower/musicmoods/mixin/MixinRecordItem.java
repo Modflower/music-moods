@@ -33,15 +33,16 @@ import java.util.Optional;
 @Mixin(RecordItem.class)
 public class MixinRecordItem {
 	@Shadow
-	@Final
-	private SoundEvent sound;
+	private SoundEvent getSound() {
+		throw new AssertionError();
+	}
 
 	@Inject(method = "appendHoverText", at = @At("RETURN"))
 	private void musicmoods$rightClickToPlay(
 		final CallbackInfo ci,
 		final @Local(argsOnly = true) List<Component> list
 	) {
-		JukeboxUtil.appendRightClickToPlay(list::add, access -> Optional.of(Sounds.findStereo(sound)));
+		JukeboxUtil.appendRightClickToPlay(list::add, access -> Optional.ofNullable(Sounds.findStereo(sound)));
 	}
 }
 

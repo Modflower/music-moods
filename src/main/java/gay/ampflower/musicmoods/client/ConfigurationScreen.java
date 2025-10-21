@@ -7,6 +7,7 @@
 package gay.ampflower.musicmoods.client;// Created 2022-24-12T20:58:10
 
 import com.mojang.logging.LogUtils;
+#if !FORGE
 import dev.lambdaurora.spruceui.Position;
 import dev.lambdaurora.spruceui.SpruceTexts;
 import dev.lambdaurora.spruceui.option.SpruceCheckboxBooleanOption;
@@ -19,6 +20,20 @@ import dev.lambdaurora.spruceui.screen.SpruceScreen;
 import dev.lambdaurora.spruceui.widget.SpruceButtonWidget;
 import dev.lambdaurora.spruceui.widget.container.SpruceOptionListWidget;
 import dev.lambdaurora.spruceui.widget.container.tabbed.SpruceTabbedWidget;
+#else
+import org.thinkingstudio.obsidianui.Position;
+import org.thinkingstudio.obsidianui.SpruceTexts;
+import org.thinkingstudio.obsidianui.option.SpruceCheckboxBooleanOption;
+import org.thinkingstudio.obsidianui.option.SpruceCyclingOption;
+import org.thinkingstudio.obsidianui.option.SpruceDoubleOption;
+import org.thinkingstudio.obsidianui.option.SpruceFloatInputOption;
+import org.thinkingstudio.obsidianui.option.SpruceIntegerInputOption;
+import org.thinkingstudio.obsidianui.option.SpruceSeparatorOption;
+import org.thinkingstudio.obsidianui.screen.SpruceScreen;
+import org.thinkingstudio.obsidianui.widget.SpruceButtonWidget;
+import org.thinkingstudio.obsidianui.widget.container.SpruceOptionListWidget;
+import org.thinkingstudio.obsidianui.widget.container.tabbed.SpruceTabbedWidget;
+#endif
 import gay.ampflower.musicmoods.ClientMain;
 import gay.ampflower.musicmoods.Config;
 import gay.ampflower.musicmoods.Constants;
