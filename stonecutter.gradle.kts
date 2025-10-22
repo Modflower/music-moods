@@ -5,7 +5,7 @@ plugins {
 	id("dev.kikugie.stonecutter")
 }
 
-stonecutter active "forge-1.20"
+stonecutter active "fabric-1.21.6"
 
 stonecutter.current?.apply {
 	val manifold = file("versions/$project/build.properties").toPath()

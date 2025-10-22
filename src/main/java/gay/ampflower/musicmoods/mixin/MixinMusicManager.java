@@ -211,6 +211,11 @@ public abstract class MixinMusicManager implements MusicHandler {
 		// Fall back to legacy logic in case this is actually true.
 
 		final int minDelay;
+		#if MC_1_21_5_OR_OLDER
+		if (Config.alwaysPlayMusic) {
+			minDelay = 100;
+		} else
+		#endif
 		if (Config.chaoticallyPlayMusic) {
 			// 10 seconds at 60 FPS
 			minDelay = 600;
@@ -407,6 +412,10 @@ public abstract class MixinMusicManager implements MusicHandler {
 		final var frequency = (AccessorMusicFrequency) (Object) this.gameMusicFrequency;
 		if (frequency != null) {
 			maxDelay = Math.min(maxDelay, frequency.getMaxFrequency());
+		}
+		#else
+		if (Config.alwaysPlayMusic) {
+			maxDelay = 100;
 		}
 		#endif
 		return this.nextSongDelay = Math.min(this.nextSongDelay - 1, maxDelay);

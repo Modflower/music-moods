@@ -97,7 +97,7 @@ public class ConfigurationScreen extends SpruceScreen {
 		);
 
 		addTabEntry("volume", this::buildVolumeList);
-		addTabEntry("music", ConfigurationScreen::buildMusicOptionList);
+		addTabEntry("music", this::buildMusicOptionList);
 		addTabEntry("jukebox", ConfigurationScreen::buildJukeboxOptionList);
 		addTabEntry("demo", ConfigurationScreen::buildDemoList);
 		addTabEntry("meta", ConfigurationScreen::buildMetaList);
@@ -196,21 +196,35 @@ public class ConfigurationScreen extends SpruceScreen {
 				Component.translatable("options.showNowPlayingToast.tooltip")
 			)
 		);
+		#else;
+		try {
+			list.addSingleOptionEntry(checkbox("alwaysPlayMusic"));
+		} catch (ReflectiveOperationException roe) {
+			throw new AssertionError("Unexpected access violation", roe);
+		}
 		#endif
 
 		return list;
 	}
 
-	protected static SpruceOptionListWidget buildMusicOptionList(int width, int height) {
+	protected SpruceOptionListWidget buildMusicOptionList(int width, int height) {
 		final var list = new SpruceOptionListWidget(Position.origin(), width, height);
 
 		try {
 			list.addSingleOptionEntry(separator("situationalMusic"));
 			list.addSingleOptionEntry(cycling("situationalMusicReplacing"));
-			list.addSingleOptionEntry(checkbox("immediatelyPlayOnReplace"));
+			#if MC_1_21_6_OR_NEWER
+			list.addOptionEntry(checkbox("immediatelyPlayOnReplace"), musicFrequency);
+			#else
+			list.addOptionEntry(checkbox("immediatelyPlayOnReplace"), checkbox("alwaysPlayMusic"));
+			#endif
 			list.addSingleOptionEntry(separator("transitions"));
 			list.addOptionEntry(intInput("fadeInTicks"), intInput("fadeOutTicks"));
+			#if MC_1_21_6_OR_NEWER
 			list.addSingleOptionEntry(checkbox("seamlessTransitions"));
+			#else
+			list.addOptionEntry(checkbox("seamlessTransitions"), checkbox("allowPausingMusic"));
+			#endif
 		} catch (ReflectiveOperationException roe) {
 			throw new AssertionError("Unexpected access violation", roe);
 		}
