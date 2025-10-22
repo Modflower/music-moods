@@ -118,6 +118,9 @@ tasks {
 	remapJar {
 		finalizedBy("optimizeOutputsOfRemapJar")
 	}
+	"modrinth" {
+		dependsOn("optimizeOutputsOfRemapJar")
+	}
 }
 
 modrinth {

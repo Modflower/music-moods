@@ -29,8 +29,22 @@ jobs:
           BUILD_RELEASE: ${{github.event.prelease == false}}
           MODRINTH_TOKEN: ${{secrets.MODRINTH}}
           CHANGELOG: ${{ github.event.release.body }}
-      - name: Upload build artifacts
+      - name: Attest build artifacts
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-path: 'versions/*/build/libs/*.jar'
+      - name: Upload releases
+        if: ${{ always() }}
         uses: AButler/upload-release-assets@v3.0
         with:
           files: 'versions/*/build/libs/*'
           repo-token: ${{secrets.GITHUB_TOKEN}}
+      - name: Upload build artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: music-moods-artifacts
+          path: |
+            versions/*/build/libs
+            build/reports
+            created_attestation_paths.txt
