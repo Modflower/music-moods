@@ -5,6 +5,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import moe.amp.AutoMixin.autoMixinFabric
+import net.fabricmc.loom.task.RemapJarTask
 
 plugins {
 	alias(libs.plugins.loom)
@@ -101,7 +102,11 @@ tasks {
 	javadoc {
 		(options as StandardJavadocDocletOptions).tags("reason:a:Reason")
 	}
-	withType<Zip> { from(rootProject.file("LICENSE")) }
+	withType<Zip> {
+		if (this !is RemapJarTask) {
+			from(rootProject.file("LICENSE"))
+		}
+	}
 	remapJar {
 		finalizedBy("optimizeOutputsOfRemapJar")
 	}
