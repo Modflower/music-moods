@@ -67,11 +67,13 @@ tasks {
 		options.compilerArgs.addAll(manifold.map { (k, v) -> "-A$k=$v" })
 		options.isFork = true
 		options.forkOptions {
-			memoryMaximumSize = "4G"
+			memoryMaximumSize = "2G"
 			// Evil witch has been here...
 			// Ignores build.properties so that Manifold doesn't pick up the root properties used by IntelliJ,
 			// which when loaded, breaks the build by having impossible conditions.
 			jvmArgs!!.add("-javaagent:${project(":witch").layout.buildDirectory.get().asFile.resolve("libs/witch.jar")}")
+			jvmArgs!!.add("-XX:+ExitOnOutOfMemoryError")
+			jvmArgs!!.add("-XX:+UseParallelGC")
 		}
 
 		doLast {
