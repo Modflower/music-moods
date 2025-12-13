@@ -45,8 +45,6 @@
 	"music-moods.option.separator.modfest.description": "Options introduced for ModFest use. Maybe you'll like them in normal gameplay too?",
 	"music-moods.option.separator.modPack": "Mod Pack",
 	"music-moods.option.separator.modPack.description": "Options useful for mod pack creators.",
-	"music-moods.option.separator.modMenu": "Mod Menu Required",
-	"music-moods.option.separator.modMenu.description": "There are options that are only available when Mod Menu is installed.\n\nYou can still manually edit those options via the config if you really must.",
 
 	"music-moods.option.situationalMusicReplacing": "Replace current track: %s",
 	"music-moods.option.situationalMusicReplacing.description": "Allows replacing the current music with a more fitting track.\n\nNEVER - Never replace the track\nALLOW - Allows replacing the track\nALWAYS - Always replace the track where applicable.",
@@ -80,7 +78,7 @@
 	"music-moods.option.rightClickToPlay": "Right-Click Discs to Play",
 	"music-moods.option.rightClickToPlay.description": "In game, right-click any disc while your inventory is open to play them.\n\nNote: this can only be done in your player inventory.\n\nI believe some people call this the eternal jukebox.",
 	"music-moods.option.injectUiComponents": "Inject UI Components",
-	"music-moods.option.injectUiComponents.description": "Inject buttons into Vanilla UIs for discoverability.\n\nNote: Disabling this will hinder discoverability of Music Moods' options and should only be done if you're providing an alternative mean of accessing its settings.",
+	"music-moods.option.injectUiComponents.description": "Inject buttons into Vanilla UIs for discoverability.\n\nNote: Disabling this will hinder discoverability of Music Moods' options and should only be done if you're providing an alternative mean of accessing its settings.\n\nRequires Mod Menu to be installed.",
 
 	"music-moods.inventory.rightClickToPlay.play": "[%s] ▶ Play",
 	"music-moods.inventory.rightClickToPlay.stop": "[%s] ■ Stop",

@@ -18,6 +18,7 @@ import dev.lambdaurora.spruceui.option.SpruceIntegerInputOption;
 import dev.lambdaurora.spruceui.option.SpruceSeparatorOption;
 import dev.lambdaurora.spruceui.screen.SpruceScreen;
 import dev.lambdaurora.spruceui.widget.SpruceButtonWidget;
+import dev.lambdaurora.spruceui.widget.SpruceWidget;
 import dev.lambdaurora.spruceui.widget.container.SpruceOptionListWidget;
 import dev.lambdaurora.spruceui.widget.container.tabbed.SpruceTabbedWidget;
 #else
@@ -31,6 +32,7 @@ import org.thinkingstudio.obsidianui.option.SpruceIntegerInputOption;
 import org.thinkingstudio.obsidianui.option.SpruceSeparatorOption;
 import org.thinkingstudio.obsidianui.screen.SpruceScreen;
 import org.thinkingstudio.obsidianui.widget.SpruceButtonWidget;
+import org.thinkingstudio.obsidianui.widget.SpruceWidget;
 import org.thinkingstudio.obsidianui.widget.container.SpruceOptionListWidget;
 import org.thinkingstudio.obsidianui.widget.container.tabbed.SpruceTabbedWidget;
 #endif
@@ -55,6 +57,7 @@ import java.lang.invoke.VarHandle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -267,12 +270,7 @@ public class ConfigurationScreen extends SpruceScreen {
 
 		try {
 			list.addSingleOptionEntry(separator("modPack"));
-			if (ClientMain.isModMenuPresent) {
-				list.addSingleOptionEntry(checkbox("injectUiComponents"));
-			} else {
-				// TODO: Make a proper widget for this.
-				list.addSingleOptionEntry(separator("modMenu"));
-			}
+			list.addSingleOptionEntry(checkbox("injectUiComponents", () -> ClientMain.isModMenuPresent));
 		} catch (ReflectiveOperationException roe) {
 			throw new AssertionError("Unexpected access violation", roe);
 		}
@@ -415,6 +413,25 @@ public class ConfigurationScreen extends SpruceScreen {
 			handle::set,
 			translation(key + ".description")
 		);
+	}
+
+	public static SpruceCheckboxBooleanOption checkbox(String field, BooleanSupplier isActive)
+		throws IllegalAccessException, NoSuchFieldException {
+		final var handle = SELF.findStaticVarHandle(Config.class, field, boolean.class);
+		final var key = "music-moods.option." + field;
+		return new SpruceCheckboxBooleanOption(
+			key,
+			() -> (boolean) handle.get(),
+			handle::set,
+			translation(key + ".description")
+		) {
+			@Override
+			public SpruceWidget createWidget(final Position position, final int width) {
+				final var widget = super.createWidget(position, width);
+				widget.isActive = isActive.asBoolean;
+				return widget;
+			}
+		};
 	}
 
 	public static SpruceCyclingOption cycling(String field) throws IllegalAccessException, NoSuchFieldException {
