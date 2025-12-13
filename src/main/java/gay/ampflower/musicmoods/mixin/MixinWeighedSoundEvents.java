@@ -10,7 +10,11 @@ import gay.ampflower.musicmoods.client.WeighedSoundEventsQuery;
 import net.minecraft.client.resources.sounds.Sound;
 import net.minecraft.client.sounds.WeighedSoundEvents;
 import net.minecraft.client.sounds.Weighted;
+#if MC_1_21_11_OR_NEWER
+import net.minecraft.resources.Identifier;
+#else
 import net.minecraft.resources.ResourceLocation;
+#endif
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.Final;
@@ -36,7 +40,7 @@ public class MixinWeighedSoundEvents implements WeighedSoundEventsQuery {
 	private List<Weighted<Sound>> list;
 
 	@Unique
-	private Set<ResourceLocation> set = Set.of();
+	private Set<#if (MC_1_21_11_OR_NEWER) Identifier #else ResourceLocation #endif > set = Set.of();
 
 	@Override
 	public boolean contains(final Sound sound) {
@@ -46,11 +50,12 @@ public class MixinWeighedSoundEvents implements WeighedSoundEventsQuery {
 	}
 
 	@Unique
-	private Set<ResourceLocation> getSet() {
+	private Set<#if (MC_1_21_11_OR_NEWER) Identifier #else ResourceLocation #endif > getSet() {
 		final var size = this.list.size();
 		final var soundSet = this.set;
 		if (size != soundSet.size()) {
-			final var newSoundSet = new HashSet<ResourceLocation>(size);
+			final var newSoundSet =
+				new HashSet<#if (MC_1_21_11_OR_NEWER) Identifier #else ResourceLocation #endif >(size);
 
 			for (final Weighted<Sound> weightedSound : this.list) {
 				if (weightedSound instanceof Sound subSound) {
@@ -60,7 +65,9 @@ public class MixinWeighedSoundEvents implements WeighedSoundEventsQuery {
 				}
 			}
 
-			return this.set = Set.of(newSoundSet.toArray(new ResourceLocation[newSoundSet.size()]));
+			return this.set = Set.of(newSoundSet.toArray(
+				new #if (MC_1_21_11_OR_NEWER) Identifier #else ResourceLocation #endif [newSoundSet.size()]
+			));
 		}
 
 		return soundSet;

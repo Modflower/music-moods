@@ -32,6 +32,7 @@
 	"options.showSubtitles.tooltip": "Enables subtitles for sounds played in the game.",
 	"options.directionalAudio.tooltip": "Enables HRTF-based directional audio to improve the simulation of 3D sound. Requires HRTF compatible audio hardware, and is best experienced with headphones.",
 	"options.soundDevice.tooltip": "The device Minecraft plays audio to.\n\nAvailable devices:",
+	"options.musicToast.tooltip": "Select whether it displays a toast whenever a song starts playing, or if it just shows the current song while paused.",
 
 	"music-moods.option.separator.situationalMusic": "Situational Music",
 	"music-moods.option.separator.situationalMusic.description": "Includes the title screen, various biomes, being underwater and battles.",

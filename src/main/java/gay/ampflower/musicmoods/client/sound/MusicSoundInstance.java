@@ -40,6 +40,6 @@ public class MusicSoundInstance extends FadeableSoundInstance {
 	@Override
 	public String toString() {
 		return "MusicSoundInstance{" + "fadeOut=" + fadeOut + ", fadeIn=" + fadeIn + ", sound=" + sound + ", location="
-				+ location + ", volume=" + volume + '}';
+			   + #if (MC_1_21_11_OR_NEWER) identifier #else location #endif + ", volume=" + volume + '}';
 	}
 }

@@ -69,6 +69,10 @@ import gay.ampflower.musicmoods.mixin.AccessorTooltip;
 import net.minecraft.client.gui.components.Tooltip;
 #endif
 
+#if MC_1_21_11_OR_NEWER
+import net.minecraft.client.MusicToastDisplayState;
+#endif
+
 /**
  * @author Ampflower
  * @since 0.0.0
@@ -76,6 +80,8 @@ import net.minecraft.client.gui.components.Tooltip;
 public class ConfigurationScreen extends SpruceScreen {
 	private static final Logger logger = LogUtils.getLogger();
 	private static final MethodHandles.Lookup SELF = MethodHandles.lookup();
+
+	private static final Component AUDIO_DEVICE = Component.translatable("options.audioDevice");
 
 	private final Screen parent;
 
@@ -193,11 +199,15 @@ public class ConfigurationScreen extends SpruceScreen {
 		// Music tab primarily should house these, but it is here in vanilla's.
 		list.addOptionEntry(
 			musicFrequency,
+			#if MC_1_21_11_OR_NEWER
+			musicToast
+			#else
 			toCheckbox(
 				"showNowPlayingToast",
 				minecraft.options.showNowPlayingToast(),
 				Component.translatable("options.showNowPlayingToast.tooltip")
 			)
+			#endif
 		);
 		#else;
 		try {
@@ -335,14 +345,14 @@ public class ConfigurationScreen extends SpruceScreen {
 			option::set,
 			str -> {
 				if ("".equals(str)) {
-					return genericValue("options.audioDevice", "options.audioDevice.default");
+					return genericValue(AUDIO_DEVICE, "options.audioDevice.default");
 				}
 
 				if (str.startsWith(SoundEngine.OPEN_AL_SOFT_PREFIX)) {
 					str = str.substring(SoundEngine.OPEN_AL_SOFT_PREFIX_LENGTH);
 				}
 
-				return genericValue(Component.translatable("options.audioDevice"), Component.literal(str));
+				return genericValue(AUDIO_DEVICE, Component.literal(str));
 			}
 		);
 
@@ -362,19 +372,55 @@ public class ConfigurationScreen extends SpruceScreen {
 
 	#if MC_1_21_6_OR_NEWER
 	private SpruceCyclingOption getMusicFrequency() {
-		final var key = "options.music_frequency";
-		final var option = minecraft.options.musicFrequency();
-
-		final var stepper = new EnumStepper<>(
+		return enumOptionStepper(
+			"options.music_frequency",
+			Component.translatable("options.music_frequency.tooltip"),
 			MusicManager.MusicFrequency.values(),
-			option::get,
-			option::set,
-			value -> genericValue(key, value.getKey())
+			minecraft.options.musicFrequency(),
+			#if MC_1_21_11_OR_NEWER
+			MusicManager.MusicFrequency::caption
+			#else
+			value -> Component.translatable(value.getKey())
+			#endif
 		);
-
-		return new SpruceCyclingOption(key, stepper, stepper, translation(key + ".tooltip"));
 	}
 	#endif
+
+	#if MC_1_21_11_OR_NEWER
+	private SpruceCyclingOption getMusicToast() {
+		return enumOptionStepper(
+			"options.musicToast",
+			Component.translatable("options.musicToast.tooltip"),
+			MusicToastDisplayState.values(),
+			minecraft.options.musicToast(),
+			MusicToastDisplayState::text
+		);
+	}
+	#endif
+
+	private static <E extends Enum<E>> SpruceCyclingOption enumOptionStepper(
+		final String key,
+		final Component tooltip,
+		final E[] enums,
+		final OptionInstance<E> option,
+		final Function<E, Component> caption
+	) {
+		final var translation = Component.translatable(key);
+
+		final var stepper = new EnumStepper<>(
+			enums,
+			option::get,
+			option::set,
+			value -> genericValue(translation, caption.apply(value))
+		);
+
+		return new SpruceCyclingOption(
+			key,
+			stepper,
+			stepper,
+			adapt(tooltip)
+		);
+	}
 
 	public static SpruceSeparatorOption separator(String field) {
 		final var key = "music-moods.option.separator." + field;
@@ -490,6 +536,10 @@ public class ConfigurationScreen extends SpruceScreen {
 
 	private static Component genericValue(final String key, final String value) {
 		return genericValue(Component.translatable(key), Component.translatable(value));
+	}
+
+	private static Component genericValue(final Component key, final String value) {
+		return genericValue(key, Component.translatable(value));
 	}
 
 	private static Component genericValue(final Component key, final Component value) {

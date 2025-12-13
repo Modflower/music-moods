@@ -17,7 +17,11 @@ import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.core.Holder;
+#if MC_1_21_11_OR_NEWER
+import net.minecraft.resources.Identifier;
+#else
 import net.minecraft.resources.ResourceLocation;
+#endif
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.sounds.SoundEvent;
@@ -38,12 +42,17 @@ import java.util.Map;
 public final class Sounds #if(FABRIC) implements SimpleSynchronousResourceReloadListener#endif {
 	private static final Logger logger = LogUtils.getLogger();
 
-	private static final ResourceLocation id = Constants.id("sounds");
+	private static final #if (MC_1_21_11_OR_NEWER) Identifier #else ResourceLocation #endif id = Constants.id("sounds");
 
 	// TODO: Perhaps a config for these?
 	//  The server could also broadcast what it's aware of too.
+	#if MC_1_21_11_OR_NEWER
+	private static final Map<Identifier, Holder<SoundEvent>> toStereoEvent = new HashMap<>();
+	private static final Map<Identifier, Identifier> toStereo = new HashMap<>();
+	#else
 	private static final Map<ResourceLocation, Holder<SoundEvent>> toStereoEvent = new HashMap<>();
 	private static final Map<ResourceLocation, ResourceLocation> toStereo = new HashMap<>();
+	#endif
 
 	#if FABRIC
 	static {
@@ -69,7 +78,7 @@ public final class Sounds #if(FABRIC) implements SimpleSynchronousResourceReload
 
 	private static Holder<SoundEvent> findStereoInternal(
 		final Holder<SoundEvent> soundEvent,
-		final ResourceLocation location
+		final #if (MC_1_21_11_OR_NEWER) Identifier #else ResourceLocation #endif location
 	) {
 		final var stereo = findStereo(location);
 
@@ -84,41 +93,41 @@ public final class Sounds #if(FABRIC) implements SimpleSynchronousResourceReload
 		#endif
 	}
 
-	public static ResourceLocation findStereo(final ResourceLocation location) {
-		return toStereo.computeIfAbsent(location, Sounds::findStereoInternal);
-	}
+	public static #if (MC_1_21_11_OR_NEWER) Identifier #else ResourceLocation #endif findStereo(
+		final #if (MC_1_21_11_OR_NEWER) Identifier #else ResourceLocation #endif location
+	) {
+		return toStereo.computeIfAbsent(location, id -> {
+			final SoundManager soundManager = Minecraft.getInstance().getSoundManager();
+			final List<String> path = new ArrayList<>(Arrays.asList(id.getPath().split("\\.")));
 
-	private static ResourceLocation findStereoInternal(final ResourceLocation location) {
-		final SoundManager soundManager = Minecraft.getInstance().getSoundManager();
-		final List<String> path = new ArrayList<>(Arrays.asList(location.getPath().split("\\.")));
+			final var itr = path.listIterator();
+			do {
+				itr.add("stereo");
 
-		final var itr = path.listIterator();
-		do {
-			itr.add("stereo");
+				final var trial = id.withPath(String.join(".", path));
 
-			final var trial = location.withPath(String.join(".", path));
+				if (soundManager.getSoundEvent(trial) != null) {
+					logger.debug("Stereo found: {} => {}", id, trial);
+					return trial;
+				}
 
-			if (soundManager.getSoundEvent(trial) != null) {
-				logger.debug("Stereo found: {} => {}", location, trial);
-				return trial;
-			}
-
-			logger.debug("Not present: {} => {}", location, trial);
+				logger.debug("Not present: {} => {}", id, trial);
 
 
-			itr.previous();
-			itr.remove();
-			if (itr.hasNext()) {
-				itr.next();
-			} else {
-				break;
-			}
-		} while(true);
+				itr.previous();
+				itr.remove();
+				if (itr.hasNext()) {
+					itr.next();
+				} else {
+					break;
+				}
+			} while (true);
 
-		logger.debug("Stereo missing: {} => ???", location);
+			logger.debug("Stereo missing: {} => ???", id);
 
-		// No stereo version found, return as-is.
-		return location;
+			// No stereo version found, return as-is.
+			return id;
+		});
 	}
 
 	private Sounds() {
@@ -126,12 +135,12 @@ public final class Sounds #if(FABRIC) implements SimpleSynchronousResourceReload
 
 	#if FABRIC
 	@Override
-	public ResourceLocation getFabricId() {
+	public #if (MC_1_21_11_OR_NEWER) Identifier #else ResourceLocation #endif getFabricId() {
 		return id;
 	}
 
 	@Override
-	public Collection<ResourceLocation> getFabricDependencies() {
+	public Collection<#if (MC_1_21_11_OR_NEWER) Identifier #else ResourceLocation #endif > getFabricDependencies() {
 		return Collections.singleton(ResourceReloadListenerKeys.SOUNDS);
 	}
 

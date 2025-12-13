@@ -124,11 +124,13 @@ public final class JukeboxUtil {
 		return mono
 			.unwrapKey()
 			.flatMap(k -> access
-						 .lookup(Registries.JUKEBOX_SONG)
-						 .orElseThrow()
-						 #if MC_1_21_OR_OLDER
-							 .get(ResourceKey.create(Registries.JUKEBOX_SONG, Constants.toStereo(k.location())))
-							 .map(Holder.Reference::value)
+					.lookup(Registries.JUKEBOX_SONG)
+					.orElseThrow()
+					#if MC_1_21_OR_OLDER
+						.get(ResourceKey.create(Registries.JUKEBOX_SONG, Constants.toStereo(k.location())))
+						.map(Holder.Reference::value)
+					#elif MC_1_21_11_OR_NEWER
+					.getOptional(Constants.toStereo(k.identifier()))
 						 #else
 						 .getOptional(Constants.toStereo(k.location()))
 					#endif

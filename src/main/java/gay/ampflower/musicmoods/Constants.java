@@ -9,7 +9,11 @@ package gay.ampflower.musicmoods;// Created 2023-16-01T21:35:22
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
+#if MC_1_21_11_OR_NEWER
+import net.minecraft.resources.Identifier;
+#else
 import net.minecraft.resources.ResourceLocation;
+#endif
 
 /**
  * @author Ampflower
@@ -44,13 +48,17 @@ public final class Constants {
 		)
 		.withStyle(ChatFormatting.BLUE, ChatFormatting.ITALIC);
 
-	public static ResourceLocation toStereo(ResourceLocation mono) {
+	public static #if (MC_1_21_11_OR_NEWER) Identifier #else ResourceLocation #endif toStereo(
+		final #if (MC_1_21_11_OR_NEWER) Identifier #else ResourceLocation #endif mono
+	) {
 		return mono.withPrefix("stereo/");
 	}
 
-	public static ResourceLocation id(String path) {
+	public static #if (MC_1_21_11_OR_NEWER) Identifier #else ResourceLocation #endif id(String path) {
 		#if MC_1_20_5_OR_OLDER
 		return new ResourceLocation(modId, path);
+		#elif MC_1_21_11_OR_NEWER
+		return Identifier.fromNamespaceAndPath(modId, path);
 		#else
 		return ResourceLocation.fromNamespaceAndPath(modId, path);
 		#endif

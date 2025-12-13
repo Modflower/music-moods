@@ -15,7 +15,8 @@ import gay.ampflower.musicmoods.client.sound.RecordSoundInstance;
 import gay.ampflower.musicmoods.config.Replacing;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SoundInstance;
-#if MC_1_21_4_OR_NEWER
+#if MC_1_21_4_OR_NEWER && !MC_1_21_11_OR_NEWER
+#define MUSIC_INFO
 import net.minecraft.client.sounds.MusicInfo;
 #endif
 import net.minecraft.client.sounds.MusicManager;
@@ -25,7 +26,11 @@ import net.minecraft.client.sounds.SoundEngine;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
+#if MC_1_21_11_OR_NEWER
+import net.minecraft.resources.Identifier;
+#else
 import net.minecraft.resources.ResourceLocation;
+#endif
 import net.minecraft.sounds.Music;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
@@ -98,8 +103,13 @@ public abstract class MixinMusicManager implements MusicHandler {
 	private RecordSoundInstance focusedJukebox;
 	@Unique
 	private MusicSoundInstance fadingOutMusic;
+	#if MC_1_21_11_OR_NEWER
+	@Unique
+	private Identifier currentCompatibleLocation;
+	#else
 	@Unique
 	private ResourceLocation currentCompatibleLocation;
+	#endif
 
 	/**
 	 * @author Ampflower
@@ -114,12 +124,12 @@ public abstract class MixinMusicManager implements MusicHandler {
 
 		final var musicInfo = this.minecraft.getSituationalMusic();
 		//noinspection UnnecessaryLocalVariable - actually is used
-		final var music = #if (MC_1_21_4_OR_NEWER) musicInfo.music() #else musicInfo #endif ;
+		final var music = #if (MUSIC_INFO) musicInfo.music() #else musicInfo #endif ;
 		final var soundManager = this.minecraft.getSoundManager();
 
 		if (this.currentMusic != null) {
 			#if MC_1_21_4_OR_NEWER
-			final float volume = musicInfo.volume();
+			final float volume = #if (MUSIC_INFO) musicInfo.volume() #else minecraft.musicVolume #endif;
 
 			if (this.currentGain != volume) {
 				// note: return intentionally not replicated.
@@ -156,7 +166,7 @@ public abstract class MixinMusicManager implements MusicHandler {
 			return;
 		}
 
-		final var musicLocation = music.location;
+		final var musicLocation = getLocation(music);
 
 		// Allow the end user to say whether they want their music replaced at all.
 		if (this.currentMusic != null && !this.currentMusicIntruded && Config.situationalMusicReplacing.replaces()
@@ -255,7 +265,7 @@ public abstract class MixinMusicManager implements MusicHandler {
 
 		final var camera = this.minecraft.gameRenderer.getMainCamera();
 
-		final var cameraPos = camera.getPosition();
+		final var cameraPos = #if (MC_1_21_11_OR_NEWER) camera.position() #else camera.getPosition() #endif ;
 		final var cameraRot = Mint.cameraToRotationVector(camera);
 
 		if (maxSq <= 0) {
@@ -356,7 +366,10 @@ public abstract class MixinMusicManager implements MusicHandler {
 	 *         otherwise.
 	 */
 	@Unique
-	private boolean isLoudAndCompatible(final MusicSoundInstance instance, final ResourceLocation musicLocation) {
+	private boolean isLoudAndCompatible(
+		final MusicSoundInstance instance,
+		final #if (MC_1_21_11_OR_NEWER) Identifier #else ResourceLocation #endif musicLocation
+	) {
 		if (instance == null || instance.getDirectVolume() < 0.75F) {
 			return false;
 		}
@@ -367,11 +380,14 @@ public abstract class MixinMusicManager implements MusicHandler {
 	@Unique
 	private boolean shouldReplace(final Music music) {
 		return (Config.situationalMusicReplacing == Replacing.always || music.replaceCurrentMusic())
-			   && this.isReplaceable(this.currentMusic, music.location);
+			   && this.isReplaceable(this.currentMusic, getLocation(music));
 	}
 
 	@Unique
-	private boolean isReplaceable(final SoundInstance instance, final ResourceLocation musicLocation) {
+	private boolean isReplaceable(
+		final SoundInstance instance,
+		final #if (MC_1_21_11_OR_NEWER) Identifier #else ResourceLocation #endif musicLocation
+	) {
 		return musicLocation != this.currentCompatibleLocation && !isCompatible(instance, musicLocation);
 	}
 
@@ -385,12 +401,17 @@ public abstract class MixinMusicManager implements MusicHandler {
 	}
 
 	@Unique
-	private boolean isCompatible(final SoundInstance instance, final ResourceLocation musicLocation) {
+	private boolean isCompatible(
+		final SoundInstance instance,
+		final #if (MC_1_21_11_OR_NEWER) Identifier #else ResourceLocation #endif musicLocation
+	) {
 		if (instance == null || musicLocation == null) {
 			return false;
 		}
 
-		if (instance.getLocation().equals(musicLocation)) {
+		final var instLocation = #if (MC_1_21_11_OR_NEWER) instance.identifier #else instance.location #endif ;
+
+		if (instLocation.equals(musicLocation)) {
 			this.currentCompatibleLocation = musicLocation;
 			return true;
 		}
@@ -421,7 +442,7 @@ public abstract class MixinMusicManager implements MusicHandler {
 		return this.nextSongDelay = Math.min(this.nextSongDelay - 1, maxDelay);
 	}
 
-	#if MC_1_21_2_OR_OLDER
+	#if !MUSIC_INFO
 	/**
 	 * Reimplementation of {@link MusicManager#startPlaying(Music)} with a
 	 * fade-in configured.
@@ -432,7 +453,7 @@ public abstract class MixinMusicManager implements MusicHandler {
 			return;
 		}
 
-		this.startPlayingCommon(music.event, null, 1.f, Config.fadeInTicks);
+		this.startPlayingCommon(#if MC_1_21_11_OR_NEWER music.sound #else music.event #endif , null, 1.f, Config.fadeInTicks);
 	}
 	#else
 
@@ -454,14 +475,14 @@ public abstract class MixinMusicManager implements MusicHandler {
 	 * @author Ampflower
 	 * @reason The original logic is proving itself ill-suited for Music Moods' needs
 	 */
-	#if MC_1_21_2_OR_OLDER
+	#if !MUSIC_INFO
 	@Overwrite
 	public void startPlaying(final Music music) {
 		if (music == null) {
 			return;
 		}
 
-		this.startPlayingCommon(music.event, null, 1.f, 0);
+		this.startPlayingCommon(#if MC_1_21_11_OR_NEWER music.sound #else music.event #endif , null, 1.f, 0);
 	}
 	#else
 	@Overwrite
@@ -533,7 +554,7 @@ public abstract class MixinMusicManager implements MusicHandler {
 		// Reset jukebox
 		final var camera = this.minecraft.gameRenderer.getMainCamera();
 
-		final var cameraPos = camera.getPosition();
+		final var cameraPos = #if (MC_1_21_11_OR_NEWER) camera.position() #else camera.getPosition() #endif ;
 		final var cameraRot = Mint.cameraToRotationVector(camera);
 
 		if (this.focusedJukebox != null) {
@@ -619,6 +640,23 @@ public abstract class MixinMusicManager implements MusicHandler {
 		}
 
 		return this.currentMusicName;
+	}
+	#endif
+
+	/**
+	 * Gets the identifier of the given music instance.
+	 */
+	#if MC_1_21_11_OR_NEWER
+	private static Identifier getLocation(Music music) {
+		return music.sound.value().location();
+	}
+	#else
+	private static ResourceLocation getLocation(Music music) {
+		#if MC_1_19_OR_OLDER
+		return music.event.location;
+		#else
+		return music.event.value().location;
+		#endif
 	}
 	#endif
 }

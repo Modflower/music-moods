@@ -10,16 +10,19 @@ import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import gay.ampflower.musicmoods.client.SoundHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.sounds.MusicManager;
 import net.minecraft.client.sounds.SoundManager;
-import net.minecraft.sounds.Music;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+
+#if !MC_1_21_11_OR_NEWER
+import net.minecraft.client.sounds.MusicManager;
+import net.minecraft.sounds.Music;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
+#endif
 
 /**
  * @author Ampflower
@@ -35,6 +38,8 @@ public abstract class MixinMinecraft {
 	@Final
 	private SoundManager soundManager;
 
+	// Fixed in vanilla.
+	#if !MC_1_21_11_OR_NEWER
 	/**
 	 * Fixes underwater music constantly playing when set to always playing or
 	 * replacing.
@@ -60,16 +65,18 @@ public abstract class MixinMinecraft {
 		)
 	)
 	private boolean musicmoods$checkPlayer(MusicManager self, Music music) {
-		assert this.player != null : "Minecraft moved underwater check?";
 		return this.player.isUnderWater() && self.isPlayingMusic(music);
 	}
+	#endif
 
 	@WrapWithCondition(
 		method = {
 			// 1.21.8-
 			"updateScreenAndTick",
-			// 1.21.9+
-			"updateLevelInEngines"
+			// 1.21.9
+			"updateLevelInEngines",
+			// 1.21.11+
+			"updateLevelInEngines(Lnet/minecraft/client/multiplayer/ClientLevel;Z)V"
 		},
 		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sounds/SoundManager;stop()V"),
 		allow = 1

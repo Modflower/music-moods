@@ -78,6 +78,10 @@ public final class Mint {
 	}
 
 	public static Vec2 cameraToRotationVector(Camera camera) {
+		#if MC_1_21_11_OR_NEWER
+		return new Vec2(camera.xRot(), camera.yRot());
+		#else
 		return new Vec2(camera.getXRot(), camera.getYRot());
+		#endif
 	}
 }
