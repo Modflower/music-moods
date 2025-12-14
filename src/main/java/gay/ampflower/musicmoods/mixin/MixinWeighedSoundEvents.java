@@ -15,8 +15,13 @@ import net.minecraft.resources.Identifier;
 #else
 import net.minecraft.resources.ResourceLocation;
 #endif
+#if MC_1_16_4_OR_OLDER
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+#else
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+#endif
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -33,7 +38,11 @@ import java.util.Set;
 @Mixin(WeighedSoundEvents.class)
 public class MixinWeighedSoundEvents implements WeighedSoundEventsQuery {
 	@Unique
+	#if MC_1_16_4_OR_OLDER
+	private static final Logger logger = LogManager.getLogger("Music Moods Weighed Sounds Query");
+	#else
 	private static final Logger logger = LoggerFactory.getLogger("Music Moods Weighed Sounds Query");
+	#endif
 
 	@Shadow
 	@Final

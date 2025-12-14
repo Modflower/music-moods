@@ -24,7 +24,9 @@ import net.minecraft.client.sounds.MusicManager;
 import net.minecraft.client.sounds.SoundEngine;
 #endif
 import net.minecraft.client.sounds.SoundManager;
+#if MC_1_18_OR_NEWER
 import net.minecraft.core.Holder;
+#endif
 import net.minecraft.network.chat.Component;
 #if MC_1_21_11_OR_NEWER
 import net.minecraft.resources.Identifier;
@@ -34,7 +36,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.Music;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
@@ -45,6 +46,12 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+#if MC_1_18_OR_OLDER
+import java.util.Random;
+#else
+import net.minecraft.util.RandomSource;
+#endif
 
 /**
  * @author Ampflower
@@ -64,7 +71,11 @@ public abstract class MixinMusicManager implements MusicHandler {
 	private int nextSongDelay;
 	@Shadow
 	@Final
+	#if MC_1_18_OR_OLDER
+	private Random random;
+	#else
 	private RandomSource random;
+	#endif
 
 	#if MC_1_21_4_OR_NEWER
 	@Shadow
@@ -300,11 +311,17 @@ public abstract class MixinMusicManager implements MusicHandler {
 				continue;
 			}
 
-			if (!(entry.getValue()instanceof RecordSoundInstance record)) {
+			if (!(entry.getValue() instanceof RecordSoundInstance record)) {
 				continue;
 			}
 
+			#if MC_1_16_4_OR_OLDER
+			var delta = entry.getKey().distSqr(player.getEyePosition(1.f), true);
+			#elif MC_1_17_OR_OLDER
+			var delta = entry.getKey().distSqr(player.getEyePosition(), true);
+			#else
 			var delta = entry.getKey().distToCenterSqr(player.getEyePosition());
+			#endif
 
 			if (delta > maxSq) {
 				continue;
@@ -335,6 +352,24 @@ public abstract class MixinMusicManager implements MusicHandler {
 		this.fadeOrStopMusic(Config.jukeboxFadeMixTicks);
 	}
 
+	#if MC_1_17_OR_OLDER
+	@Override
+	public boolean moods$intrudeJukeboxTrack(
+		final @NotNull SoundEvent soundEvent,
+		final @Nullable Component name
+	) {
+		if (
+			this.currentMusicIntruded &&
+			this.isCompatible(this.currentMusic, soundEvent.location)
+		) {
+			return false;
+		}
+
+		this.startPlayingIntruded(soundEvent, name);
+
+		return true;
+	}
+	#else
 	@Override
 	public boolean moods$intrudeJukeboxTrack(
 		final @NotNull Holder<SoundEvent> soundEvent,
@@ -351,6 +386,7 @@ public abstract class MixinMusicManager implements MusicHandler {
 
 		return true;
 	}
+	#endif
 
 	/**
 	 * Determines whether to fall back to the previous track despite the situational
@@ -453,7 +489,11 @@ public abstract class MixinMusicManager implements MusicHandler {
 			return;
 		}
 
-		this.startPlayingCommon(#if MC_1_21_11_OR_NEWER music.sound #else music.event #endif , null, 1.f, Config.fadeInTicks);
+		this.startPlayingCommon(#if MC_1_21_11_OR_NEWER music.sound #else music.event #endif ,
+			null,
+			1.f,
+			Config.fadeInTicks
+		);
 	}
 	#else
 
@@ -495,6 +535,15 @@ public abstract class MixinMusicManager implements MusicHandler {
 	}
 	#endif
 
+	#if MC_1_17_OR_OLDER
+	@Unique
+	private void startPlayingIntruded(final SoundEvent soundEventHolder, final Component name) {
+		this.reset(Config.jukeboxFadeMixTicks);
+
+		this.currentMusicIntruded = true;
+		this.startPlayingCommon(soundEventHolder, name, 1.f, 0);
+	}
+	#else
 	@Unique
 	private void startPlayingIntruded(final Holder<SoundEvent> soundEventHolder, final Component name) {
 		this.reset(Config.jukeboxFadeMixTicks);
@@ -512,6 +561,7 @@ public abstract class MixinMusicManager implements MusicHandler {
 	) {
 		this.startPlayingCommon(soundEvent.value(), name, volume, fadeInTicks);
 	}
+	#endif
 
 	@Unique
 	private void startPlayingCommon(

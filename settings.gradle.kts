@@ -98,7 +98,7 @@ for ((loader, ini) in versions.cutters) {
 		}
 
 		vcomp(buildProperties, k, versions.splices)
-		vcomp(buildProperties, k, ini.sections.keys, loader.uppercase())
+		vcomp(buildProperties, k, ini.sections.keys, loader.toYellingSnake())
 
 		root.resolve("build.properties")
 			.updateOnMismatch(buildProperties, stonecutterLastModified)

@@ -6,7 +6,9 @@
 
 package gay.ampflower.musicmoods.client;
 
+#if MC_1_18_OR_NEWER
 import net.minecraft.core.Holder;
+#endif
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import org.jetbrains.annotations.NotNull;
@@ -43,6 +45,18 @@ public interface MusicHandler {
 	}
 	#endif
 
+	#if MC_1_17_OR_OLDER
+	default boolean moods$intrudeJukeboxTrack(
+		final @NotNull SoundEvent soundEvent
+	) {
+		return moods$intrudeJukeboxTrack(soundEvent, null);
+	}
+
+	boolean moods$intrudeJukeboxTrack(
+		final @NotNull SoundEvent soundEvent,
+		final @Nullable Component name
+	);
+	#else
 	default boolean moods$intrudeJukeboxTrack(
 		final @NotNull SoundEvent soundEvent
 	) {
@@ -59,6 +73,7 @@ public interface MusicHandler {
 		final @NotNull Holder<SoundEvent> soundEvent,
 		final @Nullable Component name
 	);
+	#endif
 
 	boolean moods$isCurrentlyPlaying(final SoundEvent soundEvent);
 

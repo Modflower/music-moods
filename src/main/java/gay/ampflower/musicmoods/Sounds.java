@@ -8,7 +8,6 @@
 
 package gay.ampflower.musicmoods;
 
-import com.mojang.logging.LogUtils;
 #if FABRIC
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.ResourceReloadListenerKeys;
@@ -16,7 +15,9 @@ import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 #endif
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.sounds.SoundManager;
+#if MC_1_18_OR_NEWER
 import net.minecraft.core.Holder;
+#endif
 #if MC_1_21_11_OR_NEWER
 import net.minecraft.resources.Identifier;
 #else
@@ -25,7 +26,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.sounds.SoundEvent;
+
+#if MC_1_16_4_OR_OLDER
+import org.apache.logging.log4j.Logger;
+#else
 import org.slf4j.Logger;
+#endif
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,7 +46,7 @@ import java.util.Map;
  * @since 0.6.12
  **/
 public final class Sounds #if(FABRIC) implements SimpleSynchronousResourceReloadListener#endif {
-	private static final Logger logger = LogUtils.getLogger();
+	private static final Logger logger = Constants.getLogger();
 
 	private static final #if (MC_1_21_11_OR_NEWER) Identifier #else ResourceLocation #endif id = Constants.id("sounds");
 
@@ -49,8 +55,11 @@ public final class Sounds #if(FABRIC) implements SimpleSynchronousResourceReload
 	#if MC_1_21_11_OR_NEWER
 	private static final Map<Identifier, Holder<SoundEvent>> toStereoEvent = new HashMap<>();
 	private static final Map<Identifier, Identifier> toStereo = new HashMap<>();
-	#else
+	#elif MC_1_18_OR_NEWER
 	private static final Map<ResourceLocation, Holder<SoundEvent>> toStereoEvent = new HashMap<>();
+	private static final Map<ResourceLocation, ResourceLocation> toStereo = new HashMap<>();
+	#else
+	private static final Map<ResourceLocation, SoundEvent> toStereoEvent = new HashMap<>();
 	private static final Map<ResourceLocation, ResourceLocation> toStereo = new HashMap<>();
 	#endif
 
@@ -60,6 +69,34 @@ public final class Sounds #if(FABRIC) implements SimpleSynchronousResourceReload
 	}
 	#endif
 
+	#if MC_1_17_OR_OLDER
+	public static SoundEvent findStereo(final SoundEvent soundEvent) {
+		if (soundEvent == null) {
+			logger.warn("Something has gone severely wrong, and null was passed in, bailing.");
+			return null;
+		}
+
+		return toStereoEvent.computeIfAbsent(
+			soundEvent.location,
+			location -> findStereoInternal(soundEvent, location)
+		);
+	}
+
+
+	private static SoundEvent findStereoInternal(
+		final SoundEvent soundEvent,
+		final #if (MC_1_21_11_OR_NEWER) Identifier #else ResourceLocation #endif location
+	) {
+		final var stereo = findStereo(location);
+
+		if (stereo.equals(location)) {
+			return soundEvent;
+		}
+
+		return new SoundEvent(stereo);
+	}
+
+	#else
 	public static SoundEvent findStereo(final SoundEvent soundEvent) {
 		return findStereo(Holder.direct(soundEvent)).value();
 	}
@@ -92,6 +129,7 @@ public final class Sounds #if(FABRIC) implements SimpleSynchronousResourceReload
 		return new Holder.Direct<>(SoundEvent.createVariableRangeEvent(stereo));
 		#endif
 	}
+	#endif
 
 	public static #if (MC_1_21_11_OR_NEWER) Identifier #else ResourceLocation #endif findStereo(
 		final #if (MC_1_21_11_OR_NEWER) Identifier #else ResourceLocation #endif location

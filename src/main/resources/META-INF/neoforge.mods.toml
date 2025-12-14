@@ -11,7 +11,7 @@ displayName = "Music Moods"
 
 updateJSONURL = "https://api.modrinth.com/updates/${modrinthId}/forge_updates.json"
 
-logoFile = "assets/music-moods/pack.png"
+logoFile = "pack.png"
 logoBlur = false
 
 displayURL = "https://mod.ampflower.gay/music-moods"

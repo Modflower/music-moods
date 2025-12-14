@@ -78,10 +78,11 @@ dependencies {
 			.map(String::trim)
 			.mapNotNull(libraries::get)
 		) {
+			logger.info("Adding {} => {}", k, l)
 			(k as String)(group = l.group, name = l.name, version = l.version)
 		}
 	}
 
 	for((k, v) in ini.sections["dependencies"]?:mapOf()) { meow(k, v) }
-	for((k, v) in ini.sections[project.name.split('-')[0]]?:mapOf()) { meow(k, v) }
+	for((k, v) in ini.sections[project.name.substringBeforeLast('-')]?:mapOf()) { meow(k, v) }
 }

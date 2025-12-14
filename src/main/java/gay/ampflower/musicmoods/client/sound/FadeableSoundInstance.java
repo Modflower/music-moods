@@ -6,7 +6,9 @@
 
 package gay.ampflower.musicmoods.client.sound;
 
+#if MC_1_20_3_OR_NEWER
 import it.unimi.dsi.fastutil.floats.FloatUnaryOperator;
+#endif
 #if MC_1_20_5_OR_OLDER
 import net.minecraft.client.Timer;
 #else
@@ -15,7 +17,9 @@ import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+#if MC_1_19_OR_NEWER
 import net.minecraft.util.RandomSource;
+#endif
 
 /**
  * @author Ampflower
@@ -67,12 +71,22 @@ public class FadeableSoundInstance extends AbstractTickableSoundInstance impleme
 	protected float fadeOut;
 	protected float fadeIn;
 
+	#if MC_1_18_OR_OLDER
 	protected FadeableSoundInstance(
-		final SoundEvent soundEvent, final SoundSource soundSource,
+		final SoundEvent soundEvent,
+		final SoundSource soundSource
+	) {
+		super(soundEvent, soundSource);
+	}
+	#else
+	protected FadeableSoundInstance(
+		final SoundEvent soundEvent,
+		final SoundSource soundSource,
 		final RandomSource randomSource
 	) {
 		super(soundEvent, soundSource, randomSource);
 	}
+	#endif
 
 	@Override
 	public void tick() {

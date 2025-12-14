@@ -1,24 +1,20 @@
-/* Copyright 2023 Ampflower
- *
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
 import moe.amp.AutoMixin.autoMixinFabric
 import net.fabricmc.loom.task.RemapJarTask
 
 plugins {
-	alias(libs.plugins.loom)
+	alias(libs.plugins.forge)
 	alias(libs.plugins.machete)
+	alias(libs.plugins.shadow)
 	id("versions")
 	id("mod-publish")
 }
 
-val minecraft: String by project
 val minecraftRequired: String by project
 
 val modrinthId: String by project
 val projectVersion: String by project
+
+val mappingsAttribute = Attribute.of("net.minecraft.mappings", String::class.java)
 
 loom {
 	runConfigs {
@@ -28,6 +24,9 @@ loom {
 		"server" {
 			ideConfigGenerated(false)
 		}
+	}
+	forge {
+		mixinConfig("music-moods.mixin.json")
 	}
 }
 
@@ -44,10 +43,9 @@ repositories {
 	maven("https://api.modrinth.com/maven") {
 		name = "Modrinth"
 	}
+	maven("https://files.minecraftforge.net/") { name = "Fo" }
 	maven("https://maven.gegy.dev") { name = "Gegy" }
 	maven("https://maven.terraformersmc.com/releases/") { name = "TerraformersMC" }
-	maven("https://aperlambda.github.io/maven") { name = "AperLambda" }
-	maven("https://www.jitpack.io") { name = "JitPack" }
 }
 
 dependencies {
@@ -94,12 +92,12 @@ tasks {
 			)
 		inputs.properties(map)
 
-		filesMatching(listOf("fabric.mod.json")) { expand(map) }
+		filesMatching(listOf("META-INF/mods.toml")) { expand(map) }
 
 		exclude(
 			"*.mixin.json",
 			"*.mixins.json",
-			"META-INF/mods.toml",
+			"fabric.mod.json",
 			"META-INF/neoforge.mods.toml",
 		)
 	}
@@ -111,7 +109,14 @@ tasks {
 			from(rootProject.file("LICENSE"))
 		}
 	}
+	shadowJar {
+		configurations.value(setOf(project.configurations.shadow.get()))
+		relocate("com.llamalad7.mixinextras", "gay.ampflower.musicmoods.mixinextras")
+		mergeServiceFiles()
+	}
 	remapJar {
+		dependsOn(shadowJar)
+		this.inputFile.value(shadowJar.get().archiveFile)
 		finalizedBy("optimizeOutputsOfRemapJar")
 	}
 	"modrinth" {

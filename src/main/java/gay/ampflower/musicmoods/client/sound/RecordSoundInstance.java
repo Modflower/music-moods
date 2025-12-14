@@ -6,7 +6,9 @@
 
 package gay.ampflower.musicmoods.client.sound;
 
+#if MC_1_19_OR_NEWER
 import net.minecraft.client.resources.sounds.SoundInstance;
+#endif
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
@@ -31,7 +33,11 @@ public class RecordSoundInstance extends FadeableSoundInstance implements Relati
 	}
 
 	public RecordSoundInstance(final SoundEvent soundEvent, final double x, final double y, final double z) {
+		#if MC_1_18_OR_OLDER
+		super(soundEvent, SoundSource.RECORDS);
+		#else
 		super(soundEvent, SoundSource.RECORDS, SoundInstance.createUnseededRandom());
+		#endif
 
 		this.origin = new Vec3(x, y, z);
 

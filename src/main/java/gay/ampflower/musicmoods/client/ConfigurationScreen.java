@@ -6,8 +6,21 @@
 
 package gay.ampflower.musicmoods.client;// Created 2022-24-12T20:58:10
 
-import com.mojang.logging.LogUtils;
-#if !FORGE
+#if MC_1_16_4_OR_OLDER
+import me.lambdaurora.spruceui.Position;
+import me.lambdaurora.spruceui.SpruceTexts;
+import me.lambdaurora.spruceui.option.SpruceCheckboxBooleanOption;
+import me.lambdaurora.spruceui.option.SpruceCyclingOption;
+import me.lambdaurora.spruceui.option.SpruceDoubleOption;
+import me.lambdaurora.spruceui.option.SpruceFloatInputOption;
+import me.lambdaurora.spruceui.option.SpruceIntegerInputOption;
+import me.lambdaurora.spruceui.option.SpruceSeparatorOption;
+import me.lambdaurora.spruceui.screen.SpruceScreen;
+import me.lambdaurora.spruceui.widget.SpruceButtonWidget;
+import me.lambdaurora.spruceui.widget.SpruceWidget;
+import me.lambdaurora.spruceui.widget.container.SpruceOptionListWidget;
+import me.lambdaurora.spruceui.widget.container.tabbed.SpruceTabbedWidget;
+#elif MC_1_17_OR_OLDER || !FORGE
 import dev.lambdaurora.spruceui.Position;
 import dev.lambdaurora.spruceui.SpruceTexts;
 import dev.lambdaurora.spruceui.option.SpruceCheckboxBooleanOption;
@@ -42,14 +55,18 @@ import gay.ampflower.musicmoods.Constants;
 import gay.ampflower.musicmoods.Mint;
 import gay.ampflower.musicmoods.config.OptionEnum;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.OptionInstance;
 import net.minecraft.client.gui.screens.ErrorScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.sounds.MusicManager;
 import net.minecraft.client.sounds.SoundEngine;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundSource;
+
+#if MC_1_16_4_OR_OLDER
+import org.apache.logging.log4j.Logger;
+#else
 import org.slf4j.Logger;
+#endif
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
@@ -61,6 +78,16 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
+#if MC_1_18_OR_OLDER
+import static gay.ampflower.musicmoods.Constants.literal;
+import static gay.ampflower.musicmoods.Constants.translatable;
+#else
+import net.minecraft.client.OptionInstance;
+
+import static net.minecraft.network.chat.Component.literal;
+import static net.minecraft.network.chat.Component.translatable;
+#endif
 
 #if MC_1_21_6_OR_NEWER
 import dev.lambdaurora.spruceui.tooltip.TooltipData;
@@ -78,10 +105,10 @@ import net.minecraft.client.MusicToastDisplayState;
  * @since 0.0.0
  **/
 public class ConfigurationScreen extends SpruceScreen {
-	private static final Logger logger = LogUtils.getLogger();
+	private static final Logger logger = Constants.getLogger();
 	private static final MethodHandles.Lookup SELF = MethodHandles.lookup();
 
-	private static final Component AUDIO_DEVICE = Component.translatable("options.audioDevice");
+	private static final Component AUDIO_DEVICE = translatable("options.audioDevice");
 
 	private final Screen parent;
 
@@ -90,7 +117,7 @@ public class ConfigurationScreen extends SpruceScreen {
 	private boolean committed;
 
 	public ConfigurationScreen(final Screen parent) {
-		super(Component.translatable("music-moods.gui.configuration"));
+		super(translatable("music-moods.gui.configuration"));
 		this.parent = parent;
 	}
 
@@ -111,12 +138,21 @@ public class ConfigurationScreen extends SpruceScreen {
 		addTabEntry("demo", ConfigurationScreen::buildDemoList);
 		addTabEntry("meta", ConfigurationScreen::buildMetaList);
 
+		#if MC_1_16_4_OR_OLDER
+		this.addWidget(this.tabbedWidget);
+
+		this.addWidget(new SpruceButtonWidget(
+			Position.of(this, this.width / 2 - (Constants.buttonWidth / 2), this.height - 28),
+			Constants.buttonWidth, Constants.buttonHeight, SpruceTexts.GUI_DONE, btn -> onClose()
+		));
+		#else
 		this.addRenderableWidget(this.tabbedWidget);
 
 		this.addRenderableWidget(new SpruceButtonWidget(
 			Position.of(this, this.width / 2 - (Constants.buttonWidth / 2), this.height - 28),
 			Constants.buttonWidth, Constants.buttonHeight, SpruceTexts.GUI_DONE, btn -> onClose()
 		));
+		#endif
 	}
 
 	@Override
@@ -141,8 +177,8 @@ public class ConfigurationScreen extends SpruceScreen {
 		} catch (IOException ioe) {
 			logger.error("Failed to save Music Moods config", ioe);
 			minecraft.setScreen(new ErrorScreen(
-				Component.translatable("music-moods.gui.configuration.error"),
-				Component.literal(ioe.getLocalizedMessage())
+				translatable("music-moods.gui.configuration.error"),
+				literal(ioe.getLocalizedMessage())
 			));
 		}
 	}
@@ -150,8 +186,8 @@ public class ConfigurationScreen extends SpruceScreen {
 	protected void addTabEntry(String name, SpruceTabbedWidget.ContainerFactory factory) {
 		final var key = "music-moods.gui.configuration." + name;
 		this.tabbedWidget.addTabEntry(
-			Component.translatable(key),
-			Component.translatable(key + ".description").withStyle(ChatFormatting.GRAY),
+			translatable(key),
+			translatable(key + ".description").withStyle(ChatFormatting.GRAY),
 			factory
 		);
 	}
@@ -180,20 +216,33 @@ public class ConfigurationScreen extends SpruceScreen {
 			list.addSmallSingleOptionEntry(toSlider(last));
 		}
 
+		#if MC_1_18_OR_NEWER
 		list.addSingleOptionEntry(soundDevices);
+		#endif
 
+		#if MC_1_18_OR_OLDER
+
+		list.addSingleOptionEntry(new SpruceCheckboxBooleanOption(
+			"options.showSubtitles",
+			() -> minecraft.options.showSubtitles,
+			value -> minecraft.options.showSubtitles = value,
+			translation("options.showSubtitles.tooltip")
+		));
+
+		#else
 		list.addOptionEntry(
 			toCheckbox(
 				"showSubtitles",
 				minecraft.options.showSubtitles(),
-				Component.translatable("options.showSubtitles.tooltip")
+				translatable("options.showSubtitles.tooltip")
 			),
 			toCheckbox(
 				"directionalAudio",
 				minecraft.options.directionalAudio(),
-				Component.translatable("options.directionalAudio.tooltip")
+				translatable("options.directionalAudio.tooltip")
 			)
 		);
+		#endif
 
 		#if MC_1_21_6_OR_NEWER
 		// Music tab primarily should house these, but it is here in vanilla's.
@@ -209,7 +258,7 @@ public class ConfigurationScreen extends SpruceScreen {
 			)
 			#endif
 		);
-		#else;
+		#else
 		try {
 			list.addSingleOptionEntry(checkbox("alwaysPlayMusic"));
 		} catch (ReflectiveOperationException roe) {
@@ -319,6 +368,7 @@ public class ConfigurationScreen extends SpruceScreen {
 	}
 	#endif
 
+	#if MC_1_19_OR_NEWER
 	private static SpruceCheckboxBooleanOption toCheckbox(
 		final String name,
 		final OptionInstance<Boolean> option,
@@ -328,10 +378,25 @@ public class ConfigurationScreen extends SpruceScreen {
 
 		return new SpruceCheckboxBooleanOption(key, option::get, option::set, adapt(tooltip));
 	}
+	#endif
 
+	#if MC_1_18_OR_NEWER
 	private SpruceCyclingOption getSoundDevices() {
 		final var key = "options.soundDevice";
+
+		final Supplier<String> getter;
+		final Consumer<String> setter;
+
+		#if MC_1_18_OR_OLDER
+		getter = () -> minecraft.options.soundDevice;
+		setter = value -> minecraft.options.soundDevice = value;
+
+		#else
 		final var option = minecraft.options.soundDevice();
+
+		getter = option::get;
+		setter = option::set;
+		#endif
 
 		final var stepper = new DynamicStepper<String>(
 			() -> {
@@ -341,8 +406,8 @@ public class ConfigurationScreen extends SpruceScreen {
 				list.addAll(init);
 				return list;
 			},
-			option::get,
-			option::set,
+			getter,
+			setter,
 			str -> {
 				if ("".equals(str)) {
 					return genericValue(AUDIO_DEVICE, "options.audioDevice.default");
@@ -352,23 +417,24 @@ public class ConfigurationScreen extends SpruceScreen {
 					str = str.substring(SoundEngine.OPEN_AL_SOFT_PREFIX_LENGTH);
 				}
 
-				return genericValue(AUDIO_DEVICE, Component.literal(str));
+				return genericValue(AUDIO_DEVICE, literal(str));
 			}
 		);
 
-		final var nl = Component.literal("\n- ");
-		final var tooltip = Component.translatable(key + ".tooltip");
+		final var nl = literal("\n- ");
+		final var tooltip = translatable(key + ".tooltip");
 
 		for (var device : minecraft.soundManager.availableSoundDevices) {
 			if (device.startsWith(SoundEngine.OPEN_AL_SOFT_PREFIX)) {
 				device = device.substring(SoundEngine.OPEN_AL_SOFT_PREFIX_LENGTH);
 			}
 
-			tooltip.append(nl).append(Component.literal(device).withStyle(ChatFormatting.YELLOW));
+			tooltip.append(nl).append(literal(device).withStyle(ChatFormatting.YELLOW));
 		}
 
 		return new SpruceCyclingOption(key, stepper, stepper, adapt(tooltip));
 	}
+	#endif
 
 	#if MC_1_21_6_OR_NEWER
 	private SpruceCyclingOption getMusicFrequency() {
@@ -398,6 +464,7 @@ public class ConfigurationScreen extends SpruceScreen {
 	}
 	#endif
 
+	#if MC_1_19_OR_NEWER
 	private static <E extends Enum<E>> SpruceCyclingOption enumOptionStepper(
 		final String key,
 		final Component tooltip,
@@ -405,7 +472,7 @@ public class ConfigurationScreen extends SpruceScreen {
 		final OptionInstance<E> option,
 		final Function<E, Component> caption
 	) {
-		final var translation = Component.translatable(key);
+		final var translation = translatable(key);
 
 		final var stepper = new EnumStepper<>(
 			enums,
@@ -421,6 +488,7 @@ public class ConfigurationScreen extends SpruceScreen {
 			adapt(tooltip)
 		);
 	}
+	#endif
 
 	public static SpruceSeparatorOption separator(String field) {
 		final var key = "music-moods.option.separator." + field;
@@ -535,28 +603,28 @@ public class ConfigurationScreen extends SpruceScreen {
 	}
 
 	private static Component genericValue(final String key, final String value) {
-		return genericValue(Component.translatable(key), Component.translatable(value));
+		return genericValue(translatable(key), translatable(value));
 	}
 
 	private static Component genericValue(final Component key, final String value) {
-		return genericValue(key, Component.translatable(value));
+		return genericValue(key, translatable(value));
 	}
 
 	private static Component genericValue(final Component key, final Component value) {
-		return Component.translatable("options.generic_value", key, value);
+		return translatable("options.generic_value", key, value);
 	}
 
 	private static Component genericPercentage(final String key, final double value) {
-		return genericPercentage(Component.translatable(key), (int) (value * 100.D));
+		return genericPercentage(translatable(key), (int) (value * 100.D));
 	}
 
 	private static Component genericPercentage(final Component key, final int value) {
-		return Component.translatable("options.percent_value", key, value);
+		return translatable("options.percent_value", key, value);
 	}
 
 	#if MC_1_21_5_OR_OLDER
 	private static Component translation(final String key) {
-		return Component.translatable(key);
+		return translatable(key);
 	}
 	private static Component adapt(final Component component) {
 		return component;
@@ -597,13 +665,13 @@ public class ConfigurationScreen extends SpruceScreen {
 				final var name = value.name().toLowerCase(Locale.ROOT);
 
 				if (value instanceof OptionEnum option) {
-					return Component.translatable(
+					return translatable(
 						key,
-						Component.translatable("music-moods.option.value." + option.localizationClass() + "." + name)
+						translatable("music-moods.option.value." + option.localizationClass() + "." + name)
 					);
 				}
 
-				return Component.translatable(key, Component.translatable("music-moods.option.value." + name));
+				return translatable(key, translatable("music-moods.option.value." + name));
 			});
 		}
 

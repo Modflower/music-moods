@@ -19,7 +19,11 @@ import net.minecraft.sounds.SoundSource;
 public class MusicSoundInstance extends FadeableSoundInstance {
 
 	public MusicSoundInstance(final SoundEvent soundEvent) {
+		#if MC_1_18_OR_OLDER
+		super(soundEvent, SoundSource.MUSIC);
+		#else
 		super(soundEvent, SoundSource.MUSIC, SoundInstance.createUnseededRandom());
+		#endif
 
 		this.relative = true;
 	}
