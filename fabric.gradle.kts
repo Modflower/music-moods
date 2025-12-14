@@ -69,7 +69,7 @@ tasks {
 		options.compilerArgs.addAll(manifold.map { (k, v) -> "-A$k=$v" })
 		options.isFork = true
 		options.forkOptions {
-			memoryMaximumSize = "2G"
+			memoryMaximumSize = "4G"
 			// Evil witch has been here...
 			// Ignores build.properties so that Manifold doesn't pick up the root properties used by IntelliJ,
 			// which when loaded, breaks the build by having impossible conditions.
