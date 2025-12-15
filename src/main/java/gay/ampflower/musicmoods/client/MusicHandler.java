@@ -19,6 +19,14 @@ import gay.ampflower.musicmoods.Sounds;
 import net.minecraft.world.item.JukeboxSong;
 #endif
 
+#if MC_1_21_4_OR_NEWER && !MC_1_21_11_OR_NEWER
+#define MUSIC_INFO
+import net.minecraft.client.sounds.MusicInfo;
+#else
+import net.minecraft.sounds.Music;
+#endif
+
+
 /**
  * @author Ampflower
  * @since 0.6.12
@@ -72,6 +80,16 @@ public interface MusicHandler {
 	boolean moods$intrudeJukeboxTrack(
 		final @NotNull Holder<SoundEvent> soundEvent,
 		final @Nullable Component name
+	);
+	#endif
+
+	#if MUSIC_INFO
+	boolean moods$intrudeMusic(
+		final @NotNull MusicInfo music
+	);
+	#else
+	boolean moods$intrudeMusic(
+		final @NotNull Music music
 	);
 	#endif
 

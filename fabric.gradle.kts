@@ -36,20 +36,6 @@ java {
 	targetCompatibility = JavaVersion.VERSION_17
 }
 
-repositories {
-	mavenCentral()
-	maven("https://oss.sonatype.org/content/repositories/snapshots") {
-		name = "Nexus Repository OSS"
-	}
-	maven("https://api.modrinth.com/maven") {
-		name = "Modrinth"
-	}
-	maven("https://maven.gegy.dev") { name = "Gegy" }
-	maven("https://maven.terraformersmc.com/releases/") { name = "TerraformersMC" }
-	maven("https://aperlambda.github.io/maven") { name = "AperLambda" }
-	maven("https://www.jitpack.io") { name = "JitPack" }
-}
-
 dependencies {
 	mappings(loom.officialMojangMappings())
 }

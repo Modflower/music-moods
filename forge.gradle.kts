@@ -34,35 +34,8 @@ java {
 	targetCompatibility = JavaVersion.VERSION_17
 }
 
-repositories {
-	mavenCentral()
-	maven("https://oss.sonatype.org/content/repositories/snapshots") {
-		name = "Nexus Repository OSS"
-	}
-	maven("https://api.modrinth.com/maven") {
-		name = "Modrinth"
-	}
-	maven("https://files.minecraftforge.net/") { name = "Fo" }
-	maven("https://maven.gegy.dev") { name = "Gegy" }
-	maven("https://maven.terraformersmc.com/releases/") { name = "TerraformersMC" }
-}
-
 dependencies {
 	mappings(loom.officialMojangMappings())
-	/*
-		val mojmap = Action<ExternalModuleDependency> {
-			attributes {
-				attribute(mappingsAttribute, "mojmap")
-			}
-		}
-
-		libraries["spruceui"]?.let {
-			include(implementation(it.group, it.name, it.version, dependencyConfiguration = mojmap))
-		}
-
-		libraries["yumi-mc-foundation"]?.let {
-			include(it.group, it.name, it.version, dependencyConfiguration = mojmap)
-		}*/
 }
 
 tasks {

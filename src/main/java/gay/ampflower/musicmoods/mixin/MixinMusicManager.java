@@ -388,6 +388,36 @@ public abstract class MixinMusicManager implements MusicHandler {
 	}
 	#endif
 
+	#if MUSIC_INFO
+	@Override
+	public boolean moods$intrudeMusic(final @NotNull MusicInfo musicInfo) {
+		if (
+			this.currentMusicIntruded &&
+			this.isCompatible(this.currentMusic, getLocation(musicInfo.music()))
+		) {
+			return false;
+		}
+
+		this.startPlayingIntruded(musicInfo);
+
+		return true;
+	}
+	#else
+	@Override
+	public boolean moods$intrudeMusic(final @NotNull Music music) {
+		if (
+			this.currentMusicIntruded &&
+			this.isCompatible(this.currentMusic, getLocation(music))
+		) {
+			return false;
+		}
+
+		this.startPlayingIntruded(music);
+
+		return true;
+	}
+	#endif
+
 	/**
 	 * Determines whether to fall back to the previous track despite the situational
 	 * music being set to not replace.
@@ -534,6 +564,16 @@ public abstract class MixinMusicManager implements MusicHandler {
 		this.startPlayingCommon(music.music.event, null, music.volume(), 0);
 	}
 	#endif
+
+	@Unique
+	private void startPlayingIntruded(
+		final #if(MUSIC_INFO) MusicInfo #else Music #endif music
+	) {
+		this.reset(Config.jukeboxFadeMixTicks);
+
+		this.currentMusicIntruded = true;
+		this.startPlaying(music);
+	}
 
 	#if MC_1_17_OR_OLDER
 	@Unique

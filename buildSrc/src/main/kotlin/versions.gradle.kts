@@ -13,23 +13,22 @@ val ini = rootProject.file("versions.ini").toIni()
 
 val versions = HashMap<String, String>()
 val libraries = HashMap<String, Library>()
+val repositories = LinkedHashMap<String, String>()
 
 ini.sections["versions"]?.let {
-	it.forEach { alias, value -> versions[alias as String] = value as String }
+	it.forEach { alias, value -> versions[alias] = value }
 }
 
 ini.sections[project.name]?.let {
-	it.forEach { alias, value -> versions[alias as String] = value as String }
+	it.forEach { alias, value -> versions[alias] = value }
 }
 
 fun resolveVersions(
-	properties: Properties?,
+	properties: Map<String, String>?,
 	missingVersion: (module: String, version: String) -> Unit,
 	action: (alias: String, module: String, version: String) -> Unit
 ) {
 	for ((alias, value) in properties?:return) {
-		value as String
-
 		val colon = value.lastIndexOf(':')
 
 		val version = when {
@@ -47,7 +46,7 @@ fun resolveVersions(
 		}
 
 		action(
-			alias as String,
+			alias,
 			value.substring(0, colon),
 			version
 		)
@@ -71,6 +70,38 @@ project.extensions.add(
 	libraries
 )
 
+val slice = project.name.substringBeforeLast('-')
+
+fun RepositoryHandler.populate(k: String, v: String) {
+	if (v.isNullOrBlank()) {
+		when (k) {
+			"mavenLocal" -> {
+				mavenLocal()
+				return
+			}
+			"mavenCentral" -> {
+				mavenCentral()
+				return
+			}
+			"gradlePluginPortal" -> {
+				gradlePluginPortal()
+				return
+			}
+		}
+	}
+	logger.info("Adding maven({}) {name = {}}", v, k)
+	maven(v) { name = k }
+}
+
+repositories {
+	for ((k, v) in ini.sections["repositories"]?:mapOf()) {
+		populate(k, v)
+	}
+	for ((k, v) in ini.sections["$slice.repositories"]?:mapOf()) {
+		populate(k, v)
+	}
+}
+
 dependencies {
 	fun meow(k: Any, v: Any) {
 		for(l in (v as String).split(',')
@@ -84,5 +115,5 @@ dependencies {
 	}
 
 	for((k, v) in ini.sections["dependencies"]?:mapOf()) { meow(k, v) }
-	for((k, v) in ini.sections[project.name.substringBeforeLast('-')]?:mapOf()) { meow(k, v) }
+	for((k, v) in ini.sections[slice]?:mapOf()) { meow(k, v) }
 }

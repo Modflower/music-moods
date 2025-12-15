@@ -49,18 +49,19 @@ import org.thinkingstudio.obsidianui.widget.SpruceWidget;
 import org.thinkingstudio.obsidianui.widget.container.SpruceOptionListWidget;
 import org.thinkingstudio.obsidianui.widget.container.tabbed.SpruceTabbedWidget;
 #endif
-import gay.ampflower.musicmoods.ClientMain;
 import gay.ampflower.musicmoods.Config;
 import gay.ampflower.musicmoods.Constants;
 import gay.ampflower.musicmoods.Mint;
 import gay.ampflower.musicmoods.config.OptionEnum;
+import gay.ampflower.musicmoods.util.ModSupport;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.ErrorScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.sounds.MusicManager;
 import net.minecraft.client.sounds.SoundEngine;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.sounds.SoundSource;
+import org.jetbrains.annotations.Nullable;
 
 #if MC_1_16_4_OR_OLDER
 import org.apache.logging.log4j.Logger;
@@ -94,6 +95,7 @@ import dev.lambdaurora.spruceui.tooltip.TooltipData;
 import gay.ampflower.musicmoods.mixin.AccessorOptionInstance;
 import gay.ampflower.musicmoods.mixin.AccessorTooltip;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.sounds.MusicManager;
 #endif
 
 #if MC_1_21_11_OR_NEWER
@@ -109,6 +111,7 @@ public class ConfigurationScreen extends SpruceScreen {
 	private static final MethodHandles.Lookup SELF = MethodHandles.lookup();
 
 	private static final Component AUDIO_DEVICE = translatable("options.audioDevice");
+	private static final Component TICKER = translatable("music-moods.option.ticker");
 
 	private final Screen parent;
 
@@ -136,6 +139,9 @@ public class ConfigurationScreen extends SpruceScreen {
 		addTabEntry("music", this::buildMusicOptionList);
 		addTabEntry("jukebox", ConfigurationScreen::buildJukeboxOptionList);
 		addTabEntry("demo", ConfigurationScreen::buildDemoList);
+		if (!ModSupport.conflictsPresent.isEmpty) {
+			addTabEntry("compatibility", ConfigurationScreen::buildCompatList);
+		}
 		addTabEntry("meta", ConfigurationScreen::buildMetaList);
 
 		#if MC_1_16_4_OR_OLDER
@@ -324,12 +330,32 @@ public class ConfigurationScreen extends SpruceScreen {
 		return list;
 	}
 
+	protected static SpruceOptionListWidget buildCompatList(int width, int height) {
+		final var list = new SpruceOptionListWidget(Position.origin(), width, height);
+
+		try {
+			if (ModSupport.tickersPresent.size() != 1) {
+				list.addSingleOptionEntry(separator("compatibility"));
+				list.addSingleOptionEntry(tickers);
+			}
+
+			if (ModSupport.timm) {
+				list.addSingleOptionEntry(modSeparator("timm"));
+				list.addOptionEntry(checkbox("timm$disableFade"), checkbox("timm$intrudeStructureMusic"));
+			}
+		} catch (Throwable roe) {
+			throw new AssertionError("Unexpected access violation", roe);
+		}
+
+		return list;
+	}
+
 	protected static SpruceOptionListWidget buildMetaList(int width, int height) {
 		final var list = new SpruceOptionListWidget(Position.origin(), width, height);
 
 		try {
 			list.addSingleOptionEntry(separator("modPack"));
-			list.addSingleOptionEntry(checkbox("injectUiComponents", () -> ClientMain.isModMenuPresent));
+			list.addSingleOptionEntry(checkbox("injectUiComponents", () -> ModSupport.isModMenuPresent));
 		} catch (ReflectiveOperationException roe) {
 			throw new AssertionError("Unexpected access violation", roe);
 		}
@@ -379,6 +405,37 @@ public class ConfigurationScreen extends SpruceScreen {
 		return new SpruceCheckboxBooleanOption(key, option::get, option::set, adapt(tooltip));
 	}
 	#endif
+
+	private static MutableComponent tickerLang(final @Nullable String ticker) {
+		if (ticker == null) {
+			return translatable("music-moods.ticker.none");
+		} else {
+			return translatable("music-moods.ticker." + ticker);
+		}
+	}
+
+	private static SpruceCyclingOption getTickers() {
+		final var stepper = new DynamicStepper<String>(
+			() -> ModSupport.tickersPresent,
+			() -> Config.ticker,
+			ticker -> Config.ticker = ticker,
+			ticker -> genericValue(TICKER, tickerLang(ticker))
+		);
+
+		final var nl = literal("\n- ");
+		final var tooltip = translatable("music-moods.option.ticker.description");
+
+		for (final var ticker : ModSupport.tickersPresent) {
+			tooltip.append(nl).append(tickerLang(ticker).withStyle(ChatFormatting.YELLOW));
+		}
+
+		return new SpruceCyclingOption(
+			"music-moods.option.ticker",
+			stepper,
+			stepper,
+			adapt(tooltip)
+		);
+	}
 
 	#if MC_1_18_OR_NEWER
 	private SpruceCyclingOption getSoundDevices() {
@@ -489,6 +546,11 @@ public class ConfigurationScreen extends SpruceScreen {
 		);
 	}
 	#endif
+
+	public static SpruceSeparatorOption modSeparator(String mod) {
+		final var key = "music-moods.mod." + mod;
+		return new SpruceSeparatorOption(key, true, translation(key + ".description"));
+	}
 
 	public static SpruceSeparatorOption separator(String field) {
 		final var key = "music-moods.option.separator." + field;

@@ -2,8 +2,8 @@ package gay.ampflower.musicmoods.forge;
 
 #if FORGE
 
-import gay.ampflower.musicmoods.ClientMain;
 import gay.ampflower.musicmoods.client.ConfigurationScreen;
+import gay.ampflower.musicmoods.util.Platform;
 #if MC_1_17_OR_OLDER
 import net.minecraftforge.fmlclient.ConfigGuiHandler;
 #elif MC_1_18_OR_OLDER
@@ -39,7 +39,7 @@ public class ConfigurationRunner implements DistExecutor.SafeRunnable {
 		);
 		#endif
 
-		new ClientMain().onInitializeClient();
+		Platform.init();
 	}
 }
 

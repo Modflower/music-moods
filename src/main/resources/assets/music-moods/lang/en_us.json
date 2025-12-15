@@ -10,6 +10,8 @@
 	"music-moods.gui.configuration.jukebox.description": "Configuring jukeboxes?",
 	"music-moods.gui.configuration.demo": "Festivities",
 	"music-moods.gui.configuration.demo.description": "Off by default additions",
+	"music-moods.gui.configuration.compatibility": "Mod Compatibility",
+	"music-moods.gui.configuration.compatibility.description": "Beware of dragons!",
 	"music-moods.gui.configuration.meta": "Meta",
 	"music-moods.gui.configuration.meta.description": "Configure Music Moods itself",
 
@@ -76,8 +78,21 @@
 	"music-moods.option.jukeboxFadeMixTicks.description": "How long it takes for the situational track to fade out when a record is played, counted in ticks.",
 	"music-moods.option.jukeboxFadeStopTicks": "Jukebox Fade-out time in ticks",
 	"music-moods.option.jukeboxFadeStopTicks.description": "How long it takes for the jukebox record to fade out when the record is removed, counted in ticks.",
+
 	"music-moods.option.rightClickToPlay": "Right-Click Discs to Play",
 	"music-moods.option.rightClickToPlay.description": "In game, right-click any disc while your inventory is open to play them.\n\nNote: this can only be done in your player inventory.\n\nI believe some people call this the eternal jukebox.",
+
+	"music-moods.option.ticker": "Music Manager",
+	"music-moods.option.ticker.description": "The music manager Music Moods will use when ticking music.\n\nBeware, these managers may not work with Music Moods's extended config options.\n\nAvailable Music Managers:",
+	"music-moods.mod.none": "Music Moods",
+	"music-moods.mod.timm": "The Immersive Music Mod",
+	"music-moods.mod.timm.description": "Tweaks for The Immersive Music Mod.",
+
+	"music-moods.option.timm$disableFade": "Disable Fading Implementation",
+	"music-moods.option.timm$disableFade.description": "Disable TIMM's fader implementation.\n\nThis forces Music Moods' fader to be authoritative.",
+	"music-moods.option.timm$intrudeStructureMusic": "Intrude Structure Music",
+	"music-moods.option.timm$intrudeStructureMusic.description": "Whether to treat TIMM's structure music as an intrusion into Music Moods' music manager, allowing it to be handled specially.",
+
 	"music-moods.option.injectUiComponents": "Inject UI Components",
 	"music-moods.option.injectUiComponents.description": "Inject buttons into Vanilla UIs for discoverability.\n\nNote: Disabling this will hinder discoverability of Music Moods' options and should only be done if you're providing an alternative mean of accessing its settings.\n\nRequires Mod Menu to be installed.",
 

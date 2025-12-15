@@ -144,6 +144,9 @@ class Versions(
 		val cutters = HashMap<String, Ini>()
 		val splices = HashSet<String>()
 		for (k in HashSet<String>().apply { addAll(ini.sections.keys); removeAll(reservedSections) }) {
+			if (k.contains('.')) {
+				continue
+			}
 			val ini = file("$k.ini").toIni()
 			cutters[k] = ini
 			splices.addAll(ini.sections.keys)
@@ -213,7 +216,7 @@ class Versions(
 	}
 
 	companion object {
-		val reservedSections = setOf("plugins", "versions", "dependencies")
+		val reservedSections = setOf("plugins", "versions", "dependencies", "repositories")
 	}
 }
 

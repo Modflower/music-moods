@@ -4,8 +4,8 @@ package gay.ampflower.musicmoods.forge;
 
 #if NEOFORGE
 
-import gay.ampflower.musicmoods.ClientMain;
 import gay.ampflower.musicmoods.client.ConfigurationScreen;
+import gay.ampflower.musicmoods.util.Platform;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
@@ -37,7 +37,7 @@ public class Main {
 	#if NEOFORGE
 	public Main(ModContainer container) {
 		container.registerExtensionPoint(IConfigScreenFactory.class, (self, parent) -> new ConfigurationScreen(parent));
-		new ClientMain().onInitializeClient();
+		Platform.init();
 	}
 	#endif
 

@@ -149,6 +149,22 @@ public final class Config {
 	 */
 	public static boolean injectUiComponents = true;
 
+	/**
+	 * The active Music Manager ticker. Note: Music Moods' will always default to its ticker.
+	 */
+	public static String ticker;
+
+	// The Immersive Music Mod support
+	/**
+	 * Force-disable TIMM's volume adjustment. Defaults to true.
+	 */
+	public static boolean timm$disableFade = true;
+
+	/**
+	 * Whether structure music should be intruded in a similar manner to jukeboxes. Defaults to true.
+	 */
+	public static boolean timm$intrudeStructureMusic = true;
+
 	public static void read() throws IOException {
 		if (Files.notExists(config)) {
 			// Commit the config, so it exists on disk to edit.
@@ -186,6 +202,11 @@ public final class Config {
 		jukeboxFadeStopTicks = toInt(properties, "jukeboxFadeStopTicks", jukeboxFadeDefault);
 
 		rightClickToPlay = toBoolean(properties, "rightClickToPlay", false);
+
+		ticker = properties.getProperty("ticker");
+
+		timm$disableFade = toBoolean(properties, "timm$disableFade", true);
+		timm$intrudeStructureMusic = toBoolean(properties, "timm$intrudeStructureMusic", true);
 
 		chaoticallyPlayMusic = toBoolean(properties, "chaoticallyPlayMusic", false);
 		injectUiComponents = toBoolean(properties, "injectUiComponents", true);

@@ -4,6 +4,7 @@ import java.io.BufferedReader
 import java.io.File
 import java.util.*
 import kotlin.collections.HashMap
+import kotlin.collections.LinkedHashMap
 
 /**
  * Pretty much a Windows-spec ini parser with the concept of a null header section.
@@ -14,11 +15,11 @@ import kotlin.collections.HashMap
  * @since 0.7
  **/
 // Copy from settings.gradle.kts
-data class Ini(val header: Properties, val sections: HashMap<String, Properties>) {
+data class Ini(val header: Map<String, String>, val sections: HashMap<String, Map<String, String>>) {
 	companion object {
 		fun read(reader: BufferedReader): Ini {
-			val sections = HashMap<String, Properties>()
-			val nullSection = Properties()
+			val sections = HashMap<String, Map<String, String>>()
+			val nullSection = LinkedHashMap<String, String>()
 			var properties = nullSection
 			var line: String?
 
@@ -32,7 +33,7 @@ data class Ini(val header: Properties, val sections: HashMap<String, Properties>
 				}
 				if (line.startsWith('[') && line.endsWith(']')) {
 					val section = line.substring(1, line.length - 1)
-					properties = Properties()
+					properties = LinkedHashMap()
 					sections.put(section, properties)
 					continue
 				}
@@ -50,9 +51,9 @@ data class Ini(val header: Properties, val sections: HashMap<String, Properties>
 		}
 	}
 
-	fun getHeader(key: String) = header[key] as String?
+	fun getHeader(key: String) = header[key]
 
-	fun get(section: String, key: String) = sections[section]?.get(key) as String?
+	fun get(section: String, key: String) = sections[section]?.get(key)
 }
 
 fun File.toIni(): Ini = bufferedReader().use { Ini.read(it) }

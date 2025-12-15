@@ -20,7 +20,7 @@
 	"icon": "pack.png",
 	"entrypoints": {
 		"client": [
-			"gay.ampflower.musicmoods.ClientMain"
+			"gay.ampflower.musicmoods.util.Platform::init"
 		],
 		"modmenu": [
 			"gay.ampflower.musicmoods.client.MusicMoodsModMenuCompat"
