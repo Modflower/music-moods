@@ -62,6 +62,8 @@ object AutoMixin {
 			classes[node.name] = node to a
 		}
 
+		logger.info("Classes: {}", classes)
+
 		return classes
 	}
 
@@ -126,19 +128,36 @@ object AutoMixin {
 		return resolveMixinConfigs(files, manifest.getArray("mixins") ?: listOf())
 	}
 
+	private fun filterJsonArray(array: JsonArray?, filter: Set<String>, name: String) {
+		if (array == null) {
+			return
+		}
+
+		if (logger.isInfoEnabled) {
+			logger.info("{}:", name)
+			for (i in array) {
+				logger.info("\t- {}", i)
+			}
+		}
+
+		array.retainAll(filter)
+	}
+
 	fun filterMixins(mixin: JsonObject, classes: Lazy<MixinMap>) {
 		val pack = mixin.getString("package").replace('.', '/')
 
 		val applicable = classes.value.asSequence()
 			.filter { it.key.startsWith(pack) }
-			.map { it.key.substring(pack.length + 1) to it.value }
+			.map { it.key.substring(pack.length + 1).replace('/', '.') to it.value }
 			.toMap()
+
+		logger.info("Applicable:\n\t- {}", java.lang.String.join("\n\t- ", applicable.keys))
 
 		// Simple retain all if any of the trio are present.
 		if (mixin.contains("client") || mixin.contains("server") || mixin.contains("mixins")) {
-			mixin.getArray("client")?.retainAll(applicable.keys)
-			mixin.getArray("server")?.retainAll(applicable.keys)
-			mixin.getArray("mixins")?.retainAll(applicable.keys)
+			filterJsonArray(mixin.getArray("client"), applicable.keys, "client")
+			filterJsonArray(mixin.getArray("server"), applicable.keys, "server")
+			filterJsonArray(mixin.getArray("mixins"), applicable.keys, "mixins")
 			return
 		}
 
@@ -147,7 +166,9 @@ object AutoMixin {
 		val others = JsonArray()
 
 		for ((k, v) in applicable) {
-			when (getSide(v, k)) {
+			val side = getSide(v, k)
+			logger.info("Side({}, {}) = {}", v, k, side)
+			when (side) {
 				Side.CLIENT -> client
 				Side.SERVER -> server
 				Side.COMMON -> others
