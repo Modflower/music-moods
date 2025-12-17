@@ -5,7 +5,6 @@ import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import gay.ampflower.musicmoods.Config;
 import gay.ampflower.musicmoods.client.MusicHandler;
 import net.minecraft.client.sounds.MusicManager;
-import org.spongepowered.asm.mixin.Debug;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
@@ -25,7 +24,6 @@ import net.minecraft.sounds.Music;
  * @since 0.7
  **/
 @Pseudo
-@Debug(export = true)
 @Mixin(value = MusicManager.class, priority = 1500)
 public final class MixinMusicManager {
 	@TargetHandler(
