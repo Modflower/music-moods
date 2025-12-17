@@ -4,7 +4,9 @@ package gay.ampflower.musicmoods.forge;
 
 import gay.ampflower.musicmoods.client.ConfigurationScreen;
 import gay.ampflower.musicmoods.util.Platform;
-#if MC_1_17_OR_OLDER
+#if MC_1_16_4_OR_OLDER
+import net.minecraftforge.fml.ExtensionPoint;
+#elif MC_1_17_OR_OLDER
 import net.minecraftforge.fmlclient.ConfigGuiHandler;
 #elif MC_1_18_OR_OLDER
 import net.minecraftforge.client.ConfigGuiHandler;
@@ -23,7 +25,12 @@ public class ConfigurationRunner implements DistExecutor.SafeRunnable {
 	@Override
 	public void run() {
 
-		#if MC_1_18_OR_OLDER
+		#if MC_1_16_4_OR_OLDER
+		ModLoadingContext.get().activeContainer.registerExtensionPoint(
+			ExtensionPoint.CONFIGGUIFACTORY,
+			() -> (minecraft, parent) -> new ConfigurationScreen(parent)
+		);
+		#elif MC_1_18_OR_OLDER
 		ModLoadingContext.get().activeContainer.registerExtensionPoint(
 			ConfigGuiHandler.ConfigGuiFactory.class,
 			() -> new ConfigGuiHandler.ConfigGuiFactory(

@@ -81,7 +81,11 @@ public abstract class MixinLevelRenderer {
 	 */
 	// This method is a Forgeism. No mappings are available.
 	@Overwrite(remap = false)
+	#if OLD_FORGE_1_16_4_OR_OLDER
+	public void playRecord(@Nullable SoundEvent soundEvent, BlockPos pos, @Nullable RecordItem record) {
+	#else
 	public void playStreamingMusic(@Nullable SoundEvent soundEvent, BlockPos pos, @Nullable RecordItem record) {
+	#endif
 		final var instance = this.playingRecords.get(pos);
 		if (instance != null) {
 			if (Config.jukeboxEnabled && Config.jukeboxFadeStopTicks > 0 && instance instanceof Fadeable fadeable) {

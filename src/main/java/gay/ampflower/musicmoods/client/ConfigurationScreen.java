@@ -6,7 +6,7 @@
 
 package gay.ampflower.musicmoods.client;// Created 2022-24-12T20:58:10
 
-#if MC_1_16_4_OR_OLDER
+#if !OLD_FORGE && MC_1_16_4_OR_OLDER
 import me.lambdaurora.spruceui.Position;
 import me.lambdaurora.spruceui.SpruceTexts;
 import me.lambdaurora.spruceui.option.SpruceCheckboxBooleanOption;
@@ -20,7 +20,7 @@ import me.lambdaurora.spruceui.widget.SpruceButtonWidget;
 import me.lambdaurora.spruceui.widget.SpruceWidget;
 import me.lambdaurora.spruceui.widget.container.SpruceOptionListWidget;
 import me.lambdaurora.spruceui.widget.container.tabbed.SpruceTabbedWidget;
-#elif MC_1_17_OR_OLDER || !FORGE
+#elif MC_1_17 || !FORGE
 import dev.lambdaurora.spruceui.Position;
 import dev.lambdaurora.spruceui.SpruceTexts;
 import dev.lambdaurora.spruceui.option.SpruceCheckboxBooleanOption;
