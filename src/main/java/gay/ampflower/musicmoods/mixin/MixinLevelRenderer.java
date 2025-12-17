@@ -14,7 +14,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvent;
 import org.spongepowered.asm.mixin.Mixin;
 
-#if FORGE_1_20_OR_OLDER
+#if FORGE_1_20_OR_OLDER || OLD_FORGE
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.item.RecordItem;
@@ -51,11 +51,11 @@ import net.minecraft.client.renderer.LevelRenderer;
  **/
 @Mixin(
 	#if (MC_1_21_2_OR_NEWER) LevelEventHandler.class #else value = LevelRenderer.class #endif
-	#if (FORGE_1_20_OR_OLDER) , priority = 500 #endif
+	#if (FORGE_1_20_OR_OLDER || OLD_FORGE) , priority = 500 #endif
 )
 public abstract class MixinLevelRenderer {
 
-	#if FORGE_1_20_OR_OLDER
+	#if FORGE_1_20_OR_OLDER || OLD_FORGE
 	@Shadow
 	@Final
 	private Map<BlockPos, SoundInstance> playingRecords;

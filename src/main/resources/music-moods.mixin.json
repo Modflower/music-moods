@@ -1,6 +1,7 @@
 {
 	"required": true,
 	"package": "gay.ampflower.musicmoods.mixin",
+	"plugin": "gay.ampflower.musicmoods.MixinPlugin",
 	"compatibilityLevel": "JAVA_17",
 	"client": [
 		"compat.timm.MixinMusicManager",

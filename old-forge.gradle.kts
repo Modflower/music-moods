@@ -1,3 +1,4 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import moe.amp.AutoMixin.autoMixinFabric
 import net.fabricmc.loom.task.RemapJarTask
 
@@ -97,20 +98,32 @@ tasks {
 		}
 	}
 	shadowJar {
-		configurations.value(setOf(project.configurations.shadow.get()))
-		relocate("com.llamalad7.mixinextras", "gay.ampflower.musicmoods.mixinextras")
-		mergeServiceFiles()
+		enabled = false
 	}
 	remapJar {
-		dependsOn(shadowJar)
-		this.inputFile.value(shadowJar.get().archiveFile)
-		finalizedBy("optimizeOutputsOfRemapJar")
+		destinationDirectory.value(jar.get().destinationDirectory)
+	}
+	register<ShadowJar>("shadowRemapJar") {
+		dependsOn(remapJar)
+		from(zipTree(remapJar.get().archiveFile.get()))
+		archiveClassifier = null
+		configurations.value(setOf(project.configurations.shadow.get()))
+		relocate("com.llamalad7.mixinextras", "gay.ampflower.musicmoods.mixinextras")
+		relocate("com.bawnorton.mixinsquared", "gay.ampflower.musicmoods.mixinsquared")
+		manifest.attributes("MixinConfigs" to "music-moods.mixin.json")
+		mergeServiceFiles()
+		finalizedBy("optimizeOutputsOfShadowRemapJar")
 	}
 	"modrinth" {
-		dependsOn("optimizeOutputsOfRemapJar")
+		dependsOn("optimizeOutputsOfShadowRemapJar")
 	}
 }
 
 modrinth {
-	uploadFile.set(tasks.remapJar.get())
+	uploadFile.set(tasks.named("shadowRemapJar").get())
+}
+
+machete {
+	additionalTasks.add("shadowRemapJar")
+	ignoredTasks.addAll("jar", "remapJar", "shadowJar")
 }

@@ -61,6 +61,18 @@ modrinth {
 		}
 	}
 
+	(project.properties["dependencies.optional"] as? String)?.let {
+		for (dep in it.split(',')) {
+			dependencies.add(ModDependency(dep, DependencyType.OPTIONAL))
+		}
+	}
+
+	(project.properties["dependencies.incompatible"] as? String)?.let {
+		for (dep in it.split(',')) {
+			dependencies.add(ModDependency(dep, DependencyType.INCOMPATIBLE))
+		}
+	}
+
 	(project.properties["dependencies.embedded"] as? String)?.let {
 		for (dep in it.split(',')) {
 			dependencies.add(ModDependency(dep, DependencyType.EMBEDDED))

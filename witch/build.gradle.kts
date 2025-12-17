@@ -4,8 +4,8 @@ plugins {
 }
 
 java {
-	sourceCompatibility = JavaVersion.VERSION_1_8
-	targetCompatibility = JavaVersion.VERSION_1_8
+	sourceCompatibility = JavaVersion.VERSION_17
+	targetCompatibility = JavaVersion.VERSION_17
 }
 
 repositories {
@@ -15,6 +15,7 @@ repositories {
 dependencies {
 	implementation(libs.asm)
 	implementation(libs.asm.tree)
+	compileOnly(libs.annotations)
 }
 
 tasks {
