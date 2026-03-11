@@ -11,4 +11,5 @@ dependencies {
 
 	implementation("com.grack:nanojson:1.10")
 	implementation("org.ow2.asm:asm:9.9")
+	implementation("org.ow2.asm:asm-tree:9.9")
 }
