@@ -58,7 +58,11 @@ public class FadeableSoundInstance extends AbstractTickableSoundInstance impleme
 	);
 
 	protected final void advanceTimer() {
+		#if MC_1_21_11_OR_OLDER
 		timer.advanceTime(System.currentTimeMillis(), false);
+		#else
+		timer.advanceRealTime(System.currentTimeMillis());
+		#endif
 	}
 
 	protected final float getTickDelta() {

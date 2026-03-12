@@ -19,6 +19,7 @@ import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.core.Holder;
 #endif
 #if MC_1_21_11_OR_NEWER
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.resources.Identifier;
 #else
 import net.minecraft.resources.ResourceLocation;
@@ -125,8 +126,10 @@ public final class Sounds #if(FABRIC) implements SimpleSynchronousResourceReload
 
 		#if MC_1_19_OR_OLDER
 		return new Holder.Direct<>(new SoundEvent(stereo));
-		#else
+		#elif MC_1_21_11_OR_OLDER
 		return new Holder.Direct<>(SoundEvent.createVariableRangeEvent(stereo));
+		#else
+		return new Holder.Direct<>(SoundEvent.createVariableRangeEvent(stereo), DataComponentMap.EMPTY);
 		#endif
 	}
 	#endif

@@ -1,12 +1,16 @@
 package gay.ampflower.musicmoods.mixin;
 
+import com.llamalad7.mixinextras.expression.Definition;
+import com.llamalad7.mixinextras.expression.Expression;
 import gay.ampflower.musicmoods.Config;
 import gay.ampflower.musicmoods.client.ConfigurationScreen;
 import net.minecraft.client.gui.screens.Screen;
 #if MC_1_20_5_OR_OLDER
 import net.minecraft.client.gui.screens.OptionsScreen;
+import net.minecraft.client.gui.screens.SoundOptionsScreen;
 #else
 import net.minecraft.client.gui.screens.options.OptionsScreen;
+import net.minecraft.client.gui.screens.options.SoundOptionsScreen;
 #endif
 import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,30 +43,26 @@ public abstract class MixinOptionsScreen extends Screen {
 	private Screen replaceScreen(Screen original) {
 		return new ConfigurationScreen(this);
 	}
-	#elif FORGE
-	// This for some reason only works on Forge..???
+	#else
+	// Well, intermediary's dead now.
+	// This also is properly universal too.
 	@Inject(
 		method = "*",
-		at = @At(
-			value = "INVOKE",
-			target = "Lnet/minecraft/client/gui/screens/SoundOptionsScreen;<init>(Lnet/minecraft/client/gui/screens/Screen;Lnet/minecraft/client/Options;)V"
-		),
-		cancellable = true
-	)
-	private void wrapScreen(CallbackInfoReturnable<Screen> cir) {
-		if (!Config.injectUiComponents) {
-			return;
-		}
-		cir.returnValue = new ConfigurationScreen(this);
-	}
-	#else
-	// This of course, doesn't get remapped by Arch Loom on Forge...???
-	@Inject(
-		method = "method_19829",
-		at = @At("HEAD"),
+		at = @At("MIXINEXTRAS:EXPRESSION"),
 		allow = 1,
 		cancellable = true
 	)
+	@Definition(id = "SoundOptionsScreen", type = SoundOptionsScreen.class)
+	@Definition(
+		#if MC_1_20_5_OR_OLDER
+		field = "Lnet/minecraft/client/gui/screens/OptionsScreen;options:Lnet/minecraft/client/Options;",
+		#else
+		field = "Lnet/minecraft/client/gui/screens/options/OptionsScreen;options:Lnet/minecraft/client/Options;",
+		#endif
+		id = "options"
+	)
+
+	@Expression("new SoundOptionsScreen(this, this.options)")
 	private void wrapScreen(CallbackInfoReturnable<Screen> cir) {
 		if (!Config.injectUiComponents) {
 			return;

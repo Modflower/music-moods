@@ -11,7 +11,11 @@ package gay.ampflower.musicmoods.mixin;
 import com.llamalad7.mixinextras.sugar.Local;
 import gay.ampflower.musicmoods.util.JukeboxUtil;
 import net.minecraft.network.chat.Component;
+#if MC_1_21_11_OR_OLDER
 import net.minecraft.world.item.EitherHolder;
+#else
+import net.minecraft.core.Holder;
+#endif
 import net.minecraft.world.item.JukeboxPlayable;
 import net.minecraft.world.item.JukeboxSong;
 import org.spongepowered.asm.mixin.Final;
@@ -31,7 +35,11 @@ import java.util.function.Consumer;
 public class MixinJukeboxPlayable {
 	@Shadow
 	@Final
+	#if MC_1_21_11_OR_OLDER
 	private EitherHolder<JukeboxSong> song;
+	#else
+	private Holder<JukeboxSong> song;
+	#endif
 
 	@Inject(method = "addToTooltip", at = @At("RETURN"))
 	private void addRightClickToPlay(

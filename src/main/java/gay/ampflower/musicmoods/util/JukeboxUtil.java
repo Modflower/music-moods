@@ -28,7 +28,9 @@ import net.minecraft.world.item.RecordItem;
 #else
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
+#if MC_1_21_11_OR_OLDER
 import net.minecraft.world.item.EitherHolder;
+#endif
 import net.minecraft.world.item.JukeboxSong;
 #endif
 
@@ -94,12 +96,14 @@ public final class JukeboxUtil {
 
 	#else
 
+		#if MC_1_21_11_OR_OLDER
 	public static Optional<JukeboxSong> toStereoElseMono(
 		final RegistryAccess access,
 		final EitherHolder<JukeboxSong> mono
 	) {
 		return toStereoElseMono(access, mono.unwrap(access));
 	}
+	#endif
 
 	public static Optional<JukeboxSong> toStereoElseMono(
 		final RegistryAccess access,
@@ -109,7 +113,13 @@ public final class JukeboxUtil {
 			return Optional.empty();
 		}
 
-		return toStereoElseMono(access, JukeboxSong.fromStack(access, itemStack));
+		#if MC_1_21_11_OR_OLDER
+		final var optionalMono = JukeboxSong.fromStack(access, itemStack);
+		#else
+		final var optionalMono = JukeboxSong.fromStack(itemStack);
+		#endif
+
+		return toStereoElseMono(access, optionalMono);
 	}
 
 	public static Optional<JukeboxSong> toStereoElseMono(
@@ -121,6 +131,13 @@ public final class JukeboxUtil {
 		}
 
 		final var mono = optionalMono.get();
+		return toStereoElseMono(access, mono);
+	}
+
+	public static Optional<JukeboxSong> toStereoElseMono(
+		final RegistryAccess access,
+		final Holder<JukeboxSong> mono
+	) {
 		return mono
 			.unwrapKey()
 			.flatMap(k -> access
