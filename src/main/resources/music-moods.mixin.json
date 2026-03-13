@@ -18,6 +18,7 @@
 		"MixinClientPacketListener",
 		"MixinJukeboxPlayable",
 		"MixinLevelRenderer",
+		"MixinMatrix3f",
 		"MixinMinecraft",
 		"MixinMusicManager",
 		"MixinNowPlayingToast",

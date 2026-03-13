@@ -6,6 +6,7 @@
 
 package gay.ampflower.musicmoods.client.sound;
 
+import gay.ampflower.musicmoods.Mint;
 #if MC_1_19_OR_NEWER
 import net.minecraft.client.resources.sounds.SoundInstance;
 #endif
@@ -81,21 +82,20 @@ public class RecordSoundInstance extends FadeableSoundInstance implements Relati
 		if (this.relative && this.x == 0 && this.y == 0 && this.z == 0) {
 			return;
 		}
-		this.toRelative = true;
-		startTransition(camera);
+		toRelative(camera, rotation);
+		startTransition(Vec3.ZERO);
 	}
 
 	public void centerOnOrigin(Vec3 camera, Vec2 rotation) {
-		this.toRelative = false;
 		fromRelative(camera, rotation);
 		startTransition(origin);
 	}
 
 	private void fromRelative(Vec3 camera, Vec2 rotation) {
 		if (this.relative) {
-			this.x += camera.x();
-			this.y += camera.y();
-			this.z += camera.z();
+			final var local = Mint.alToLocal(this.x, this.y, this.z);
+			this.setPosition(Mint.localToGlobal(camera, rotation, local));
+
 			this.relativeDirty = true;
 			this.relative = false;
 		}
@@ -103,7 +103,9 @@ public class RecordSoundInstance extends FadeableSoundInstance implements Relati
 
 	private void toRelative(Vec3 player, Vec2 rotation) {
 		if (!this.relative) {
-			this.move(Vec3.ZERO);
+			final var local = Mint.globalToLocal(player, rotation, this.getPosition());
+			this.setPosition(Mint.localToAl(local));
+
 			this.relativeDirty = true;
 			this.relative = true;
 		}
@@ -118,14 +120,19 @@ public class RecordSoundInstance extends FadeableSoundInstance implements Relati
 			return;
 		}
 
+		// FIXME: this realistically should be a curve that is biased towards the front of the player.
 		this.dest = dest;
 		this.delta = dest.subtract(this.x, this.y, this.z).scale(1 / duration);
 	}
 
-	public void move(Vec3 vec3) {
+	private void setPosition(Vec3 vec3) {
 		this.x = vec3.x();
 		this.y = vec3.y();
 		this.z = vec3.z();
+	}
+
+	private Vec3 getPosition() {
+		return new Vec3(this.x, this.y, this.z);
 	}
 
 	@Override
