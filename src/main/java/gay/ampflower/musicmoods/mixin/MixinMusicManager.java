@@ -111,7 +111,7 @@ public abstract class MixinMusicManager implements MusicHandler {
 	@Unique
 	private boolean currentMusicIntruded;
 	@Unique
-	private RecordSoundInstance focusedJukebox;
+	private SoundInstance focusedJukebox;
 	@Unique
 	private MusicSoundInstance fadingOutMusic;
 	#if MC_1_21_11_OR_NEWER
@@ -276,14 +276,14 @@ public abstract class MixinMusicManager implements MusicHandler {
 
 		final var camera = this.minecraft.gameRenderer.getMainCamera();
 
-		final var cameraPos = #if (MC_1_21_11_OR_NEWER) camera.position() #else camera.getPosition() #endif ;
+		final var cameraPos = Mint.cameraToPosition(camera);
 		final var cameraRot = Mint.cameraToRotationVector(camera);
 
 		if (maxSq <= 0) {
-			if (this.focusedJukebox != null) {
-				this.focusedJukebox.centerOnOrigin(cameraPos, cameraRot);
-				this.focusedJukebox = null;
+			if (this.focusedJukebox instanceof RecordSoundInstance lastFocused) {
+				lastFocused.centerOnOrigin(cameraPos, cameraRot);
 			}
+			this.focusedJukebox = null;
 			return;
 		}
 
@@ -301,17 +301,13 @@ public abstract class MixinMusicManager implements MusicHandler {
 		final var soundManager = this.minecraft.getSoundManager();
 
 		final var itr = map.entrySet().iterator();
-		RecordSoundInstance lastRecord = null;
+		SoundInstance lastRecord = null;
 		double lastDelta = Double.POSITIVE_INFINITY;
 		while (itr.hasNext()) {
 			final var entry = itr.next();
 
 			if (!soundManager.isActive(entry.getValue())) {
 				itr.remove();
-				continue;
-			}
-
-			if (!(entry.getValue() instanceof RecordSoundInstance record)) {
 				continue;
 			}
 
@@ -327,26 +323,32 @@ public abstract class MixinMusicManager implements MusicHandler {
 				continue;
 			}
 
-			if (delta < lastDelta) {
-				lastRecord = record;
+			// note: we'll favor RecordSoundInstance as we can mutate that to do our bidding.
+			if (
+				delta < lastDelta
+				&& (entry.getValue() instanceof RecordSoundInstance || !(lastRecord instanceof RecordSoundInstance))
+			) {
+				lastRecord = entry.getValue();
 				lastDelta = delta;
 			}
 		}
 
-		if (this.focusedJukebox != null && this.focusedJukebox != lastRecord) {
-			this.focusedJukebox.centerOnOrigin(cameraPos, cameraRot);
+		if (this.focusedJukebox != lastRecord && this.focusedJukebox instanceof RecordSoundInstance lastFocused) {
+			lastFocused.centerOnOrigin(cameraPos, cameraRot);
 		}
-		if (lastRecord != null && lastDelta > replSq) {
-			lastRecord.centerOnOrigin(cameraPos, cameraRot);
-		}
+
 		this.focusedJukebox = lastRecord;
 
 		if (lastRecord == null) {
 			return;
 		}
 
-		if (lastDelta < replSq) {
-			lastRecord.centerOnPlayer(cameraPos, cameraRot);
+		if (lastRecord instanceof RecordSoundInstance toFocus) {
+			if (lastDelta > replSq) {
+				toFocus.centerOnOrigin(cameraPos, cameraRot);
+			} else {
+				toFocus.centerOnPlayer(cameraPos, cameraRot);
+			}
 		}
 
 		this.fadeOrStopMusic(Config.jukeboxFadeMixTicks);
@@ -641,16 +643,16 @@ public abstract class MixinMusicManager implements MusicHandler {
 
 	@Unique
 	private void reset(final int fadeOut) {
-		// Reset jukebox
-		final var camera = this.minecraft.gameRenderer.getMainCamera();
+		if (this.focusedJukebox instanceof RecordSoundInstance lastFocused) {
+			// Reset jukebox
+			final var camera = this.minecraft.gameRenderer.getMainCamera();
 
-		final var cameraPos = #if (MC_1_21_11_OR_NEWER) camera.position() #else camera.getPosition() #endif ;
-		final var cameraRot = Mint.cameraToRotationVector(camera);
+			final var cameraPos = Mint.cameraToPosition(camera);
+			final var cameraRot = Mint.cameraToRotationVector(camera);
 
-		if (this.focusedJukebox != null) {
-			this.focusedJukebox.centerOnOrigin(cameraPos, cameraRot);
-			this.focusedJukebox = null;
+			lastFocused.centerOnOrigin(cameraPos, cameraRot);
 		}
+		this.focusedJukebox = null;
 
 		this.fadeOrStopMusic(fadeOut);
 	}
