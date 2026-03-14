@@ -7,7 +7,6 @@
 		"minVersion": "0.5.0"
 	},
 	"client": [
-		"compat.timm.MixinMusicManager",
 		"AccessorClientLevel",
 		"AccessorLevelEventHandler",
 		"AccessorMinecraft",
@@ -21,12 +20,14 @@
 		"MixinMatrix3f",
 		"MixinMinecraft",
 		"MixinMusicManager",
+		"MixinMusicManagerTicker",
 		"MixinNowPlayingToast",
 		"MixinOptionsScreen",
 		"MixinRecordItem",
 		"MixinSoundEngine",
 		"MixinSoundManager",
-		"MixinWeighedSoundEvents"
+		"MixinWeighedSoundEvents",
+		"compat.timm.MixinMusicManager"
 	],
 	"injectors": {
 		"defaultRequire": 1

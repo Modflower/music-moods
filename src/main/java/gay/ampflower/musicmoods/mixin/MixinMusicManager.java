@@ -13,6 +13,7 @@ import gay.ampflower.musicmoods.client.WeighedSoundEventsQuery;
 import gay.ampflower.musicmoods.client.sound.MusicSoundInstance;
 import gay.ampflower.musicmoods.client.sound.RecordSoundInstance;
 import gay.ampflower.musicmoods.config.Replacing;
+import gay.ampflower.musicmoods.debug.Debuggable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SoundInstance;
 #if MC_1_21_4_OR_NEWER && !MC_1_21_11_OR_NEWER
@@ -58,7 +59,7 @@ import net.minecraft.util.RandomSource;
  * @since 0.0.0
  **/
 @Mixin(value = MusicManager.class, priority = 500)
-public abstract class MixinMusicManager implements MusicHandler {
+public abstract class MixinMusicManager implements MusicHandler, Debuggable {
 	@Shadow
 	@Nullable
 	private SoundInstance currentMusic;
@@ -122,12 +123,23 @@ public abstract class MixinMusicManager implements MusicHandler {
 	private ResourceLocation currentCompatibleLocation;
 	#endif
 
+	@Unique
+	private long totalTicks;
+	@Unique
+	private long completedTicks;
+	@Unique
+	private long lastTickTime;
+
 	/**
 	 * @author Ampflower
 	 * @reason Better integration without having injects and redirects everywhere.
 	 */
 	@Overwrite
 	public void tick() {
+		// Debug tracker
+		this.totalTicks++;
+		this.lastTickTime = System.currentTimeMillis();
+
 		if (Config.jukeboxEnabled
 			&& (Config.jukeboxMultiplayer || !((AccessorMinecraft) minecraft).invokeIsMultiplayerServer())) {
 			handleRecords();
@@ -174,6 +186,7 @@ public abstract class MixinMusicManager implements MusicHandler {
 		// Vanilla behaviour.
 		if (music == null) {
 			this.handleMissingTrack();
+			this.completedTicks++;
 			return;
 		}
 
@@ -201,6 +214,7 @@ public abstract class MixinMusicManager implements MusicHandler {
 
 		if (this.focusedJukebox != null) {
 			if (soundManager.isActive(this.focusedJukebox)) {
+				this.completedTicks++;
 				return;
 			}
 			this.focusedJukebox = null;
@@ -213,6 +227,8 @@ public abstract class MixinMusicManager implements MusicHandler {
 				this.startPlaying(musicInfo);
 			}
 		}
+
+		this.completedTicks++;
 	}
 
 	@Unique
@@ -751,4 +767,19 @@ public abstract class MixinMusicManager implements MusicHandler {
 		#endif
 	}
 	#endif
+
+	@Override
+	public long moods$totalTicks() {
+		return this.totalTicks;
+	}
+
+	@Override
+	public long moods$completedTicks() {
+		return this.completedTicks;
+	}
+
+	@Override
+	public long moods$lastTickTime() {
+		return this.lastTickTime;
+	}
 }
