@@ -246,7 +246,7 @@ public final class Mint {
 
 	/** Converts the given local coordinate to an OpenAL coordinate. */
 	public static Vec3 localToAl(final double x, final double y, final double z) {
-		return new Vec3(-z, -x, y);
+		return new Vec3(-z, x, y);
 	}
 
 	/** Converts the given local coordinate to an OpenAL coordinate. */
@@ -256,7 +256,7 @@ public final class Mint {
 
 	/** Converts the given OpenAL coordinate to a local coordinate. */
 	public static Vec3 alToLocal(final double x, final double y, final double z) {
-		return new Vec3(-y, z, -x);
+		return new Vec3(y, z, -x);
 	}
 
 	/** Converts the given OpenAL coordinate to a local coordinate. */
@@ -264,4 +264,28 @@ public final class Mint {
 		return alToLocal(position.x, position.y, position.z);
 	}
 	// </editor-fold>
+
+	public static boolean equals(final Vec2 position, final float x, final float y) {
+		return position.x == x && position.y == y;
+	}
+
+	public static boolean equals(final Vec3 position, final double x, final double y, final double z) {
+		return position.x == x && position.y == y && position.z == z;
+	}
+
+	public static Vec3 lerp(final Vec3 a, final Vec3 b, final double delta) {
+		#if MC_1_16_4_OR_OLDER
+		return new Vec3(
+			lerp(a.x, b.x, delta),
+			lerp(a.y, b.y, delta),
+			lerp(a.z, b.z, delta)
+		);
+		#else
+		return a.lerp(b, delta);
+		#endif
+	}
+
+	public static double lerp(final double a, final double b, final double delta) {
+		return Math.fma(b - a, delta, a);
+	}
 }

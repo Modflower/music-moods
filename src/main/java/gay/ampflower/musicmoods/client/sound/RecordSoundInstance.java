@@ -7,6 +7,7 @@
 package gay.ampflower.musicmoods.client.sound;
 
 import gay.ampflower.musicmoods.Mint;
+import gay.ampflower.musicmoods.math.CubicBezierCurve;
 #if MC_1_19_OR_NEWER
 import net.minecraft.client.resources.sounds.SoundInstance;
 #endif
@@ -25,9 +26,8 @@ public class RecordSoundInstance extends FadeableSoundInstance implements Relati
 	private final Vec3 origin;
 
 	private boolean relativeDirty;
-	private boolean toRelative;
-	private Vec3 delta, dest;
-	private final float duration = 20.f;
+	private CubicBezierCurve curve;
+	private float ticks, div;
 
 	public RecordSoundInstance(final SoundEvent soundEvent, final BlockPos origin) {
 		this(soundEvent, origin.getX() + .5D, origin.getY() + .5D, origin.getZ() + .5D);
@@ -57,38 +57,78 @@ public class RecordSoundInstance extends FadeableSoundInstance implements Relati
 	public void tick() {
 		super.tick();
 
-		if (dest != null && delta != null) {
-			final var scale = delta.scale(Math.min(this.tickDelta, 1.f));
-			this.x += scale.x();
-			this.y += scale.y();
-			this.z += scale.z();
+		if (this.curve != null) {
+			final double delta = (this.ticks += this.tickDelta) * div;
 
-			if (dest.distanceToSqr(this.x, this.y, this.z) < Math.max(delta.lengthSqr(), 0.1)) {
-				if (toRelative) {
-					toRelative(null, null);
-				} else {
-					this.x = dest.x();
-					this.y = dest.y();
-					this.z = dest.z();
-				}
+			this.setPosition(curve.lerp(delta));
 
-				dest = null;
-				delta = null;
+			if (delta >= 1.d) {
+				this.curve = null;
 			}
 		}
 	}
 
 	public void centerOnPlayer(Vec3 camera, Vec2 rotation) {
-		if (this.relative && this.x == 0 && this.y == 0 && this.z == 0) {
+		if (this.relative && this.isDestinationSame(Vec3.ZERO)) {
 			return;
 		}
+		this.ticks = 0.f;
 		toRelative(camera, rotation);
-		startTransition(Vec3.ZERO);
+
+		// AL ~ x = back, y = right, z = up
+		final var current = this.getPosition();
+		final double dist = current.distanceTo(Vec3.ZERO);
+
+		this.setDeltaMultiplier(dist);
+		this.curve = new CubicBezierCurve(
+			current,
+			Mint.lerp(current, Vec3.ZERO, 0.5d),
+			new Vec3(
+				0,
+				Math.copySign(dist, current.y) * 0.45d,
+				current.z * 0.25d
+			),
+			Vec3.ZERO
+		);
 	}
 
 	public void centerOnOrigin(Vec3 camera, Vec2 rotation) {
+		if (!this.relative && this.isDestinationSame(this.origin)) {
+			return;
+		}
+		this.ticks = 0.f;
 		fromRelative(camera, rotation);
-		startTransition(origin);
+
+		final var current = this.getPosition();
+
+		// if it's over 5 blocks away, the transition is unlikely to be noticed
+		// Although we could perhaps derive the quadratic curve to make it
+		// bounce back more seamlessly, if this is a problem.
+		if (camera.distanceToSqr(current) > 25.d) {
+			this.curve = new CubicBezierCurve(
+				current,
+				Mint.lerp(current, this.origin, 0.15d),
+				Mint.lerp(current, this.origin, 0.85d),
+				this.origin
+			);
+			return;
+		}
+
+		// MC ~ x = forward, y = up, z = left
+		final var local = Mint.globalToLocal(camera, rotation, this.origin);
+		final double dist = current.distanceTo(this.origin);
+
+		this.setDeltaMultiplier(dist);
+		this.curve = new CubicBezierCurve(
+			current,
+			Mint.localToGlobal(camera, rotation, new Vec3(
+				Math.copySign(dist, local.x) * 0.45d,
+				local.y * -0.25d,
+				0
+			)),
+			Mint.lerp(current, this.origin, 0.5d),
+			this.origin
+		);
 	}
 
 	private void fromRelative(Vec3 camera, Vec2 rotation) {
@@ -111,18 +151,20 @@ public class RecordSoundInstance extends FadeableSoundInstance implements Relati
 		}
 	}
 
-	private void startTransition(Vec3 dest) {
-		if (dest.equals(this.dest)) {
-			return;
-		}
+	private void setDeltaMultiplier(final double distance) {
+		this.div = (float)(1/(20.d/32.d * distance));
+	}
 
+	private boolean isDestinationSame(Vec3 dest) {
 		if (dest.x() == this.x && dest.y() == this.y && dest.z() == this.z) {
-			return;
+			return true;
 		}
 
-		// FIXME: this realistically should be a curve that is biased towards the front of the player.
-		this.dest = dest;
-		this.delta = dest.subtract(this.x, this.y, this.z).scale(1 / duration);
+		if (this.curve == null) {
+			return false;
+		}
+
+		return this.curve.point4().equals(dest);
 	}
 
 	private void setPosition(Vec3 vec3) {
