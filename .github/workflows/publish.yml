@@ -35,6 +35,7 @@ jobs:
           MODRINTH_TOKEN: ${{secrets.MODRINTH}}
           CHANGELOG: ${{ github.event.release.body }}
       - name: Attest build artifacts
+        if: ${{ always() }}
         uses: actions/attest-build-provenance@v3
         with:
           subject-path: 'versions/*/build/libs/*.jar'
