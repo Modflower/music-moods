@@ -14,6 +14,7 @@ import gay.ampflower.musicmoods.client.sound.RecordSoundInstance;
 import gay.ampflower.musicmoods.config.Replacing;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.client.resources.sounds.Sound;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.client.sounds.MusicManager;
 import net.minecraft.client.sounds.SoundManager;
@@ -24,6 +25,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -32,12 +35,19 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 /**
  * @author Ampflower
  * @since 0.0.0
  **/
 @Mixin(value = MusicManager.class, priority = 500)
 public abstract class MixinMusicManager {
+	@Unique
+	private static final Logger logger = LoggerFactory.getLogger("Music Moods: Music Manager");
+
 	@Shadow
 	@Nullable
 	private SoundInstance currentMusic;
@@ -60,6 +70,9 @@ public abstract class MixinMusicManager {
 	private MusicSoundInstance fadingOutMusic;
 	@Unique
 	private ResourceLocation currentCompatibleLocation;
+
+	@Unique
+	private final Set<Map.Entry<Class<? extends SoundInstance>, ResourceLocation>> waitWhatWhatAreYouDoing = new HashSet<>();
 
 	/**
 	 * @author Ampflower
@@ -271,9 +284,20 @@ public abstract class MixinMusicManager {
 			return true;
 		}
 
+		final Sound sound = instance.getSound();
+
+		if (sound == null) {
+			if (waitWhatWhatAreYouDoing.add(Map.entry(instance.getClass(), instance.getLocation()))) {
+				logger.warn("Non-compliant sound instance! Returned null sound?");
+				logger.warn("{} => {}, {}", instance, instance.getClass(), instance.getLocation());
+				logger.warn("Is someone racing with the music manager?");
+			}
+			return false;
+		}
+
 		final var weighedSounds = minecraft.getSoundManager().getSoundEvent(musicLocation);
 
-		if (weighedSounds instanceof WeighedSoundEventsQuery query && query.contains(instance.getSound())) {
+		if (weighedSounds instanceof WeighedSoundEventsQuery query && query.contains(sound)) {
 			this.currentCompatibleLocation = musicLocation;
 			return true;
 		}

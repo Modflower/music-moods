@@ -40,6 +40,10 @@ public class MixinWeighedSoundEvents implements WeighedSoundEventsQuery {
 
 	@Override
 	public boolean contains(final Sound sound) {
+		if (sound == null) {
+			return false;
+		}
+
 		final var set = this.getSet();
 
 		return set.contains(sound.getLocation());
