@@ -6,6 +6,7 @@
 
 package gay.ampflower.musicmoods.mixin;// Created 2023-11-01T06:47:10
 
+import gay.ampflower.musicmoods.Constants;
 import gay.ampflower.musicmoods.client.WeighedSoundEventsQuery;
 import net.minecraft.client.resources.sounds.Sound;
 import net.minecraft.client.sounds.WeighedSoundEvents;
@@ -17,10 +18,8 @@ import net.minecraft.resources.ResourceLocation;
 #endif
 #if MC_1_16_4_OR_OLDER
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 #else
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 #endif
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,12 +36,7 @@ import java.util.Set;
  **/
 @Mixin(WeighedSoundEvents.class)
 public class MixinWeighedSoundEvents implements WeighedSoundEventsQuery {
-	@Unique
-	#if MC_1_16_4_OR_OLDER
-	private static final Logger logger = LogManager.getLogger("Music Moods Weighed Sounds Query");
-	#else
-	private static final Logger logger = LoggerFactory.getLogger("Music Moods Weighed Sounds Query");
-	#endif
+	private static final Logger logger = Constants.getLogger("Music Moods: Weighed Sounds Query");
 
 	@Shadow
 	@Final
