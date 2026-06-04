@@ -19,6 +19,7 @@ import gay.ampflower.musicmoods.debug.Debuggable;
 import gay.ampflower.musicmoods.util.InternalSupport;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.sounds.Sound;
 import net.minecraft.client.resources.sounds.SoundInstance;
 #if MC_1_21_4_OR_NEWER && !MC_1_21_11_OR_NEWER
 #define MUSIC_INFO
@@ -66,6 +67,7 @@ import org.slf4j.Logger;
 #endif
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -135,6 +137,9 @@ public abstract class MixinMusicManager implements MusicHandler, Debuggable {
 
 	@Unique
 	private final Set<#if (MC_1_21_11_OR_NEWER) Identifier #else ResourceLocation #endif > stereoTracks = new HashSet<>();
+	@Unique
+	private final Set<Map.Entry<Class<? extends SoundInstance>, #if (MC_1_21_11_OR_NEWER) Identifier #else ResourceLocation #endif >>
+		waitWhatWhatAreYouDoing = new HashSet<>();
 
 	@Unique
 	private final Set<SoundInstance> intruding = new ReferenceOpenHashSet<>();
@@ -612,6 +617,16 @@ public abstract class MixinMusicManager implements MusicHandler, Debuggable {
 
 		final var instLocation = #if (MC_1_21_11_OR_NEWER) instance.identifier #else instance.location #endif ;
 
+		final Sound sound = instance.getSound();
+		if (sound == null) {
+			if (waitWhatWhatAreYouDoing.add(Map.entry(instance.getClass(), instLocation))) {
+				logger.warn("Non-compliant sound instance! Returned null sound?");
+				logger.warn("{} => {}, {}", instance, instance.getClass(), instLocation);
+				logger.warn("Is someone racing with the music manager?");
+			}
+			return false;
+		}
+
 		if (instLocation.equals(musicLocation)) {
 			this.currentCompatibleLocation = musicLocation;
 			return true;
@@ -619,7 +634,7 @@ public abstract class MixinMusicManager implements MusicHandler, Debuggable {
 
 		final var weighedSounds = minecraft.getSoundManager().getSoundEvent(musicLocation);
 
-		if (weighedSounds instanceof WeighedSoundEventsQuery query && query.contains(instance.getSound())) {
+		if (weighedSounds instanceof WeighedSoundEventsQuery query && query.contains(sound)) {
 			this.currentCompatibleLocation = musicLocation;
 			return true;
 		}
