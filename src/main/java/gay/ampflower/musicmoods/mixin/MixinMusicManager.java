@@ -7,13 +7,17 @@
 package gay.ampflower.musicmoods.mixin;// Created 2022-24-12T20:34:50
 
 import gay.ampflower.musicmoods.Config;
+import gay.ampflower.musicmoods.Constants;
 import gay.ampflower.musicmoods.Mint;
 import gay.ampflower.musicmoods.client.MusicHandler;
 import gay.ampflower.musicmoods.client.WeighedSoundEventsQuery;
 import gay.ampflower.musicmoods.client.sound.MusicSoundInstance;
 import gay.ampflower.musicmoods.client.sound.RecordSoundInstance;
+import gay.ampflower.musicmoods.client.sound.Relativeable;
 import gay.ampflower.musicmoods.config.Replacing;
 import gay.ampflower.musicmoods.debug.Debuggable;
+import gay.ampflower.musicmoods.util.InternalSupport;
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SoundInstance;
 #if MC_1_21_4_OR_NEWER && !MC_1_21_11_OR_NEWER
@@ -36,6 +40,7 @@ import net.minecraft.resources.ResourceLocation;
 #endif
 import net.minecraft.sounds.Music;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -54,12 +59,24 @@ import java.util.Random;
 import net.minecraft.util.RandomSource;
 #endif
 
+#if MC_1_16_4_OR_OLDER
+import org.apache.logging.log4j.Logger;
+#else
+import org.slf4j.Logger;
+#endif
+
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * @author Ampflower
  * @since 0.0.0
  **/
 @Mixin(value = MusicManager.class, priority = 500)
 public abstract class MixinMusicManager implements MusicHandler, Debuggable {
+	@Unique
+	private static final Logger logger = Constants.getLogger("Music Moods: Music Manager");
+
 	@Shadow
 	@Nullable
 	private SoundInstance currentMusic;
@@ -115,6 +132,19 @@ public abstract class MixinMusicManager implements MusicHandler, Debuggable {
 	private SoundInstance focusedJukebox;
 	@Unique
 	private MusicSoundInstance fadingOutMusic;
+
+	@Unique
+	private final Set<#if (MC_1_21_11_OR_NEWER) Identifier #else ResourceLocation #endif > stereoTracks = new HashSet<>();
+
+	@Unique
+	private final Set<SoundInstance> intruding = new ReferenceOpenHashSet<>();
+	@Unique
+	private final Set<SoundInstance> potential = new ReferenceOpenHashSet<>();
+	@Unique
+	private long lastIntrusion;
+	@Unique
+	private long lastClear;
+
 	#if MC_1_21_11_OR_NEWER
 	@Unique
 	private Identifier currentCompatibleLocation;
@@ -140,9 +170,11 @@ public abstract class MixinMusicManager implements MusicHandler, Debuggable {
 		this.totalTicks++;
 		this.lastTickTime = System.currentTimeMillis();
 
+		final boolean hasIntrusion = this.tickIntrusions();
+
 		if (Config.jukeboxEnabled
 			&& (Config.jukeboxMultiplayer || !((AccessorMinecraft) minecraft).invokeIsMultiplayerServer())) {
-			handleRecords();
+			handleRecords(hasIntrusion);
 		}
 
 		final var musicInfo = this.minecraft.getSituationalMusic();
@@ -193,15 +225,24 @@ public abstract class MixinMusicManager implements MusicHandler, Debuggable {
 		final var musicLocation = getLocation(music);
 
 		// Allow the end user to say whether they want their music replaced at all.
-		if (this.currentMusic != null && !this.currentMusicIntruded && Config.situationalMusicReplacing.replaces()
-				&& (isLoudAndCompatible(fadingOutMusic, musicLocation) || shouldReplace(music))) {
-			this.fadeOrStopMusic();
+		if (
+			this.currentMusic != null
+			&& !this.currentMusicIntruded
+			&& (
+				(
+					Config.situationalMusicReplacing.replaces()
+					&& (isLoudAndCompatible(fadingOutMusic, musicLocation) || shouldReplace(music))
+				)
+				|| hasIntrusion
+			)
+		) {
+			this.fadeOrStopMusic(hasIntrusion ? Config.jukeboxFadeMixTicks : Config.fadeOutTicks);
 
-			if (isCompatible(fadingOutMusic, musicLocation)) {
+			if (!hasIntrusion && isCompatible(fadingOutMusic, musicLocation)) {
 				this.reset(0);
 				this.currentMusic = fadingOutMusic;
 				fadingOutMusic.setFadeIn(Config.fadeInTicks);
-			} else if (Config.immediatelyPlayOnReplace) {
+			} else if (!hasIntrusion && Config.immediatelyPlayOnReplace) {
 				this.startPlayingFadeIn(musicInfo);
 			} else {
 				// Clear currentMusic, so it's not trying to tick it.
@@ -220,7 +261,11 @@ public abstract class MixinMusicManager implements MusicHandler, Debuggable {
 			this.focusedJukebox = null;
 		}
 
-		if ((Config.chaoticallyPlayMusic || this.currentMusic == null) && (decrementSongDelay(music) <= 0)) {
+		if (
+			!hasIntrusion
+			&& (Config.chaoticallyPlayMusic || this.currentMusic == null)
+			&& decrementSongDelay(music) <= 0
+		) {
 			if (fadingOutMusic != null) {
 				this.startPlayingFadeIn(musicInfo);
 			} else {
@@ -229,6 +274,84 @@ public abstract class MixinMusicManager implements MusicHandler, Debuggable {
 		}
 
 		this.completedTicks++;
+	}
+
+	@Unique
+	private boolean tickIntrusions() {
+		final var player = this.minecraft.player;
+		if (player == null) {
+			return false;
+		}
+
+		final SoundManager manager = this.minecraft.soundManager;
+
+		boolean intrusion = false;
+		boolean music = false;
+		{
+			final var itr = this.intruding.iterator();
+			while (itr.hasNext()) {
+				final SoundInstance instance = itr.next();
+				if (!manager.isActive(instance)) {
+					itr.remove();
+					continue;
+				}
+				intrusion = true;
+				music = true;
+			}
+		}
+		{
+			final float fadeSq = Mint.square(Config.jukeboxFadeRange);
+
+			final var itr = this.potential.iterator();
+			while (itr.hasNext()) {
+				final SoundInstance instance = itr.next();
+				if (!manager.isActive(instance)) {
+					itr.remove();
+					continue;
+				}
+
+				if (instance instanceof RecordSoundInstance) {
+					// ignored for the purposes of this check.
+					continue;
+				}
+
+				final double delta = Mint.squaredDistanceToCamera(instance);
+
+				if (delta < fadeSq) {
+					intrusion = true;
+				}
+
+				if (instance.source == SoundSource.MUSIC) {
+					music = true;
+				}
+			}
+		}
+
+		if (intrusion) {
+			if (
+				!music
+				&& System.currentTimeMillis() - this.lastClear < 5000
+				&& System.currentTimeMillis() - this.lastIntrusion >= 5000
+			) {
+				return false;
+			}
+
+			if (this.focusedJukebox instanceof RecordSoundInstance lastFocused) {
+				final var camera = this.minecraft.gameRenderer.getMainCamera();
+
+				final var cameraPos = Mint.cameraToPosition(camera);
+				final var cameraRot = Mint.cameraToRotationVector(camera);
+
+				lastFocused.centerOnOrigin(cameraPos, cameraRot);
+			}
+
+			this.lastIntrusion = System.currentTimeMillis();
+			this.focusedJukebox = null;
+			return true;
+		} else {
+			this.lastClear = System.currentTimeMillis();
+			return System.currentTimeMillis() - this.lastIntrusion < 5000;
+		}
 	}
 
 	@Unique
@@ -275,9 +398,9 @@ public abstract class MixinMusicManager implements MusicHandler, Debuggable {
 	}
 
 	@Unique
-	private void handleRecords() {
+	private void handleRecords(final boolean hasIntrusion) {
 		// Don't override intruded tracks.
-		if (this.currentMusicIntruded) {
+		if (this.currentMusicIntruded || hasIntrusion) {
 			return;
 		}
 
@@ -327,13 +450,7 @@ public abstract class MixinMusicManager implements MusicHandler, Debuggable {
 				continue;
 			}
 
-			#if MC_1_16_4_OR_OLDER
-			var delta = entry.getKey().distSqr(player.getEyePosition(1.f), true);
-			#elif MC_1_17_OR_OLDER
-			var delta = entry.getKey().distSqr(player.getEyePosition(), true);
-			#else
-			var delta = entry.getKey().distToCenterSqr(player.getEyePosition());
-			#endif
+			final double delta = Mint.squaredDistanceTo(entry.key, player);
 
 			if (delta > maxSq) {
 				continue;
@@ -712,6 +829,67 @@ public abstract class MixinMusicManager implements MusicHandler, Debuggable {
 	@Inject(method = {"stopPlaying()V"}, at = @At("RETURN"))
 	private void clearOnStopPlaying(CallbackInfo ci) {
 		this.clearCurrent();
+	}
+
+	@Override
+	public void moods$removeProbableIntrusion(final SoundInstance instance) {
+		if (!this.minecraft.isSameThread) {
+			this.minecraft.execute(() -> this.removeProbableIntrusion(instance));
+		} else {
+			this.removeProbableIntrusion(instance);
+		}
+	}
+
+	@Unique
+	private void removeProbableIntrusion(final SoundInstance instance) {
+		this.intruding.remove(instance);
+		this.potential.remove(instance);
+	}
+
+	@Override
+	public void moods$addProbableIntrusion(final SoundInstance instance, final boolean isGlobal) {
+		if (!this.minecraft.isSameThread) {
+			this.minecraft.execute(() -> this.addProbableIntrusion(instance, isGlobal));
+		} else {
+			this.addProbableIntrusion(instance, isGlobal);
+		}
+	}
+
+	@Unique
+	private void addProbableIntrusion(final SoundInstance instance, boolean isGlobal) {
+		// Well, we don't really care if it's our track, do we?
+		if (instance == this.currentMusic || instance == this.fadingOutMusic) {
+			return;
+		}
+
+		final var resource = #if (MC_1_21_11_OR_NEWER) instance.identifier #else instance.location #endif ;
+
+		// We can ignore UI here, as there's frankly no reason to count it.
+		if (
+			InternalSupport.ignoredSources.contains(instance.source)
+			|| (instance.source == SoundSource.MASTER && resource.path.startsWith("ui."))
+		) {
+			return;
+		}
+
+		if (isGlobal && instance.getSource() != SoundSource.MUSIC && this.stereoTracks.add(resource)) {
+			logger.warn(
+				"{} ({}) is a stereo track on the {} sound source. Counting as an intruded unmanaged track.",
+				instance,
+				resource,
+				instance.source
+			);
+		}
+
+		if (!(instance instanceof Relativeable) && instance.isRelative()) {
+			isGlobal = true;
+		}
+
+		if (isGlobal) {
+			this.intruding.add(instance);
+		} else {
+			this.potential.add(instance);
+		}
 	}
 
 	#if MC_1_21_6_OR_NEWER

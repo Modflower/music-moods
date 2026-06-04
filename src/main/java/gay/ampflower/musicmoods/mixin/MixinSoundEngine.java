@@ -6,15 +6,23 @@
 
 package gay.ampflower.musicmoods.mixin;
 
+import com.llamalad7.mixinextras.expression.Definition;
+import com.llamalad7.mixinextras.expression.Expression;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.audio.Channel;
+import com.mojang.blaze3d.audio.SoundBuffer;
+import gay.ampflower.musicmoods.client.MusicHandler;
 import gay.ampflower.musicmoods.client.SoundHandler;
 import gay.ampflower.musicmoods.client.sound.MusicSoundInstance;
 import gay.ampflower.musicmoods.client.sound.Relativeable;
+import gay.ampflower.musicmoods.util.InternalSupport;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.client.resources.sounds.TickableSoundInstance;
+import net.minecraft.client.sounds.AudioStream;
 import net.minecraft.client.sounds.ChannelAccess;
 import net.minecraft.client.sounds.SoundEngine;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -27,6 +35,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 #if MC_1_21_5_OR_OLDER
@@ -204,6 +213,83 @@ public abstract class MixinSoundEngine implements SoundHandler {
 			if (relativeDirty) {
 				channel.setRelative(relative);
 			}
+		});
+	}
+
+
+	@Inject(
+		method = {"tickNonPaused", "tickMusicWhenPaused", "tickInGameSound"},
+		at = @At(
+			value = "FIELD",
+			target = "Lnet/minecraft/client/sounds/SoundEngine;instanceBySource:Lcom/google/common/collect/Multimap;"
+		)
+	)
+	private static void captureStoppedSoundInstance(final CallbackInfo ci, final @Local SoundInstance instance) {
+		MusicHandler.instance.moods$removeProbableIntrusion(instance);
+	}
+
+	@Definition(
+		id = "thenAccept",
+		method = "Ljava/util/concurrent/CompletableFuture;thenAccept(Ljava/util/function/Consumer;)Ljava/util/concurrent/CompletableFuture;"
+	)
+	@Definition(
+		id = "getCompleteBuffer",
+		method = {
+			"Lnet/minecraft/client/sounds/SoundBufferLibrary;getCompleteBuffer(Lnet/minecraft/resources/Identifier;)Ljava/util/concurrent/CompletableFuture;",
+			"Lnet/minecraft/client/sounds/SoundBufferLibrary;getCompleteBuffer(Lnet/minecraft/resources/ResourceLocation;)Ljava/util/concurrent/CompletableFuture;",
+		}
+	)
+	@Expression("@(?.getCompleteBuffer(?)).thenAccept(?)")
+	@ModifyExpressionValue(method = "play", at = @At("MIXINEXTRAS:EXPRESSION"))
+	private static CompletableFuture<SoundBuffer> detectMusicFromCompleteBuffer(
+		final CompletableFuture<SoundBuffer> self,
+		final @Local(argsOnly = true) SoundInstance instance,
+		final @Local SoundSource soundSource
+	) {
+		// What we really need is a peek.
+		return self.thenApply(buf -> {
+			final var format = ((AccessorSoundBuffer) buf).format;
+			if (format.getChannels() != 1) {
+				// Stereo+ cannot be positioned due to engine limitations.
+				// It will always be played as if it is positioned relatively at 0, 0, 0.
+				MusicHandler.instance.moods$addProbableIntrusion(instance, true);
+			} else if (InternalSupport.musicalSources.contains(soundSource)) {
+				MusicHandler.instance.moods$addProbableIntrusion(instance, false);
+			}
+
+			return buf;
+		});
+	}
+
+	@Definition(
+		id = "thenAccept",
+		method = "Ljava/util/concurrent/CompletableFuture;thenAccept(Ljava/util/function/Consumer;)Ljava/util/concurrent/CompletableFuture;"
+	)
+	@Definition(
+		id = "getStream",
+		method = {
+			"Lnet/minecraft/client/sounds/SoundBufferLibrary;getStream(Lnet/minecraft/resources/Identifier;Z)Ljava/util/concurrent/CompletableFuture;",
+			"Lnet/minecraft/client/sounds/SoundBufferLibrary;getStream(Lnet/minecraft/resources/ResourceLocation;Z)Ljava/util/concurrent/CompletableFuture;",
+		}
+	)
+	@Expression("@(?.getStream(?, ?)).thenAccept(?)")
+	@ModifyExpressionValue(method = "play", at = @At("MIXINEXTRAS:EXPRESSION"))
+	private static CompletableFuture<AudioStream> detectMusicFromAudioStream(
+		final CompletableFuture<AudioStream> self,
+		final @Local(argsOnly = true) SoundInstance instance,
+		final @Local SoundSource soundSource
+	) {
+		// What we really need is a peek.
+		return self.thenApply(stream -> {
+			if (stream.getFormat().getChannels() != 1) {
+				// Stereo+ cannot be positioned due to engine limitations.
+				// It will always be played as if it is positioned relatively at 0, 0, 0.
+				MusicHandler.instance.moods$addProbableIntrusion(instance, true);
+			} else if (InternalSupport.musicalSources.contains(soundSource)) {
+				MusicHandler.instance.moods$addProbableIntrusion(instance, false);
+			}
+
+			return stream;
 		});
 	}
 

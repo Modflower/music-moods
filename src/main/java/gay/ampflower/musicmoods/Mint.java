@@ -7,8 +7,12 @@
 package gay.ampflower.musicmoods;
 
 import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 #if MC_1_19_OR_OLDER
@@ -85,6 +89,88 @@ public final class Mint {
 
 	public static double square(double base) {
 		return base * base;
+	}
+
+	/**
+	 * Version-safe abstraction to get the distance between a {@link SoundInstance sound} and the {@link Camera camera}.
+	 *
+	 * @implNote The camera position will be derived from the entity before the camera object.
+	 * @since 0.7.0
+	 */
+	public static double squaredDistanceToCamera(final SoundInstance instance) {
+		if (instance.isRelative) {
+			return square(instance.x) + square(instance.y) + square(instance.z);
+		}
+		final Minecraft minecraft = Minecraft.instance;
+		if (minecraft.level == null) {
+			return Double.NaN;
+		}
+		Entity entity = minecraft.cameraEntity;
+		if (entity == null) {
+			entity = minecraft.player;
+		}
+		if (entity == null) {
+			return squaredDistanceTo(instance, cameraToPosition(minecraft.gameRenderer.mainCamera));
+		}
+		return squaredDistanceTo(instance, entityEyePosition(entity));
+	}
+
+	/**
+	 * Version-safe abstraction to get the distance between a {@link SoundInstance sound} and {@link Entity entity}.
+	 *
+	 * @implNote Should the sound be relative, and the entity is not the camera,
+	 * 	this may produce unexpected results.
+	 * @since 0.7.0
+	 */
+	public static double squaredDistanceTo(final SoundInstance instance, final Entity entity) {
+		if (instance.isRelative) {
+			final Minecraft minecraft = Minecraft.instance;
+			if (entity == minecraft.cameraEntity) {
+				return square(instance.x) + square(instance.y) + square(instance.z);
+			} else {
+				final Vec3 local = alToLocal(instance.x, instance.y, instance.z);
+				final Vec3 global = localToGlobal(minecraft.gameRenderer.mainCamera, local);
+				final Vec3 entityEye = entityEyePosition(entity);
+
+				return global.distanceToSqr(entityEye);
+			}
+		}
+		return squaredDistanceTo(instance, entityEyePosition(entity));
+	}
+
+	/**
+	 * @since 0.7.0
+	 */
+	public static double squaredDistanceTo(final SoundInstance instance, final Vec3 position) {
+		return position.distanceToSqr(instance.x, instance.y, instance.z);
+	}
+
+	/**
+	 * Version-safe abstraction to get the distance between a {@link BlockPos block pos} and {@link Entity entity}.
+	 *
+	 * @since 0.7.0
+	 */
+	public static double squaredDistanceTo(final BlockPos pos, final Entity entity) {
+		#if MC_1_16_4_OR_OLDER
+		return pos.distSqr(entity.getEyePosition(1.f), true);
+		#elif MC_1_17_OR_OLDER
+		return pos.distSqr(entity.getEyePosition(), true);
+		#else
+		return pos.distToCenterSqr(entity.getEyePosition());
+		#endif
+	}
+
+	/**
+	 * Version-safe abstraction to get the eye position of a given {@link Entity entity}.
+	 *
+	 * @since 0.7.0
+	 */
+	public static Vec3 entityEyePosition(final Entity entity) {
+		#if MC_1_16_4_OR_OLDER
+		return entity.getEyePosition(1.f);
+		#else
+		return entity.getEyePosition();
+		#endif
 	}
 
 	public static Vec2 cameraToRotationVector(Camera camera) {

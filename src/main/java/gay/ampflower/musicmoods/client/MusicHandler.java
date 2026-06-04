@@ -6,11 +6,15 @@
 
 package gay.ampflower.musicmoods.client;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.sounds.SoundInstance;
 #if MC_1_18_OR_NEWER
 import net.minecraft.core.Holder;
 #endif
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -95,5 +99,39 @@ public interface MusicHandler {
 
 	boolean moods$isCurrentlyPlaying(final SoundEvent soundEvent);
 
+	/**
+	 * Removes a track from the intruding or potential lists.
+	 *
+	 * @param instance The sound instance that was stopped. Passed in by the sound engine.
+	 * @implNote A return value whether the instance was removed is impossible,
+	 * 	due to not knowing whether the sound engine is ticked off-thread or not.
+	 * @since 0.7.0
+	 */
+	@ApiStatus.Internal
+	void moods$removeProbableIntrusion(final SoundInstance instance);
+
+	/**
+	 * Adds a track that's on the {@link SoundSource#MUSIC music sound source}
+	 * or {@link SoundSource#RECORDS jukebox sound source} to the intrusion list,
+	 * only if it isn't the music manager's sound instance.
+	 * <p>
+	 * This may include non-music tracks that are in stereo, due to the nature of such tracks.
+	 * <p>
+	 * The {@code isGlobal} parameter is only a hint; the music manager may choose to treat the provided
+	 * sound instance as if it was global anyway.
+	 *
+	 * @param instance The sound instance being intruded. Passed in by the sound engine.
+	 * @param isGlobal Hint of whether the sound is either stereo, or is positioned on top of the player.
+	 * @implNote A return value whether the instance was added is impossible,
+	 * 	due to not knowing whether the sound engine is ticked off-thread or not.
+	 * @since 0.7.0
+	 */
+	@ApiStatus.Internal
+	void moods$addProbableIntrusion(final SoundInstance instance, final boolean isGlobal);
+
 	Component moods$getCurrentMusicName();
+
+	static MusicHandler getInstance() {
+		return (MusicHandler)Minecraft.getInstance().musicManager;
+	}
 }

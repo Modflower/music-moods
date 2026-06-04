@@ -12,6 +12,7 @@
 		"AccessorMinecraft",
 		"AccessorMusicFrequency",
 		"AccessorOptionInstance",
+		"AccessorSoundBuffer",
 		"AccessorTooltip",
 		"MixinAbstractContainerScreen",
 		"MixinClientPacketListener",

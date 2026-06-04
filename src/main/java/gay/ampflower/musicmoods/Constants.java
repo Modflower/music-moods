@@ -109,9 +109,17 @@ public final class Constants {
 	public static Logger getLogger() {
 		return LogManager.getLogger(walker.callerClass);
 	}
+
+	public static Logger getLogger(final String name) {
+		return LogManager.getLogger(name);
+	}
 	#else
 	public static Logger getLogger() {
 		return LoggerFactory.getLogger(walker.callerClass);
+	}
+
+	public static Logger getLogger(final String name) {
+		return LoggerFactory.getLogger(name);
 	}
 	#endif
 }
