@@ -224,7 +224,7 @@ public abstract class MixinSoundEngine implements SoundHandler {
 			target = "Lnet/minecraft/client/sounds/SoundEngine;instanceBySource:Lcom/google/common/collect/Multimap;"
 		)
 	)
-	private static void captureStoppedSoundInstance(final CallbackInfo ci, final @Local SoundInstance instance) {
+	private void captureStoppedSoundInstance(final CallbackInfo ci, final @Local SoundInstance instance) {
 		MusicHandler.instance.moods$removeProbableIntrusion(instance);
 	}
 
@@ -241,7 +241,7 @@ public abstract class MixinSoundEngine implements SoundHandler {
 	)
 	@Expression("@(?.getCompleteBuffer(?)).thenAccept(?)")
 	@ModifyExpressionValue(method = "play", at = @At("MIXINEXTRAS:EXPRESSION"))
-	private static CompletableFuture<SoundBuffer> detectMusicFromCompleteBuffer(
+	private CompletableFuture<SoundBuffer> detectMusicFromCompleteBuffer(
 		final CompletableFuture<SoundBuffer> self,
 		final @Local(argsOnly = true) SoundInstance instance,
 		final @Local SoundSource soundSource
@@ -272,9 +272,18 @@ public abstract class MixinSoundEngine implements SoundHandler {
 			"Lnet/minecraft/client/sounds/SoundBufferLibrary;getStream(Lnet/minecraft/resources/ResourceLocation;Z)Ljava/util/concurrent/CompletableFuture;",
 		}
 	)
-	@Expression("@(?.getStream(?, ?)).thenAccept(?)")
+	@Definition(
+		id = "youveBeenForged",
+		method = "Lnet/minecraft/client/resources/sounds/SoundInstance;getStream(Lnet/minecraft/client/sounds/SoundBufferLibrary;Lnet/minecraft/client/resources/sounds/Sound;Z)Ljava/util/concurrent/CompletableFuture;"
+	)
+	@Expression(
+		{
+			"@(?.getStream(?, ?)).thenAccept(?)",
+			"@(?.youveBeenForged(?, ?, ?)).thenAccept(?)"
+		}
+	)
 	@ModifyExpressionValue(method = "play", at = @At("MIXINEXTRAS:EXPRESSION"))
-	private static CompletableFuture<AudioStream> detectMusicFromAudioStream(
+	private CompletableFuture<AudioStream> detectMusicFromAudioStream(
 		final CompletableFuture<AudioStream> self,
 		final @Local(argsOnly = true) SoundInstance instance,
 		final @Local SoundSource soundSource
