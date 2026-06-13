@@ -179,10 +179,10 @@ public class ConfigurationScreen extends SpruceScreen {
 			committed = true;
 			Config.commit();
 			minecraft.options.save();
-			minecraft.setScreen(parent);
+			Mint.setScreen(minecraft, parent);
 		} catch (IOException ioe) {
 			logger.error("Failed to save Music Moods config", ioe);
-			minecraft.setScreen(new ErrorScreen(
+			Mint.setScreen(minecraft, new ErrorScreen(
 				translatable("music-moods.gui.configuration.error"),
 				literal(ioe.getLocalizedMessage())
 			));

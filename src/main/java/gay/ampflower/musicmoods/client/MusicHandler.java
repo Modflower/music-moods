@@ -131,6 +131,9 @@ public interface MusicHandler {
 
 	Component moods$getCurrentMusicName();
 
+	@ApiStatus.Internal
+	void moods$reload();
+
 	static MusicHandler getInstance() {
 		return (MusicHandler)Minecraft.getInstance().musicManager;
 	}

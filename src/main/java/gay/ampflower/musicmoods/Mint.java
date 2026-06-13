@@ -8,6 +8,10 @@ package gay.ampflower.musicmoods;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+#if MC_1_21_2_OR_NEWER
+import net.minecraft.client.gui.components.toasts.ToastManager;
+#endif
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
@@ -110,7 +114,7 @@ public final class Mint {
 			entity = minecraft.player;
 		}
 		if (entity == null) {
-			return squaredDistanceTo(instance, cameraToPosition(minecraft.gameRenderer.mainCamera));
+			return squaredDistanceTo(instance, cameraToPosition(camera()));
 		}
 		return squaredDistanceTo(instance, entityEyePosition(entity));
 	}
@@ -129,7 +133,7 @@ public final class Mint {
 				return square(instance.x) + square(instance.y) + square(instance.z);
 			} else {
 				final Vec3 local = alToLocal(instance.x, instance.y, instance.z);
-				final Vec3 global = localToGlobal(minecraft.gameRenderer.mainCamera, local);
+				final Vec3 global = localToGlobal(camera(), local);
 				final Vec3 entityEye = entityEyePosition(entity);
 
 				return global.distanceToSqr(entityEye);
@@ -187,6 +191,36 @@ public final class Mint {
 		#else
 		return camera.getPosition();
 		#endif
+	}
+
+	#if MC_1_21_2_OR_NEWER
+	public static ToastManager toastManager(Minecraft minecraft) {
+		#if MC_26_2_OR_NEWER
+		return minecraft.gui.toastManager();
+		#else
+		return minecraft.toastManager;
+		#endif
+	}
+	#endif
+
+	public static void setScreen(Minecraft minecraft, Screen screen) {
+		#if MC_26_2_OR_NEWER
+		minecraft.gui.setScreen(screen);
+		#else
+		minecraft.setScreen(screen);
+		#endif
+	}
+
+	public static Camera camera(Minecraft minecraft) {
+		#if MC_26_2_OR_NEWER
+		return minecraft.gameRenderer.mainCamera();
+		#else
+		return minecraft.gameRenderer.mainCamera;
+		#endif
+	}
+
+	public static Camera camera() {
+		return camera(Minecraft.instance);
 	}
 
 	/**

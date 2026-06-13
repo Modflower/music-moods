@@ -8,11 +8,6 @@
 
 package gay.ampflower.musicmoods;
 
-#if FABRIC
-import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-import net.fabricmc.fabric.api.resource.ResourceReloadListenerKeys;
-import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
-#endif
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.sounds.SoundManager;
 #if MC_1_18_OR_NEWER
@@ -24,9 +19,8 @@ import net.minecraft.resources.Identifier;
 #else
 import net.minecraft.resources.ResourceLocation;
 #endif
-import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.sounds.SoundEvent;
+import org.jetbrains.annotations.ApiStatus;
 
 #if MC_1_16_4_OR_OLDER
 import org.apache.logging.log4j.Logger;
@@ -36,8 +30,6 @@ import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +38,7 @@ import java.util.Map;
  * @author Ampflower
  * @since 0.6.12
  **/
-public final class Sounds #if(FABRIC) implements SimpleSynchronousResourceReloadListener#endif {
+public final class Sounds {
 	private static final Logger logger = Constants.getLogger();
 
 	private static final #if (MC_1_21_11_OR_NEWER) Identifier #else ResourceLocation #endif id = Constants.id("sounds");
@@ -62,12 +54,6 @@ public final class Sounds #if(FABRIC) implements SimpleSynchronousResourceReload
 	#else
 	private static final Map<ResourceLocation, SoundEvent> toStereoEvent = new HashMap<>();
 	private static final Map<ResourceLocation, ResourceLocation> toStereo = new HashMap<>();
-	#endif
-
-	#if FABRIC
-	static {
-		ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new Sounds());
-	}
 	#endif
 
 	#if MC_1_17_OR_OLDER
@@ -174,21 +160,9 @@ public final class Sounds #if(FABRIC) implements SimpleSynchronousResourceReload
 	private Sounds() {
 	}
 
-	#if FABRIC
-	@Override
-	public #if (MC_1_21_11_OR_NEWER) Identifier #else ResourceLocation #endif getFabricId() {
-		return id;
-	}
-
-	@Override
-	public Collection<#if (MC_1_21_11_OR_NEWER) Identifier #else ResourceLocation #endif > getFabricDependencies() {
-		return Collections.singleton(ResourceReloadListenerKeys.SOUNDS);
-	}
-
-	@Override
-	public void onResourceManagerReload(final ResourceManager resourceManager) {
+	@ApiStatus.Internal
+	public static void reload() {
 		toStereoEvent.clear();
 		toStereo.clear();
 	}
-	#endif
 }

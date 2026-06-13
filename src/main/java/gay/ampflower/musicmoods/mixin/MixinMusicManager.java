@@ -208,7 +208,7 @@ public abstract class MixinMusicManager implements MusicHandler, Debuggable {
 			}
 			#if MC_1_21_6_OR_NEWER
 			else if (!this.toastShown && this.currentMusic.getVolume() >= 0.75F) {
-				this.minecraft.getToastManager().showNowPlayingToast();
+				Mint.toastManager(this.minecraft).showNowPlayingToast();
 				this.toastShown = true;
 			}
 			#endif
@@ -342,7 +342,7 @@ public abstract class MixinMusicManager implements MusicHandler, Debuggable {
 			}
 
 			if (this.focusedJukebox instanceof RecordSoundInstance lastFocused) {
-				final var camera = this.minecraft.gameRenderer.getMainCamera();
+				final var camera = Mint.camera(this.minecraft);
 
 				final var cameraPos = Mint.cameraToPosition(camera);
 				final var cameraRot = Mint.cameraToRotationVector(camera);
@@ -418,7 +418,7 @@ public abstract class MixinMusicManager implements MusicHandler, Debuggable {
 		final float replSq = Mint.square(Config.jukeboxReplaceRange);
 		final float maxSq = Math.max(fadeSq, replSq);
 
-		final var camera = this.minecraft.gameRenderer.getMainCamera();
+		final var camera = Mint.camera(this.minecraft);
 
 		final var cameraPos = Mint.cameraToPosition(camera);
 		final var cameraRot = Mint.cameraToRotationVector(camera);
@@ -781,7 +781,7 @@ public abstract class MixinMusicManager implements MusicHandler, Debuggable {
 		this.updateCurrentMusicName(name);
 
 		if (state == SoundEngine.PlayResult.STARTED || fadeInTicks <= 0) {
-			this.minecraft.getToastManager().showNowPlayingToast();
+			Mint.toastManager(this.minecraft).showNowPlayingToast();
 			this.toastShown = true;
 		} else {
 			this.toastShown = false;
@@ -793,7 +793,7 @@ public abstract class MixinMusicManager implements MusicHandler, Debuggable {
 	private void reset(final int fadeOut) {
 		if (this.focusedJukebox instanceof RecordSoundInstance lastFocused) {
 			// Reset jukebox
-			final var camera = this.minecraft.gameRenderer.getMainCamera();
+			final var camera = Mint.camera(this.minecraft);
 
 			final var cameraPos = Mint.cameraToPosition(camera);
 			final var cameraRot = Mint.cameraToRotationVector(camera);
@@ -837,7 +837,7 @@ public abstract class MixinMusicManager implements MusicHandler, Debuggable {
 		#if MC_1_21_6_OR_NEWER
 		this.currentMusicName = null;
 		this.toastShown = false;
-		this.minecraft.getToastManager().hideNowPlayingToast();
+		Mint.toastManager(this.minecraft).hideNowPlayingToast();
 		#endif
 	}
 
@@ -960,6 +960,11 @@ public abstract class MixinMusicManager implements MusicHandler, Debuggable {
 		#endif
 	}
 	#endif
+
+	@Override
+	public void moods$reload() {
+		this.waitWhatWhatAreYouDoing.clear();
+	}
 
 	@Override
 	public long moods$totalTicks() {

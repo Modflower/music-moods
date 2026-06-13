@@ -72,6 +72,11 @@ public abstract class MixinSoundEngine implements SoundHandler {
 	@Shadow
 	protected abstract float calculatePitch(final SoundInstance soundInstance);
 
+	@Inject(method = "reload", at = @At("HEAD"))
+	private void onReload(CallbackInfo ci) {
+		InternalSupport.reload();
+	}
+
 	@ModifyArg(
 		method = {
 			"tickNonPaused",
