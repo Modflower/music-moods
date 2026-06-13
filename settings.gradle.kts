@@ -83,11 +83,16 @@ for ((loader, ini) in versions.cutters) {
 		val gradle = Properties()
 		gradle.putAll(ini.header)
 		gradle.putAll(v)
+		gradle.put("series", loader)
 
 		root.resolve("gradle.properties")
 			.updateOnMismatch(gradle, stonecutterLastModified, "== DO NOT MODIFY ==\n\nSee versions.ini instead")
 
 		val buildProperties = Properties()
+
+		for ((k, v) in ini.header) {
+			buildProperties[(k as String).toYellingSnake()] = v
+		}
 
 		for ((k, v) in v) {
 			buildProperties[(k as String).toYellingSnake()] = v

@@ -15,11 +15,12 @@ val loaders: String? by project
 
 val modrinthId: String by project
 val projectVersion: String by project
+val series: String by project
 
 val isPublish = System.getenv("GITHUB_EVENT_NAME") == "release"
 val isRelease = System.getenv("BUILD_RELEASE").toBoolean()
 val isActions = System.getenv("GITHUB_ACTIONS").toBoolean()
-val baseVersion: String = "$projectVersion+mc.${minecraft}"
+val baseVersion: String = "$projectVersion+${series}.${minecraft}"
 
 version =
 	when {
