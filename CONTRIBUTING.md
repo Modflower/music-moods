@@ -6,7 +6,7 @@ You should ideally make your new contribution work on all the supported versions
 and target your PRs to the `cherry` branch. If you can't make it work for every version,
 just do your best effort to make it work for one version.
 
-If you need help with something, reach feel free to out.
+If you need help with something, feel free to reach out.
 
 ## Required tooling
 
