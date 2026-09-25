@@ -702,6 +702,11 @@ public abstract class MixinMusicManager implements MusicHandler, Debuggable {
 			return;
 		}
 
+		if (Constants.walker.callerClass != MixinMusicManager.class) {
+			this.reset(Config.jukeboxFadeMixTicks);
+			this.currentMusicIntruded = true;
+		}
+
 		this.startPlayingCommon(#if MC_1_21_11_OR_NEWER music.sound #else music.event #endif , null, 1.f, 0);
 	}
 	#else
@@ -709,6 +714,11 @@ public abstract class MixinMusicManager implements MusicHandler, Debuggable {
 	public void startPlaying(final MusicInfo music) {
 		if (music.music() == null || music.volume() <= 0) {
 			return;
+		}
+
+		if (Constants.walker.callerClass != MixinMusicManager.class) {
+			this.reset(Config.jukeboxFadeMixTicks);
+			this.currentMusicIntruded = true;
 		}
 
 		this.startPlayingCommon(music.music.event, null, music.volume(), 0);

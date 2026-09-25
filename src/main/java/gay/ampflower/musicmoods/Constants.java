@@ -36,7 +36,7 @@ import static net.minecraft.network.chat.Component.translatable;
  * @since 0.0.0
  **/
 public final class Constants {
-	private static final StackWalker walker = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE);
+	public static final StackWalker walker = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE);
 
 	public static final String modId = "music-moods";
 
