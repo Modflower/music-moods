@@ -36,6 +36,7 @@ import java.util.Set;
  **/
 @Mixin(WeighedSoundEvents.class)
 public class MixinWeighedSoundEvents implements WeighedSoundEventsQuery {
+	@Unique
 	private static final Logger logger = Constants.getLogger("Music Moods: Weighed Sounds Query");
 
 	@Shadow

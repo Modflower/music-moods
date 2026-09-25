@@ -957,6 +957,7 @@ public abstract class MixinMusicManager implements MusicHandler, Debuggable {
 	/**
 	 * Gets the identifier of the given music instance.
 	 */
+	@Unique
 	#if MC_1_21_11_OR_NEWER
 	private static Identifier getLocation(Music music) {
 		return music.sound.value().location();
