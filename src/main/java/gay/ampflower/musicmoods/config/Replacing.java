@@ -8,7 +8,7 @@ package gay.ampflower.musicmoods.config;// Created 2023-03-02T01:09:52
 
 /**
  * @author Ampflower
- * @since ${version}
+ * @since 0.0.3, 0.1.1
  **/
 public enum Replacing {
 	never,
