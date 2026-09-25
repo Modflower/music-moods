@@ -7,6 +7,11 @@
 package gay.ampflower.musicmoods.mixin;
 
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
+#if MC_1_16_4_OR_OLDER
+import org.lwjgl.glfw.GLFW;
+#else
+import com.mojang.blaze3d.platform.InputConstants;
+#endif
 import gay.ampflower.musicmoods.Config;
 import gay.ampflower.musicmoods.client.MusicHandler;
 import gay.ampflower.musicmoods.util.JukeboxUtil;
@@ -18,6 +23,9 @@ import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 #if MC_1_21_11_OR_OLDER
 import net.minecraft.world.inventory.ClickType;
 #else
+#if !MC_26_2_OR_OLDER
+import net.minecraft.client.input.MouseButtonEvent;
+#endif
 import net.minecraft.world.inventory.ContainerInput;
 #endif
 import net.minecraft.world.inventory.Slot;
@@ -32,6 +40,13 @@ import org.spongepowered.asm.mixin.injection.Slice;
  **/
 @Mixin(AbstractContainerScreen.class)
 public class MixinAbstractContainerScreen {
+	@Unique
+	private static final int RIGHT_MOUSE_BUTTON =
+		#if MC_1_16_4_OR_OLDER
+		GLFW.GLFW_MOUSE_BUTTON_RIGHT
+		#else
+		InputConstants.MOUSE_BUTTON_RIGHT
+		#endif ;
 
 	@WrapWithCondition(
 		method = "mouseClicked",
@@ -39,8 +54,10 @@ public class MixinAbstractContainerScreen {
 			value = "INVOKE",
 			#if MC_1_21_11_OR_OLDER
 			target = "Lnet/minecraft/client/gui/screens/inventory/AbstractContainerScreen;slotClicked(Lnet/minecraft/world/inventory/Slot;IILnet/minecraft/world/inventory/ClickType;)V",
-			#else
+			#elif MC_26_2_OR_OLDER
 			target = "Lnet/minecraft/client/gui/screens/inventory/AbstractContainerScreen;slotClicked(Lnet/minecraft/world/inventory/Slot;IILnet/minecraft/world/inventory/ContainerInput;)V",
+			#else
+			target = "Lnet/minecraft/client/gui/screens/inventory/AbstractContainerScreen;slotClicked(Lnet/minecraft/world/inventory/Slot;ILnet/minecraft/client/input/MouseButtonEvent;Lnet/minecraft/world/inventory/ContainerInput;)V",
 			#endif
 			ordinal = 0
 		),
@@ -57,7 +74,11 @@ public class MixinAbstractContainerScreen {
 		final AbstractContainerScreen<?> self,
 		final Slot slot,
 		final int index,
+		#if MC_26_2_OR_OLDER
 		final int button,
+		#else
+		final MouseButtonEvent event,
+		#endif
 		#if MC_1_21_11_OR_OLDER
 		final ClickType clickType
 		#else
@@ -65,6 +86,10 @@ public class MixinAbstractContainerScreen {
 		#endif
 	) {
 		final var level = Minecraft.getInstance().level;
+
+		#if !MC_26_2_OR_OLDER
+		final int button = event.button();
+		#endif
 
 		// General fast path
 		if (level == null
@@ -74,7 +99,7 @@ public class MixinAbstractContainerScreen {
 			#else
 			||clickType != ContainerInput.PICKUP
 			#endif
-			|| button != 1
+			|| button != RIGHT_MOUSE_BUTTON
 			// Ensure we're one of either of these.
 			// We don't really want to mess with normal inventory interactions.
 			|| !isScreenPlayerInventory(self)
