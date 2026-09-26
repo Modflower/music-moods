@@ -7,6 +7,8 @@ import com.llamalad7.mixinextras.MixinExtrasBootstrap;
 #endif
 
 import com.bawnorton.mixinsquared.ext.ExtensionRegistrar;
+import com.moulberry.mixinconstraints.MixinConstraints;
+import com.moulberry.mixinconstraints.mixin.MixinConstraintsBootstrap;
 import gay.ampflower.musicmoods.compat.FrozenLibMusicManagerAdjuster;
 import gay.ampflower.musicmoods.compat.MixinClassAdjusterRegistrar;
 import gay.ampflower.musicmoods.util.Platform;
@@ -26,6 +28,7 @@ public class MixinPlugin implements IMixinConfigPlugin {
 
 	@Override
 	public void onLoad(final String mixinPackage) {
+		MixinConstraintsBootstrap.init(mixinPackage);
 		#if OLD_FORGE
 		MixinSquaredBootstrap.init();
 		MixinExtrasBootstrap.init();
@@ -48,7 +51,7 @@ public class MixinPlugin implements IMixinConfigPlugin {
 			final var mod = mixinClassName.substring(compat.length(), mixinClassName.lastIndexOf('.'));
 			return Platform.isModMixinable(mod);
 		}
-		return true;
+		return MixinConstraints.shouldApplyMixin(targetClassName, mixinClassName);
 	}
 
 	@Override

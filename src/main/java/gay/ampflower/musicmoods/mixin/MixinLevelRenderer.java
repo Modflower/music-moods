@@ -6,6 +6,7 @@
 
 package gay.ampflower.musicmoods.mixin;
 
+import com.moulberry.mixinconstraints.annotations.IfModAbsent;
 import gay.ampflower.musicmoods.Config;
 import gay.ampflower.musicmoods.client.sound.Fadeable;
 import gay.ampflower.musicmoods.client.sound.RecordSoundInstance;
@@ -49,6 +50,7 @@ import net.minecraft.client.renderer.LevelRenderer;
  * @author Ampflower
  * @since 0.5
  **/
+@IfModAbsent("legacy")
 @Mixin(
 	#if (MC_1_21_2_OR_NEWER) LevelEventHandler.class #else value = LevelRenderer.class #endif
 	#if ((FORGE || OLD_FORGE) && MC_1_20_OR_OLDER) , priority = 500 #endif
