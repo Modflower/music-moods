@@ -6,6 +6,9 @@ import com.bawnorton.mixinsquared.MixinSquaredBootstrap;
 import com.llamalad7.mixinextras.MixinExtrasBootstrap;
 #endif
 
+import com.bawnorton.mixinsquared.ext.ExtensionRegistrar;
+import gay.ampflower.musicmoods.compat.FrozenLibMusicManagerAdjuster;
+import gay.ampflower.musicmoods.compat.MixinClassAdjusterRegistrar;
 import gay.ampflower.musicmoods.util.Platform;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
@@ -27,6 +30,11 @@ public class MixinPlugin implements IMixinConfigPlugin {
 		MixinSquaredBootstrap.init();
 		MixinExtrasBootstrap.init();
 		#endif
+
+		ExtensionRegistrar.register(new MixinClassAdjusterRegistrar());
+
+		final var mux = new FrozenLibMusicManagerAdjuster();
+		MixinClassAdjusterRegistrar.registerByMixin("gay.ampflower.musicmoods.mixin.MixinMusicManager", mux);
 	}
 
 	@Override
