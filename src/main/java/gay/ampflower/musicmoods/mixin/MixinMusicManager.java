@@ -14,6 +14,7 @@ import gay.ampflower.musicmoods.client.WeighedSoundEventsQuery;
 import gay.ampflower.musicmoods.client.sound.MusicSoundInstance;
 import gay.ampflower.musicmoods.client.sound.RecordSoundInstance;
 import gay.ampflower.musicmoods.client.sound.Relativeable;
+import gay.ampflower.musicmoods.compat.Marker;
 import gay.ampflower.musicmoods.config.Replacing;
 import gay.ampflower.musicmoods.debug.Debuggable;
 import gay.ampflower.musicmoods.util.InternalSupport;
@@ -763,6 +764,7 @@ public abstract class MixinMusicManager implements MusicHandler, Debuggable {
 	}
 	#endif
 
+	@Marker("frozenLibTarget")
 	@Unique
 	private void startPlayingCommon(
 		final SoundEvent soundEvent,

@@ -192,17 +192,12 @@ final class Annotations {
 			return;
 		}
 
-		iterateAnnotations(visibleAnnotations, invisibleAnnotations, container.descriptor, value -> {
-			final List<?> list = find(value, "value", List.class);
-			if (list == null) {
-				return;
-			}
-			for (final var sub : list) {
-				if (sub instanceof AnnotationNode subNode && annotation.equals(subNode.desc)) {
-					consumer.accept(subNode);
-				}
-			}
-		});
+		iterateAnnotations(
+			visibleAnnotations,
+			invisibleAnnotations,
+			container.descriptor,
+			value -> filteredRepeatable(value, annotation, consumer)
+		);
 	}
 
 	//endregion
@@ -259,6 +254,31 @@ final class Annotations {
 		final var value = creator.get();
 		node.visit(name, value);
 		return value;
+	}
+
+	public static void filteredRepeatable(
+		final AnnotationNode container,
+		final String descriptor,
+		final Consumer<AnnotationNode> consumer
+	) {
+		final List<?> list = find(container, "value", List.class);
+		if (list == null) {
+			return;
+		}
+		for (final var sub : list) {
+			if (sub instanceof AnnotationNode subNode && descriptor.equals(subNode.desc)) {
+				consumer.accept(subNode);
+			}
+		}
+	}
+
+	public static List<AnnotationNode> filteredRepeatable(
+		final AnnotationNode container,
+		final String descriptor
+	) {
+		final List<AnnotationNode> annotations = new ArrayList<>();
+		filteredRepeatable(container, descriptor, annotations::add);
+		return annotations;
 	}
 
 
@@ -363,10 +383,12 @@ final class Annotations {
 	}
 
 	private static Class<?> toClass(final java.lang.reflect.Type type) {
-		return switch (type) {
-			case Class<?> clazz -> clazz;
-			case ParameterizedType parameterizedType -> toClass(parameterizedType.getRawType());
-			default -> throw new ClassCastException(type.getClass() + " can't be toClass'd; is: " + type);
-		};
+		if (type instanceof Class<?> clazz) {
+			return clazz;
+		}
+		if (type instanceof ParameterizedType parameterizedType) {
+			return toClass(parameterizedType.getRawType());
+		}
+		throw new ClassCastException(type.getClass() + " can't be toClass'd; is: " + type);
 	}
 }

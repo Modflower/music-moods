@@ -1,5 +1,6 @@
 package gay.ampflower.musicmoods.compat;
 
+import com.bawnorton.mixinsquared.adjuster.tools.AdjustableAnnotationNode;
 import org.jetbrains.annotations.NotNullByDefault;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AnnotationNode;
@@ -206,5 +207,49 @@ final class TaintUtil {
 		}
 
 		values.addAll(value);
+	}
+
+	public static boolean test(final AnnotationNode annotation) {
+		if (annotation.desc.equals(taintDesc) && testSession(annotation)) {
+			return true;
+		}
+
+		return annotation.desc.equals(taintsDesc) && test(Annotations.find(annotation, "value", List.class));
+	}
+
+	private static boolean testSession(final AnnotationNode annotation) {
+		return Taint.session.equals(Annotations.find(annotation, "session", String.class));
+	}
+
+	public static boolean test(final AdjustableAnnotationNode annotation) {
+		if (annotation.is(Taint.class)) {
+			final var raw = annotation.get("session");
+			return raw.isPresent() && raw.get().equals(Taint.session);
+		}
+		if (annotation.is(Taints.class)) {
+			final var raw = annotation.get("value");
+			if (raw.isPresent() && raw.get() instanceof List<?> list) {
+				return test(list);
+			}
+		}
+		return false;
+	}
+
+	private static boolean test(List<?> taints) {
+		if (taints == null) {
+			return false;
+		}
+
+		for (final var unknown : taints) {
+			if (!(unknown instanceof AnnotationNode annotation)) {
+				continue;
+			}
+
+			if (testSession(annotation)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }
