@@ -17,7 +17,7 @@ logoBlur = false
 displayURL = "https://mod.ampflower.gay/music-moods"
 
 description = '''
-Configure how music & sound are handled.
+A highly configurable music engine with cross-fading, constant music, i.e. infinite with no delay, and uninterruptible music when pausing or switching worlds, allowing seamless transitions.
 '''
 
 authors = "Ampflower"

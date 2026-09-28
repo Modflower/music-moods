@@ -3,7 +3,7 @@
 	"id": "music-moods",
 	"version": "${version}",
 	"name": "Music Moods",
-	"description": "Configure how music & sound are handled.",
+	"description": "A highly configurable music engine with cross-fading, constant music, i.e. infinite with no delay, and uninterruptible music when pausing or switching worlds, allowing seamless transitions.",
 	"contributors": [
 		"HyperPigeon",
 		"sisby-folk"

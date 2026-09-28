@@ -9,26 +9,44 @@
 [![Stable](https://img.shields.io/github/v/release/the-glitch-network/music-moods?label=stable)](https://github.com/the-glitch-network/music-moods/releases)
 [![Beta](https://img.shields.io/github/v/release/the-glitch-network/music-moods?include_prereleases&label=beta)](https://github.com/the-glitch-network/music-moods/releases)
 <br/>
-[![Discord](https://img.shields.io/discord/380201541078089738?color=7289da&label=Development&logo=discord&logoColor=7289da)](https://discord.gg/EmPS9y9)
-[![Discord](https://img.shields.io/discord/368932049354227712?color=7289da&label=Community&logo=discord&logoColor=7289da)](https://discord.gg/ExCdXwP)
+[![Discord](https://img.shields.io/discord/380201541078089738?color=7289da&label=Discord&logo=discord&logoColor=7289da)](https://discord.gg/EmPS9y9)
 
-Configure how music & sound are handled.
+A highly configurable modern music engine, handling cross-fading, constant music and uninterruptible music.
 Useful for cases where resource packs and mods replace the music immediately instead of just letting it play for any
 reason.
 
 ## How to Use
 
-Music Moods requires Minecraft 1.19-1.19.2 currently, along with Quilt Loader.
+Music Moods requires Minecraft 1.16.5+ and Java 17+, and can run on
+[Fabric](https://fabricmc.net/use),
+[Quilt](https://quiltmc.org/install),
+[NeoForge](https://neoforged.net/) and
+[Forge](https://files.minecraftforge.net/).
 
-It is recommended that you install [Mod Menu](https://modrinth.com/mod/modmenu) to easily access the configuration
-screen as well.
+Warning: Running Music Moods on cross-loader compatibility and translation layers, such as Sinytra Connector and Kilt,
+is unsupported due to non-trivial transforms best handled natively.
+Install the version of Music Moods native to your loader when it's available.
 
-Install Minecraft 1.19+, [Quilt](https://quiltmc.org/install), any mods that like to replace the currently playing track
-and stick with the default of fading between tracks or modify the config to not let the current track be replaced.
+For Fabric, you must install [Fabric API](https://modrinth.com/mod/fabric-api),
+or if you're on Quilt, the [Quilted Fabric API & Quilt Standard Libraries](https://modrinth.com/mod/qsl).
+For the best experience, you may want to also install [Mod Menu](https://modrinth.com/mod/modmenu).
 
-Mods that are recommended to be used with are the [BetterNether](https://modrinth.com/mod/betternether) and
-[BetterEnd](https://modrinth.com/mod/betterend) mods,
-as this mod aims to solve the niche requirement that these two add.
+For Forge 1.20, and 1.17 and older, you must install
+[ObsidianUI](https://modrinth.com/mod/obsidianui) and
+[Architectury API](https://modrinth.com/mod/architectury-api) as well.
+
+## Mod Support
+
+Designed around the [BetterNether](https://modrinth.com/mod/betternether)
+and [BetterEnd](https://modrinth.com/mod/betterend) mods' built in resource packs,
+you can play with any mod or resource pack that has per-biome music that replaces the current track to have it smoothly
+transition.
+
+Limited support has been added for
+[Vanilla Backport](https://modrinth.com/mod/vanillabackport),
+[The Immersive Music Mod](https://modrinth.com/mod/immersivemusicmod),
+[FrozenLib](https://modrinth.com/mod/frozenlib),
+and [Legacy4J](https://modrinth.com/mod/legacy4j).
 
 ## Configuration
 
