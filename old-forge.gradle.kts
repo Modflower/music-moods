@@ -38,6 +38,13 @@ java {
 
 dependencies {
 	mappings(loom.officialMojangMappings())
+
+	libraries["mixinconstraints"]?.let {
+		shadow("$it") {
+			isTransitive = false
+		}
+	}
+
 }
 
 tasks {
@@ -110,6 +117,7 @@ tasks {
 		configurations.value(setOf(project.configurations.shadow.get()))
 		relocate("com.llamalad7.mixinextras", "gay.ampflower.musicmoods.mixinextras")
 		relocate("com.bawnorton.mixinsquared", "gay.ampflower.musicmoods.mixinsquared")
+		relocate("com.moulberry.mixinconstraints", "gay.ampflower.musicmoods.mixinconstraints")
 		manifest.attributes("MixinConfigs" to "music-moods.mixin.json")
 		mergeServiceFiles()
 		finalizedBy("optimizeOutputsOfShadowRemapJar")
